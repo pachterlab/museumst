@@ -9,7 +9,33 @@ Description: More about what it does (maybe more than one line)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+Imports:
+    dplyr,
+    forcats,
+    gganimate,
+    ggplot2,
+    ggrepel,
+    ggtext,
+    ggtextures,
+    googlesheets4,
+    grid,
+    lubridate,
+    magrittr,
+    purrr,
+    rlang,
+    rnaturalearth,
+    scales,
+    sf,
+    stringr,
+    tidyr,
+    tidytext,
+    wordcloud2,
+    zeallot
 Suggests: 
     knitr,
+    magick,
     rmarkdown
 VignetteBuilder: knitr
+Depends: 
+    R (>= 2.10)
+RoxygenNote: 7.1.0

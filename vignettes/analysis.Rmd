@@ -1,11 +1,12 @@
 ---
 title: "Analysis"
 author: "Lambda Moses"
-date: "5/25/2020"
-output: html_document
-params:
-  sheet: "Analysis"
-
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{foo}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -14,26 +15,15 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Here I explore the history and geography of spatial transcriptomics based on microdissection through the metadata I collected.
 ```{r}
-library(tidyverse)
-library(googlesheets4)
-library(lubridate)
 library(magick)
-library(scales)
-library(zeallot)
-source("code/metadata_plotting.R")
+library(museumst)
+library(tidyverse)
 theme_set(theme_bw())
 ```
 
 # Import data
 ```{r}
-gs4_deauth()
-sheet <- read_sheet("https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154", sheet = params$sheet)
-```
-
-Add the year column as this will be used for plotting rather than the full date.
-```{r}
-sheet <- sheet %>% 
-  mutate(year = year(date_published))
+sheet <- read_metadata("Analysis")
 ```
 
 # Number of publications
@@ -56,7 +46,7 @@ nrow(publications)
 
 ```{r}
 # For maps later in this notebook
-c(inst_gc, city_gc) %<-% geocode_inst_city(publications)
+c(inst_gc, city_gc) %<-% geocode_inst_city(publications, cache_location = "inst")
 pubs_on_map2 <- partial(pubs_on_map, inst_gc = inst_gc, city_gc = city_gc)
 ```
 
@@ -76,12 +66,13 @@ category <- sheet %>%
 ```
 
 ```{r}
-pubs_per_cat(category, "category")
+pubs_per_cat(category, category)
 ```
 
 ```{r, fig.width=4, fig.height=8}
 pubs_per_year(category, facet_by = "category")
 ```
+
 ```{r}
 principle <- sheet %>% 
   mutate(core_principle = str_split(core_principle, pattern = "(;|,)\\s")) %>% 
@@ -91,18 +82,18 @@ principle <- sheet %>%
 ```
 
 ```{r}
-pubs_per_cat(principle, "core_principle")
+pubs_per_cat(principle, core_principle)
 ```
 
 ## By species
 These are the species the computational methods were demonstrated on
 ```{r}
-species_img <- readRDS("output/species_img.rds")
+species_img <- data("species_img")
 ```
 
 ```{r}
 species <- sheet %>% 
-  select(year, title, species, country, institution) %>% 
+  select(year, title, species, country, city, institution) %>% 
   filter(!is.na(species)) %>% 
   mutate(species = str_split(species, "; ")) %>% 
   unnest(cols = "species") %>%
@@ -114,7 +105,7 @@ unique(species$species)
 ```
 
 ```{r}
-pubs_per_cat(species, category = "species")
+pubs_per_cat(species, species)
 ```
 
 ```{r}
@@ -144,7 +135,7 @@ sort(table(publications$journal))
 ### General
 Just some barplots for number of publications per institution, city, and country. 
 ```{r}
-pubs_per_cat(publications, "country")
+pubs_per_cat(publications, country)
 ```
 
 How about per capita? Actually this probably does not say much since many researchers in the West are immigrants. Then it raises the burning political question of who counts as the "population".
@@ -160,12 +151,12 @@ pubs_per_year(publications, facet_by = "country")
 Now look at cities. 
 
 ```{r}
-pubs_per_cat(publications, "city")
+pubs_per_cat(publications, city)
 ```
 
 Institutions
 ```{r}
-pubs_per_cat(publications, "institution")
+pubs_per_cat(publications, institution)
 ```
 
 ### Worldwide
@@ -228,16 +219,16 @@ plot_wordcloud(sheet)
 
 ## Summaries
 ```{r}
-plot_wordcloud(sheet, col_use = "summary")
+plot_wordcloud(sheet, summary)
 ```
 
 ```{r}
-plot_wordcloud(sheet, col_use = "core_principle")
+plot_wordcloud(sheet, core_principle)
 ```
 
 ## Tissues
 ```{r}
-plot_wordcloud(sheet, col_use = "tissue")
+plot_wordcloud(sheet, tissue)
 ```
 
 ## Over time
@@ -255,18 +246,15 @@ plot_wordcloud(sheet, year_min = 2015, year_max = 2021)
 ```
 
 ## Department names
-```{r}
-institution_words <- readRDS("output/inst_words.rds")
-```
 
 ```{r}
-plot_wordcloud(sheet, col_use = "department", other_stop_words = institution_words)
+plot_wordcloud(sheet, col_use = "department", other_stop_words = inst_words)
 ```
 
 # Programming languages
 ```{r}
 langs <- sheet %>% 
-  select(year, title, language, documented:`CRAN/Bioc/pip/conda`) %>% 
+  select(year, date_published, title, journal, language, documented:`CRAN/Bioc/pip/conda`) %>% 
   filter(!is.na(language)) %>% 
   distinct() %>% 
   mutate(language = str_split(language, "; ")) %>% 
@@ -280,38 +268,37 @@ lang_img$image <- purrr::map(lang_img$image_paths, image_read)
 
 ```{r}
 langs %>% 
-  inner_join(lang_img, by = "language") %>% 
-  pubs_per_cat(category = "language", isotype = TRUE, img_unit = 2)
+  #inner_join(lang_img, by = "language") %>% 
+  pubs_per_cat(language,
+               isotype = FALSE) #isotype = TRUE, img_unit = 2)
 ```
 
 # Data and code availability
 
 How many publications have provided a code repo?
 ```{r}
-ggplot(publications, aes(year, color = !is.na(repo))) +
-  geom_freqpoly(binwidth = 1)
+hist_bool(sheet, !is.na(repo))
 ```
 
 It seems that more recent publications are more likely to provide a repo. Is this significant? Here I fit a linear model to use year to predict proportion of publications with repo and test if the coefficients are 0.
 ```{r}
-pub_repos <- publications %>% 
-  group_by(year) %>% 
-  summarize(prop_repo = sum(!is.na(repo))/length(repo))
-summary(lm(prop_repo ~ year, data = pub_repos))
+test_year_bool(sheet, !is.na(repo))
 ```
 
 Yep, it's very significant. How about whether the code is well-documented?
+
+```{r, fig.width=4, fig.height=6}
+pubs_per_year(langs, "language")
+```
+
+
 ```{r}
-ggplot(langs, aes(year, color = documented)) +
-  geom_freqpoly(binwidth = 1) +
-  facet_wrap(~ language)
+hist_bool_line(langs, documented, facet_by = "language") 
 ```
 
 It seems that R, Python, and C++ packages are more likely to be well-documented, and MATLAB ones are less likely. Is that MATLAB culture?
 ```{r}
-ggplot(langs, aes(year, color = `CRAN/Bioc/pip/conda`)) +
-  geom_freqpoly(binwidth = 1) +
-  facet_wrap(~ language)
+hist_bool_line(langs, `CRAN/Bioc/pip/conda`, "language")
 ```
 
 It seems that most packages are not on those public repos. Why? Too lazy to write documentations?
@@ -323,3 +310,8 @@ langs %>%
 ```
 
 So it seems that packages on those public repos sort of tend to be better documented.
+
+```{r}
+sessionInfo()
+```
+

@@ -2,6 +2,7 @@
 # museumst
 
 <!-- badges: start -->
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 <!-- badges: end -->
 
 This package contains functions to make plots in analysis of manually curated metadata about publications throughout the history of spatial transcriptomics. The vignettes are the analysis notebooks.
@@ -40,6 +41,8 @@ Instead of using a child document for the shared part, I still decided to copy t
 
 To do: 
 
+  * More defensive programming
+  * Polish user interface
   * Build pkgdown website
   * Build shiny app for exploring this metadata
   * Put the vignettes on a RStudio Cloud project for those who do code to play around with. The entire package repo will be there so the user can also change the code and make other plots.

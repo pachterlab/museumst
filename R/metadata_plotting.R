@@ -1,46 +1,49 @@
-library(tidyverse)
-library(lubridate)
-library(ggmap)
-library(ggtext)
-library(ggrepel)
-library(ggtextures)
-library(sf)
-library(rnaturalearth)
-library(urbnmapr)
-library(tidytext)
-library(wordcloud2)
-library(googlesheets4)
-library(zeallot)
-library(scales)
 #' Read the metadata from Google Sheets
-#' 
+#'
 #' To do: Cache and add an argument to update cache. Unlike the geocodes, this
 #' won't be stored in the data of this package since it's much faster to download
 #' the sheet than to geocode.
-#' 
+#'
+#' @param sheet_use Name of the sheet(s) to read.
 #' @return A tibble for the sheet of interest.
-read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS", 
-                                        "Microdissection", "No imaging", 
+#' @importFrom googlesheets4 gs4_deauth read_sheet
+#' @importFrom dplyr mutate
+#' @importFrom magrittr %>%
+#' @importFrom lubridate year as_date
+#' @importFrom purrr map reduce map2_dfr
+#' @export
+read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS",
+                                        "Microdissection", "No imaging",
                                         "Analysis", "Prequel analysis")) {
-  sheet_use <- match.arg(sheet_use)
+  sheet_use <- match.arg(sheet_use, several.ok = TRUE)
   gs4_deauth()
-  read_sheet("https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154", 
-             sheet = sheet_use) %>% 
-    mutate(year = year(date_published),
-           date_published = as_date(date_published))
+  url_use <- "https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154"
+  if (length(sheet_use) > 1) {
+    sheets <- map(sheet_use, read_sheet, ss = url_use)
+    colnames_use <- map(sheets, names) %>% reduce(intersect)
+    sheets <- map2_dfr(sheets, sheet_use, ~ .x %>% mutate(sheet = .y) %>%
+                         select(!!!syms(c(colnames_use, "sheet")))) %>%
+      mutate(year = year(date_published),
+             date_published = as_date(date_published))
+    return(sheets)
+  } else {
+    read_sheet(url_use, sheet = sheet_use) %>%
+      mutate(year = year(date_published),
+             date_published = as_date(date_published))
+  }
 }
 
 #' Construct HTML image labels for time lines
-#' 
+#'
 #' Internal, called by `plot_timeline`.
-#' 
+#'
 #' @param image_path Character vector, paths to the images of interest. Should be NA for
 #' items that don't have an image.
 #' @param width Width of the images on the time line in pixels to be shown on the
 #' plot.
-#' @param description The text for the items to be shown beneath the images. 
+#' @param description The text for the items to be shown beneath the images.
 #' Should be a character vector of the same length as `image_path`.
-#' @param description_width Width of the description text in characters to wrap 
+#' @param description_width Width of the description text in characters to wrap
 #' the text in the labels.
 #' @return A character vector of HTML code to plot the images and descriptions
 #' with `geom_richtext`.
@@ -55,10 +58,10 @@ make_image_labs <- function(image_path, width, description, description_width) {
 }
 
 #' Plot time line with images and descriptions of each event
-#' 
+#'
 #' The time line is plotted horizontally with ticks for years. The labels with
 #' images and descriptions are above and/or below that line.
-#' 
+#'
 #' @param events_df A data frame with at least these columns:
 #' \describe{
 #'   \item{image}{Paths to the images to use in the label. NA for items without
@@ -76,7 +79,7 @@ make_image_labs <- function(image_path, width, description, description_width) {
 #' overlap for geom_richtext, I have to manually set the y coordinates to make
 #' sure that the labels don't overlap and look good.
 #' @param width Width of the labels in pixels. How the labels will look depends
-#' on the size of the plot. Would be cool if this can be specified in terms of 
+#' on the size of the plot. Would be cool if this can be specified in terms of
 #' units within the plot.
 #' @param description_width Width of the description text in characters to wrap
 #' the text in the labels.
@@ -85,16 +88,22 @@ make_image_labs <- function(image_path, width, description, description_width) {
 #' labels are not cropped off at the edge of the plot.
 #' @param expand_y Same as expand_x, but for the y axis.
 #' @return A ggplot2 object for the plot.
-#' 
+#' @importFrom dplyr case_when arrange between
+#' @importFrom purrr map2_chr
+#' @importFrom lubridate floor_date ceiling_date
+#' @importFrom ggplot2 ggplot geom_point aes geom_hline geom_segment scale_x_date
+#' expansion scale_y_continuous theme_void annotate
+#' @importFrom ggtext geom_richtext
+#' @export
 plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
                           expand_x = c(0.1, 0.1), expand_y = c(0.05, 0.05)) {
-  events_df <- events_df %>% 
+  events_df <- events_df %>%
     mutate(image = case_when(is.na(image) ~ NA_character_,
                              TRUE ~ paste0("./images/", image)),
            description = paste(year(date_published), description),
-           lab = map2_chr(image, description, 
-                          ~ make_image_labs(.x, width, .y, description_width))) %>% 
-    arrange(date_published) %>% 
+           lab = map2_chr(image, description,
+                          ~ make_image_labs(.x, width, .y, description_width))) %>%
+    arrange(date_published) %>%
     mutate(vjusts = case_when(ys >= 0 ~ 1,
                               TRUE ~ 0),
            ys = ys)
@@ -104,13 +113,13 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
                            between(yrs_range, 50, 100) ~ "5 years",
                            TRUE ~ "10 years")
   axis <- seq(floor_date(min(events_df$date_published), "year"),
-              ceiling_date(max(events_df$date_published), "year"), 
+              ceiling_date(max(events_df$date_published), "year"),
               by = date_brks)
   p <- ggplot(events_df) +
     geom_point(aes(x = date_published), y = 0) +
     geom_hline(yintercept = 0) +
     geom_segment(aes(x = date_published, y = 0, xend = date_published, yend = ys)) +
-    geom_richtext(aes(x = date_published, y = ys, label = lab, vjust = vjusts), 
+    geom_richtext(aes(x = date_published, y = ys, label = lab, vjust = vjusts),
                   color = "blue", fill = "white") +
     scale_x_date(expand = expansion(expand_x)) +
     scale_y_continuous(expand = expansion(expand_y)) +
@@ -122,11 +131,11 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
 }
 
 #' Number of publications per year
-#' 
+#'
 #' Plot bar plot of the number of publications per year. Preprints are excluded
 #' as the dates are incoherent with those for published papers. I find facetting
 #' makes the plot easier to read than filling with different colors.
-#' 
+#'
 #' @param pubs A data frame with at least these columns:
 #' \describe{
 #'   \item{journal}{Name of the journal of the paper.}
@@ -135,16 +144,20 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
 #' There must be one row per publication or per method or species for each title
 #' if faceting by those. If facetting, then a column whose name is the value in
 #' `facet_by` must be present.
-#' @param break_width How many years per major grid line.
-#' @param facet_by Name of a column for facetting. Tidyeval is supported.
+#' @param facet_by Name of a column for facetting.
 #' @return A ggplot2 object.
-pubs_per_year <- function(pubs, facet_by = NULL, do_facet = FALSE) {
-  facet_by <- enquo(facet_by)
-  pubs <- pubs %>% 
+#' @importFrom dplyr filter select
+#' @importFrom forcats fct_reorder
+#' @importFrom rlang !! sym
+#' @importFrom ggplot2 geom_bar scale_x_continuous labs theme facet_wrap
+#' @importFrom scales breaks_pretty
+#' @export
+pubs_per_year <- function(pubs, facet_by = NULL) {
+  pubs <- pubs %>%
     filter(!journal %in% c("bioRxiv", "arXiv"))
-  if (do_facet) {
-    pubs <- pubs %>% 
-      mutate(facets = fct_reorder(!!facet_by, year, .fun = "min"))
+  if (!is.null(facet_by)) {
+    pubs <- pubs %>%
+      mutate(facets = fct_reorder(!!sym(facet_by), year, .fun = "min"))
   }
   p <- ggplot(pubs, aes(year)) +
     geom_bar(width = 1) +
@@ -153,7 +166,7 @@ pubs_per_year <- function(pubs, facet_by = NULL, do_facet = FALSE) {
     scale_x_continuous(breaks = breaks_pretty(10)) +
     labs(y = "Number of publication") +
     theme(panel.grid.minor = element_blank(), legend.position = "none")
-  if (do_facet) {
+  if (!is.null(facet_by)) {
     p <- p +
       geom_bar(aes(fill = "all"), width = 1, data = select(pubs, -facets),
                fill = "gray70", alpha = 0.5) +
@@ -163,37 +176,43 @@ pubs_per_year <- function(pubs, facet_by = NULL, do_facet = FALSE) {
 }
 
 #' Number of publications per category
-#' 
+#'
 #' I think it looks better when the bars are horizontal to make the category
 #' names easier to read, as the names can be quite long. This will plot a bar
-#' chart for the number of publications per category, sorted according to the 
+#' chart for the number of publications per category, sorted according to the
 #' number of publications.
-#' 
+#'
 #' @param pubs A data frame at least with a column for the category of interest.
 #' If `isotype = TRUE`, then there should also be a column for images called "image",
 #' already read by magick as image pointers. Each row is a unique combination of
 #' the publication and the category of interest.
-#' @param category Column name to plot.
+#' @param category Column name to plot. Tidyeval is supported.
 #' @param isotype Logical, whether to make isotype plot, like one icon stands for
 #' a certain number of publications.
 #' @param img_unit Integer, how many publications for one icon.
 #' @return A ggplot2 object.
+#' @importFrom rlang enquo as_name
+#' @importFrom forcats fct_infreq fct_rev
+#' @importFrom ggtextures geom_isotype_bar
+#' @importFrom grid unit
+#' @importFrom ggplot2 coord_flip theme element_blank
+#' @export
 pubs_per_cat <- function(pubs, category, isotype = FALSE, img_unit = 5) {
   category <- enquo(category)
-  p <- pubs %>% 
-    mutate(reordered = fct_infreq(!!category) %>% fct_rev()) %>% 
-    ggplot(aes(reordered)) 
+  p <- pubs %>%
+    mutate(reordered = fct_infreq(!!category) %>% fct_rev()) %>%
+    ggplot(aes(reordered))
   if (isotype) {
     p <- p +
-      geom_isotype_bar(aes(image = image), 
-                       img_width = grid::unit(img_unit, "native"), 
+      geom_isotype_bar(aes(image = image),
+                       img_width = grid::unit(img_unit, "native"),
                        img_height = NULL,
                        nrow = 1, ncol = NA,
                        hjust = 0, vjust = 0.5)
   } else {
     p <- p + geom_bar()
   }
-  p <- p + 
+  p <- p +
     scale_y_continuous(expand = expansion(mult = c(0, 0.05)),
                        breaks = breaks_pretty()) +
     labs(y = "Number of publications", x = rlang::as_name(category)) +
@@ -202,42 +221,110 @@ pubs_per_cat <- function(pubs, category, isotype = FALSE, img_unit = 5) {
   p
 }
 
+geocode_inst <- function(sheet) {
+  # Geocode institutions
+  institution2 <- sheet %>%
+    select(country, city, institution) %>%
+    distinct() %>%
+    filter(!is.na(institution)) %>%
+    unite(col = "institution2", institution, city, country, remove = FALSE, sep = ", ") %>%
+    mutate(institution2 = str_remove(institution2, "NA, "))
+  institution_gc <- geocode(institution2$institution2)
+  institution_gc <- cbind(institution2, institution_gc)
+  institution_gc <- st_as_sf(institution_gc, coords = c("lon", "lat"), crs = st_crs(4326))
+  institution_gc
+}
+geocode_city <- function(sheet) {
+  # Geocode cities
+  cities <- sheet %>%
+    select(city, `state/province`, country) %>%
+    distinct() %>%
+    filter(!is.na(city)) %>%
+    unite(col = "city2", city, `state/province`, country, remove = FALSE, sep = ", ") %>%
+    mutate(city2 = str_remove(city2, "NA, "))
+  cities_gc <- geocode(cities$city2)
+  cities_gc <- cbind(cities, cities_gc)
+  cities_gc <- st_as_sf(cities_gc, coords = c("lon", "lat"), crs = st_crs(4326))
+  cities_gc
+}
+
+geocode_first_time <- function(sheet, cache = TRUE, cache_location = ".") {
+  if (cache) {
+    cache_location <- normalizePath(cache_location, mustWork = FALSE)
+    fn <- paste0(cache_location, "/geocode_cache.rds")
+  }
+  inst_gc <- geocode_inst(sheet)
+  city_gc <- geocode_city(sheet)
+  out <- list(inst_gc = inst_gc,
+              city_gc = city_gc)
+  if (cache) saveRDS(out, file = fn)
+  out
+}
+
 #' Geocode institutions and cities
-#' 
-#' To do: Cache. Also, when updating, only locations not already included in the
-#' cache will be geocoded. How about the first time? I think I can include it in
-#' the data of this package and later it can be updated and written to somewhere
-#' else on disk.
-#' 
+#'
+#' Get longitude and latitude of institutions and cities. If cache is used and
+#' there're some institutions or cities not already in the cache, those will be
+#' added.
+#'
 #' @param sheet The tibble read from Google Sheets, which has columns country,
 #' state/province, city, and institution.
+#' @param cache Logial, whether to cache.
+#' @param cache_location Where to save the cache
 #' @return A list of two sf data frames:
 #' \describe{
 #'   \item{inst_gc}{A sf data frame with columns city, institution, and geometry.}
 #'   \item{city_gc}{A sf data frame with columns country, state/province, city,
 #'   and geometry.}
 #' }
-geocode_inst_city <- function(sheet) {
-  # Geocode institutions
-  institution2 <- sheet %>% 
-    select(country, city, institution) %>% 
-    distinct() %>% 
-    unite(col = "institution2", institution, city, country, remove = FALSE, sep = ", ") %>% 
-    mutate(institution2 = str_remove(institution2, "NA, "))
-  institution_gc <- geocode(institution2$institution2)
-  institution_gc <- cbind(institution2, institution_gc)
-  institution_gc <- st_as_sf(institution_gc, coords = c("lon", "lat"), crs = st_crs(4326))
-  # Geocode cities
-  cities <- sheet %>% 
-    select(city, `state/province`, country) %>% 
-    distinct() %>% 
-    unite(col = "city2", city, `state/province`, country, remove = FALSE, sep = ", ") %>% 
-    mutate(city2 = str_remove(city2, "NA, "))
-  cities_gc <- geocode(cities$city2)
-  cities_gc <- cbind(cities, cities_gc)
-  cities_gc <- st_as_sf(cities_gc, coords = c("lon", "lat"), crs = st_crs(4326))
-  list(inst_gc = institution_gc,
-       city_gc = cities_gc)
+#' @importFrom ggmap geocode
+#' @importFrom dplyr distinct
+#' @importFrom tidyr unite
+#' @importFrom stringr str_remove
+#' @importFrom sf st_as_sf st_crs st_polygon st_sfc st_transform st_bbox
+#' @importFrom zeallot %<-%
+#' @export
+geocode_inst_city <- function(sheet, cache = TRUE, cache_location = ".") {
+  if (cache) {
+    cache_location <- normalizePath(cache_location, mustWork = FALSE)
+    fn <- paste0(cache_location, "/geocode_cache.rds")
+    first_time <- !dir.exists(cache_location) | !file.exists(fn)
+    if (!dir.exists(cache_location)) dir.create(cache_location)
+    if (first_time) {
+      file.copy(system.file("geocode_cache.rds", package = "museumst"),
+                fn)
+      return(readRDS(fn))
+    } else {
+      # Get existing cache
+      c(inst_gc, city_gc) %<-% readRDS(fn)
+      # Check if there's new institution
+      sheet_inst <- sheet %>%
+        anti_join(inst_gc, by = c("country", "city", "institution"))
+      if (nrow(sheet_inst) > 0) {
+        inst_gc2 <- geocode_inst(sheet_inst)
+        inst_gc <- rbind(inst_gc, inst_gc2)
+        message("Added ", nrow(sheet_inst), " new institutions to cache.")
+        # Check if there's new city
+        sheet_city <- sheet %>%
+          anti_join(city_gc, by = c("country", "state/province", "city"))
+        if (nrow(sheet_city) > 0) {
+          city_gc2 <- geocode_city(sheet_city)
+          city_gc <- rbind(city_gc, city_gc2)
+          message("Added ", nrow(sheet_city), " new cities to cache.")
+        }
+        out <- list(inst_gc = inst_gc,
+                    city_gc = city_gc)
+        saveRDS(out, file = fn)
+        return(out)
+      } else {
+        out <- list(inst_gc = inst_gc,
+                    city_gc = city_gc)
+        return(out)
+      }
+    }
+  } else {
+    geocode_first_time(sheet, cache = FALSE)
+  }
 }
 
 get_europe_limits <- function() {
@@ -250,33 +337,38 @@ get_europe_limits <- function() {
 }
 
 #' Plot number of publications at each location
-#' 
+#'
 #' Plots points on a map, and the areas of the points are proportional to the
-#' number of publications at the location. Can facet by some category like 
+#' number of publications at the location. Can facet by some category like
 #' method or species.
-#' 
+#'
 #' World map will use the Robinson projection. European map uses the LAEA Europe
 #' projection (EPSG:3035), and the American map uses the US National Atlas Equal Area
 #' projection (EPSG:2163) and Alaska and Hawaii are moved and included. The option
 #' to zoom in on Europe and the US is available because those are the two regions
 #' of the world with the most publications and it's hard to see the data when
 #' plotted on a world map.
-#' 
-#' @param pubs A dataframe with one publication x facet_by combination per row.
-#' must have columns country, city, and institution
+#'
+#' @inheritParams pubs_per_year
 #' @param inst_gc From geocode_inst_city
 #' @param city_gc From geocode_inst_city
 #' @param zoom Whether to plot the world map or only Europe (centered on Western
 #' Europe and some Eastern European countries are partially cropped off) or only
 #' the US.
-#' @param facet_by Column name of the categorical variable to facet. This way it's
-#' easier to see than plotting points on the same map with different colors.
 #' @param ncol Number of columns in facetted plot.
 #' @param label_cities Logical, whether to label cities. In facetted plots, cities
 #' are not labeled to reduce clutter.
 #' @param per_year Logical, whether to do the count for each year separately.
 #' This is for making animations with gganimate.
 #' @return A ggplot2 object
+#' @importFrom rlang !!!
+#' @importFrom dplyr left_join count semi_join vars
+#' @importFrom rnaturalearth ne_countries
+#' @importFrom ggplot2 geom_sf scale_size_area scale_color_viridis_c coord_sf
+#' @importFrom gganimate transition_states enter_fade exit_fade
+#' @importFrom scales breaks_width
+#' @importFrom ggrepel geom_label_repel
+#' @export
 pubs_on_map <- function(pubs, inst_gc, city_gc,
                         zoom = c("world", "europe", "usa"),
                         facet_by = "none",
@@ -290,86 +382,85 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
     vars_count <- c("country", "city", "institution")
   }
   if (facet_by == "none") {
-    inst_count <- pubs %>% 
+    inst_count <- pubs %>%
       count(!!!syms(vars_count))
   } else {
-    inst_count <- pubs %>% 
-      count(!!!syms(c(vars_count, facet_by))) 
+    inst_count <- pubs %>%
+      count(!!!syms(c(vars_count, facet_by)))
   }
-  inst_count <- inst_count %>% 
+  inst_count <- inst_count %>%
     left_join(inst_gc, by = c("country", "city", "institution"))
-  city_gc <- city_gc %>% 
+  city_gc <- city_gc %>%
     semi_join(inst_count, by = c("country", "city"))
   if (zoom == "world") {
     map_use <- ne_countries(scale = "small", returnclass = "sf")
     # use Robinson projection
     map_use <- st_transform(map_use, 54030)
-    inst_count <- inst_count %>% 
+    inst_count <- inst_count %>%
       mutate(geometry = st_transform(geometry, 54030))
   } else if (zoom == "europe") {
     map_use <- ne_countries(scale = "medium", returnclass = "sf")
-    europe_countries <- readRDS("output/europe_countries.rds")
     crs_europe <- 3035
-    inst_count <- inst_count %>% 
-      filter(country %in% europe_countries) %>% 
+    inst_count <- inst_count %>%
+      filter(country %in% europe_countries) %>%
       mutate(geometry = st_transform(geometry, crs = crs_europe))
-    city_gc <- city_gc %>% 
-      filter(country %in% europe_countries) %>% 
+    city_gc <- city_gc %>%
+      filter(country %in% europe_countries) %>%
       mutate(geometry = st_transform(geometry, crs = crs_europe))
     # Box centering on Western Europe
     xylims <- get_europe_limits()
     # project on European transformation
     map_use <- st_transform(map_use, crs = crs_europe)
   } else if (zoom == "usa") {
-    map_use <- get_urbn_map(sf = TRUE)
+    map_use <- usa_w_pop
     crs_usa <- 2163
-    inst_count <- inst_count %>% 
-      filter(country == "USA") %>% 
+    inst_count <- inst_count %>%
+      filter(country == "USA") %>%
       mutate(geometry = st_transform(geometry, crs = crs_usa))
-    city_gc <- city_gc %>% 
-      filter(country == "USA") %>% 
+    city_gc <- city_gc %>%
+      filter(country == "USA") %>%
       mutate(geometry = st_transform(geometry, crs = crs_usa))
   }
   if (max(inst_count$n, na.rm = TRUE) < 4) {
     size_break_width <- 1
   } else {
-    size_break_width <- ceiling((max(inst_count$n, na.rm = TRUE) - 
+    size_break_width <- ceiling((max(inst_count$n, na.rm = TRUE) -
                                    min(inst_count$n, na.rm = TRUE))/4)
   }
   p <- ggplot() +
     geom_sf(data = map_use) +
-    scale_size_area(name = "Number of\npublications", 
+    scale_size_area(name = "Number of\npublications",
                     breaks = breaks_width(size_break_width)) +
     theme(panel.border = element_blank(), axis.title = element_blank())
   if (facet_by == "none") {
     if (per_year) {
-      p <- p + 
-        geom_sf(data = inst_count, aes(geometry = geometry, size = n, color = n, 
-                                       group = institution2), 
+      p <- p +
+        geom_sf(data = inst_count, aes(geometry = geometry, size = n, color = n,
+                                       group = institution2),
                 alpha = 0.7, show.legend = "point")
     } else {
       p <- p +
-        geom_sf(data = inst_count, aes(geometry = geometry, size = n, color = n), 
-                alpha = 0.7, show.legend = "point") 
+        geom_sf(data = inst_count, aes(geometry = geometry, size = n, color = n),
+                alpha = 0.7, show.legend = "point")
     }
     p <- p +
       scale_color_viridis_c(name = "", breaks_width(size_break_width))
     if (zoom != "world" && label_cities) {
-      p <- p + 
-        geom_label_repel(data = city_gc, aes(geometry = geometry, label = city), 
+      p <- p +
+        geom_label_repel(data = city_gc, aes(geometry = geometry, label = city),
                          alpha = 0.7, stat = "sf_coordinates")
     }
   } else {
     if (per_year) {
-      p <- p + 
-        geom_sf(data = inst_counts, aes(geometry = geometry, size = n, 
+      p <- p +
+        geom_sf(data = inst_count, aes(geometry = geometry, size = n,
                                         group = institution2,
-                                        color = !!sym(facet_by)), 
+                                        color = !!sym(facet_by)),
                 alpha = 0.7, show.legend = "point")
     } else {
       p <- p +
-        geom_sf(data = inst_counts, aes(geometry = geometry, size = n, 
-                    color = !!sym(facet_by)), 
+        geom_sf(data = inst_count, aes(geometry = geometry, size = n,
+                    color = !!sym(facet_by)),
                 alpha = 0.7, show.legend = "point")
     }
     p <- p +
@@ -379,7 +470,7 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
   if (zoom == "europe") {
     # Limit to that box
     p <- p +
-      coord_sf(xlim = xylims[c("xmin", "xmax")], ylim = xylims[c("ymin", "ymax")], 
+      coord_sf(xlim = xylims[c("xmin", "xmax")], ylim = xylims[c("ymin", "ymax")],
                crs = crs_europe)
   }
   if (per_year) {
@@ -393,10 +484,10 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
 }
 
 #' Plot per capita data as choropleth or bar plot
-#' 
+#'
 #' For the entire world, Europe (for European countries tend to be smaller) and
-#' states within the US. 
-#' 
+#' states within the US.
+#'
 #' @param pubs A data frame with one row per publication and columns country and
 #' for the US, also a column "state/province".
 #' @param zoom Whether to plot the world map or only Europe (centered on Western
@@ -404,52 +495,53 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
 #' the US.
 #' @param plot Whether to plot choropleth or bar plot.
 #' @return A ggplot2 object.
+#' @importFrom ggplot2 scale_fill_distiller
+#' @export
 pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
                             plot = c("choropleth", "bar")) {
   zoom <- match.arg(zoom)
   plot <- match.arg(plot)
   if (zoom != "usa") {
     if (zoom == "world") {
-      map_use <- ne_countries(scale = "small", returnclass = "sf") 
+      map_use <- ne_countries(scale = "small", returnclass = "sf")
       if (plot == "choropleth") {
         map_use <- st_transform(map_use, 54030)
       }
     } else {
-      map_use <- ne_countries(scale = "medium", returnclass = "sf") 
+      map_use <- ne_countries(scale = "medium", returnclass = "sf")
       if (plot == "choropleth") {
         map_use <- st_transform(map_use, 3035)
       }
     }
-    pubs_count <- pubs %>% 
+    pubs_count <- pubs %>%
       mutate(country_full = case_when(country == "USA" ~ "United States",
                                       country == "UK" ~ "United Kingdom",
-                                      TRUE ~ country)) %>% 
-      count(country_full, country) 
+                                      TRUE ~ country)) %>%
+      count(country_full, country)
     if (zoom == "europe") {
-      europe_countries <- readRDS("output/europe_countries.rds")
-      pubs_count <- pubs_count %>% 
+      pubs_count <- pubs_count %>%
         filter(country %in% europe_countries)
     }
-    map_use <- map_use %>% 
-      left_join(pubs_count, by = c("name" = "country_full")) %>% 
+    map_use <- map_use %>%
+      left_join(pubs_count, by = c("name" = "country_full")) %>%
       mutate(per_capita = n/pop_est)
     if (plot == "bar") {
-      map_use <- map_use %>% 
-        filter(!is.na(per_capita)) %>% 
+      map_use <- map_use %>%
+        filter(!is.na(per_capita)) %>%
         mutate(area = fct_reorder(country, per_capita))
     }
   } else {
-    map_use <- readRDS("output/usa_w_pop.rds")
-    pubs_count <- pubs %>% 
-      filter(country == "USA") %>% 
-      count(`state/province`) 
-    map_use <- map_use %>% 
-      left_join(pubs_count, 
-                by = c("state_abbv" = "state/province")) %>% 
+    map_use <- usa_w_pop
+    pubs_count <- pubs %>%
+      filter(country == "USA") %>%
+      count(`state/province`)
+    map_use <- map_use %>%
+      left_join(pubs_count,
+                by = c("state_abbv" = "state/province")) %>%
       mutate(per_capita = n/`2019`)
     if (plot == "bar") {
-      map_use <- map_use %>% 
-        filter(!is.na(per_capita)) %>% 
+      map_use <- map_use %>%
+        filter(!is.na(per_capita)) %>%
         mutate(area = fct_reorder(state_name, per_capita))
     }
   }
@@ -462,13 +554,13 @@ pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
     if (zoom == "europe") {
       xylims <- get_europe_limits()
       p <- p +
-        coord_sf(xlim = xylims[c("xmin", "xmax")], ylim = xylims[c("ymin", "ymax")], 
+        coord_sf(xlim = xylims[c("xmin", "xmax")], ylim = xylims[c("ymin", "ymax")],
                  crs = 3035)
     }
   } else {
     area_lab <- if (zoom == "usa") "state" else "country"
     if (zoom == "europe") {
-      map_use <- map_use %>% 
+      map_use <- map_use %>%
         filter(country %in% europe_countries)
     }
     p <- ggplot(map_use, aes(per_capita, area)) +
@@ -479,67 +571,74 @@ pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
   p
 }
 
-#' Plot word cloud for a column 
-#' 
+#' Plot word cloud for a column
+#'
 #' Plots a word cloud for columns in the metadata that don't have a controlled
 #' vocabulary. I guess maybe I should start using a controlled vocabulary.
-#' 
+#'
 #' @param sheet The sheet read in from Google Sheets as a tibble.
-#' @param col_use Which column to break down into words for word cloud.
+#' @param col_use Which column to break down into words for word cloud. Tidyeval
+#' is supported.
 #' @param species_use Which species to filter by.
 #' @param year_min Minimum year. The range of years will be >= year_min and
 #' < year_max.
 #' @param year_max Maximum year.
 #' @param other_stop_words A character vector for other stop words besides the
 #' stop_words data frame that comes with tidytext.
-#' @return A html widget. 
-plot_wordcloud <- function(sheet, col_use = "title", species_use = "all", 
+#' @return A html widget.
+#' @importFrom dplyr distinct anti_join
+#' @importFrom tidytext unnest_tokens
+#' @importFrom wordcloud2 wordcloud2
+#' @export
+plot_wordcloud <- function(sheet, col_use = title, species_use = "all",
                            year_min = NA, year_max = NA,
                            other_stop_words = NULL) {
-  df <- sheet %>% 
-    select(title, year, species, !!sym(col_use)) %>% 
-    filter(!is.na(!!sym(col_use)))
+  col_use <- enquo(col_use)
+  df <- sheet %>%
+    select(title, year, species, !!col_use) %>%
+    filter(!is.na(!!col_use))
   if (species_use != "all") {
-    df <- df %>% 
+    df <- df %>%
       filter(species == species_use)
   }
   if (!is.na(year_min) && !is.na(year_max)) {
-    df <- df %>% 
+    df <- df %>%
       filter(year >= year_min, year < year_max)
   }
-  data("stop_words")
-  df <- df %>% 
-    select(-species, -year) %>% 
-    distinct() %>% 
-    unnest_tokens(output = "word", input = !!sym(col_use)) %>% 
-    anti_join(stop_words, by = "word") %>% 
+  df <- df %>%
+    select(-species, -year) %>%
+    distinct() %>%
+    unnest_tokens(output = "word", input = !!col_use) %>%
+    anti_join(stop_words, by = "word") %>%
     count(word, name = "freq")
   if (!is.null(other_stop_words)) {
-    df <- df %>% 
+    df <- df %>%
       filter(!word %in% other_stop_words)
   }
   wordcloud2(df, minRotation = -pi/2, maxRotation = -pi/2, shuffle = FALSE)
 }
 
 #' Plot heatmap to show relationship between two categorical variables
-#' 
+#'
 #' For instance, are papers for certain techniques more likely to be in certain
 #' journals? Is there an association between species and journal? This is just
 #' for visualization. Use `fisher.test` to see if it's significant. I still wonder
 #' if I should rewrite this with ggplot2, which is more work than base R in this
 #' case.
-#' 
-#' @param pubs Data frame for publications.
+#'
+#' @inheritParams pubs_per_year
 #' @param row_var Variable for rows of the heatmap. Tidyeval is supported.
 #' @param col_var Variable for columns of the heatmap.
 #' @param ... Extra arguments to pass to `heatmap`
 #' @return A base R heatmap is plotted to the current device.
-#' 
+#' @importFrom dplyr pull
+#' @importFrom tidyr pivot_wider
+#' @export
 cat_heatmap <- function(pubs, row_var, col_var, ...) {
   rv <- enquo(row_var)
   cv <- enquo(col_var)
-  mat1 <- pubs %>% 
-    count(!!rv, !!cv) %>% 
+  mat1 <- pubs %>%
+    count(!!rv, !!cv) %>%
     pivot_wider(names_from = !!cv, values_from = "n")
   method_mat <- as.matrix(mat1[,-1])
   rownames(method_mat) <- pull(mat1, !!rv)
@@ -548,20 +647,21 @@ cat_heatmap <- function(pubs, row_var, col_var, ...) {
 }
 
 #' Plot histogram for each value of a logical variable
-#' 
+#'
 #' Plots 3 histograms showing the number of publications per year for TRUE, FALSE,
 #' and NA, with the histogram overlaid on top of a translucent one for all
-#' values. There's one facet per row so it's easy to compare how things change 
+#' values. There's one facet per row so it's easy to compare how things change
 #' with time.
-#' 
-#' @param pubs Data frame for publications.
+#'
+#' @inheritParams pubs_per_year
 #' @param var_use Which logical variable to plot. Tidyeval is supported.
 #' @param binwidth Width of bins for the histogram in days.
 #' @return A ggplot2 object
-
+#' @importFrom ggplot2 geom_histogram facet_grid
+#' @export
 hist_bool <- function(pubs, var_use, binwidth = 365) {
   var_use <- enquo(var_use)
-  pubs <- pubs %>% 
+  pubs <- pubs %>%
     mutate(v = !!var_use)
   ggplot(pubs, aes(date_published)) +
     geom_histogram(aes(fill = 'all'), alpha = 0.7, fill = "gray70",
@@ -575,40 +675,56 @@ hist_bool <- function(pubs, var_use, binwidth = 365) {
 }
 
 #' Plot outlines of histogram for a logical variable
-#' 
+#'
 #' Kind of like `hist_bool`, but instead of plotting TRUE, FALSE, and NA in 3
 #' separate facets, it plots them as an outline overlaid on a translucent
 #' histogram for all values. This is useful when facetting with another categorical
 #' variable, such as programming language.
-#' 
-
-hist_bool_line <- function(pubs, var_use) {
+#'
+#' @inheritParams hist_bool
+#' @inheritParams pubs_per_year
+#' @importFrom tidyr complete
+#' @importFrom ggplot2 scale_x_continuous
+#' @export
+hist_bool_line <- function(pubs, var_use, facet_by = NULL, ncol = 3) {
   var_use <- enquo(var_use)
-  pubs %>% 
-    count(year, !!var_use) %>% 
-    complete(year = seq(min(year), max(year), 1), !!var_use, fill = list(n = 0)) %>% 
-    ggplot(aes(year, n)) +
+  if (!is.null(facet_by)) {
+    pubs <- pubs %>%
+      count(year, !!var_use, !!sym(facet_by)) %>%
+      complete(year = seq(min(year), max(year), 1), !!var_use, !!sym(facet_by),
+               fill = list(n = 0))
+  } else {
+    pubs <- pubs %>%
+      count(year, !!var_use) %>%
+      complete(year = seq(min(year), max(year), 1), !!var_use, fill = list(n = 0))
+  }
+  p <- ggplot(pubs, aes(year, n)) +
     geom_col(width = 1, alpha = 0.5, fill = "gray90") +
     geom_step(aes(color = !!var_use), direction = "mid") +
     scale_y_continuous(breaks = breaks_pretty(), expand = expansion(c(0, 0.05))) +
     scale_x_continuous(breaks = breaks_pretty(10)) +
     theme(panel.grid.minor = element_blank(), legend.position = "top") +
     labs(y = "count")
+  if (!is.null(facet_by)) {
+    p <- p + facet_wrap(vars(!!sym(facet_by)), ncol = ncol)
+  }
+  p
 }
 
 #' Test whether something is associated with time
-#' 
+#'
 #' Fits a linear model with lm to use year to predict proportion of a logical
 #' variable is TRUE, and tests whether beta is 0.
-#' 
+#'
+#' @inheritParams hist_bool
 #' @return A lm object is returned invisibly. The summary is printed to screen
+#' @importFrom dplyr group_by summarize
 test_year_bool <- function(pubs, var_use) {
   var_use <- enquo(var_use)
-  df <- pubs %>% 
-    group_by(year) %>% 
+  df <- pubs %>%
+    group_by(year) %>%
     summarize(prop = sum(!!var_use)/length(!!var_use))
   out <- lm(prop ~ year, data = df)
   print(summary(out))
   invisible(out)
 }
-
