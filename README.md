@@ -42,5 +42,6 @@ To do:
 
   * Build pkgdown website
   * Build shiny app for exploring this metadata
+  * Put the vignettes on a RStudio Cloud project for those who do code to play around with. The entire package repo will be there so the user can also change the code and make other plots.
   * Get this package to CRAN
   * The code to produce final figures for the review papers about this metadata will be in a separate repo
