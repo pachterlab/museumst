@@ -1,0 +1,342 @@
+---
+title: "Prequel"
+author: "Lambda Moses"
+date: "5/25/2020"
+output: html_document
+params:
+  sheet: "Prequel"
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Here I explore the history and geography of spatial transcriptomics based on microdissection through the metadata I collected.
+```{r}
+library(tidyverse)
+library(googlesheets4)
+library(lubridate)
+library(magick)
+library(scales)
+library(zeallot)
+source("code/metadata_plotting.R")
+theme_set(theme_bw())
+```
+
+# Import data
+```{r}
+gs4_deauth()
+sheet <- read_sheet("https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154", sheet = params$sheet)
+```
+
+Add the year column as this will be used for plotting rather than the full date.
+```{r}
+sheet <- sheet %>% 
+  mutate(year = year(date_published),
+         date_published = as_date(date_published))
+```
+
+# Number of publications
+
+```{r}
+anyDuplicated(sheet$title[!is.na(sheet$title)])
+```
+
+How many publications are there in total in this sheet?
+```{r}
+nrow(sheet)
+```
+
+```{r}
+# For maps later in this notebook
+c(inst_gc, city_gc) %<-% geocode_inst_city(sheet)
+pubs_on_map2 <- partial(pubs_on_map, inst_gc = inst_gc, city_gc = city_gc,
+                        label_cities = FALSE)
+```
+
+## Overall
+```{r}
+gs4_deauth()
+events <- read_sheet("https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154", sheet = "major events")
+events$date_published <- as_date(events$date_published)
+```
+
+```{r, fig.width=5.5, fig.height=3}
+events %>% 
+  filter(category == "trap") %>% 
+  plot_timeline(rep(c(1, -1), length.out = nrow(.)), 
+                expand_x = c(0.1, 0.1), expand_y = c(0.05, 0.05))
+```
+
+```{r, fig.width=5.5, fig.height=5.5}
+events %>% 
+  filter(category == "ISH atlas") %>% 
+  plot_timeline(c(0.6, -0.8, 0.6, -0.8, 0.4, -1.2, 0.5, -0.5, 1, -1, 0.8, -0.5, 1.1, -0.8, 0.5), 
+                expand_x = c(0.1, 0.1), expand_y = c(0.05, 0.05))
+```
+
+```{r}
+pubs_per_year(sheet)
+```
+
+## By method
+
+```{r}
+methods <- sheet %>% 
+  mutate(method = str_split(method, pattern = "(;|,)\\s")) %>% 
+  select(year, title, journal, method, country, institution) %>% 
+  unnest(cols = "method") %>% 
+  filter(!is.na(method))
+```
+
+```{r}
+pubs_per_cat(methods, "method")
+```
+
+```{r, fig.width=4, fig.height=4}
+pubs_per_year(methods, facet_by = "method")
+```
+
+## By species
+These are the species the computational methods were demonstrated on
+```{r}
+species_img <- readRDS("output/species_img.rds")
+```
+
+```{r}
+species <- sheet %>% 
+  select(year, title, journal, species, country, institution) %>% 
+  filter(!is.na(species)) %>% 
+  mutate(species = str_split(species, "; ")) %>% 
+  unnest(cols = "species") %>%
+  distinct()
+```
+
+```{r}
+unique(species$species)
+```
+
+```{r}
+pubs_per_cat(species, category = "species")
+```
+
+```{r}
+top_species <- species %>% 
+  count(species) %>%
+  top_n(5, n) %>% 
+  arrange(desc(n)) %>% 
+  pull(species)
+species_img$image <- purrr::map(species_img$image_paths, image_read)
+```
+
+```{r}
+species %>% 
+  filter(species %in% top_species) %>% 
+  left_join(species_img, by = "species") %>% 
+  pubs_per_cat(category = "species", isotype = TRUE, img_unit = 10)
+```
+
+## By journal
+```{r}
+cat_heatmap(methods, journal, method)
+```
+
+```{r}
+cat_heatmap(species, journal, species)
+```
+
+## Location
+### General
+Just some barplots for number of publications per institution, city, and country. 
+```{r}
+pubs_per_cat(sheet, "country")
+```
+
+How about per capita? Actually this probably does not say much since many researchers in the West are immigrants. Then it raises the burning political question of who counts as the "population".
+
+```{r}
+pubs_per_capita(sheet, plot = "bar")
+```
+
+How about country over time? There might not be enough publications to show a trend.
+```{r, fig.height=8, fig.width=4}
+pubs_per_year(sheet, facet_by = "country")
+```
+Now look at cities. 
+
+```{r, fig.width=4, fig.height=5}
+pubs_per_cat(sheet, "city")
+```
+
+Bar Harbor is for GXD(JAX), and Edinburgh is for EMAGE
+Institutions
+```{r, fig.width=4, fig.height=6}
+pubs_per_cat(sheet, "institution")
+```
+
+### Worldwide
+```{r}
+pubs_on_map2(sheet)
+```
+
+Still, it's mostly in the US and Western Europe, but this time we see some more in Asia. Still no Africa and South America.
+
+Let me also plot the per capita thing on a map, as a choropleth
+```{r}
+pubs_per_capita(sheet)
+```
+
+Break down by species
+```{r, fig.width=5, fig.height=5}
+pubs_on_map2(species, facet_by = "species", ncol = 4)
+```
+
+Ciona is more centered in Japan, and chicken more in Arizona. I already know that.
+
+Probably this does not tell us much since there's only 1 study for some species. Again, we see the received wisdom that research is mostly confined to the West, especially Western Europe, west coast of the US, and New England, but not as much in the other parts of the "West".
+
+### Europe
+Plot a map just for Europe. A problem here is that if I simply filter the `world` sf object, I'll get some islands away from what we usually think is Europe. 
+
+```{r}
+pubs_on_map2(sheet, zoom = "europe")
+```
+
+```{r}
+pubs_per_capita(sheet, "europe")
+```
+
+I'm kind of amazed that Sweden didn't contribute to the prequel stuff, yet it's doing so well in the newer spatial transcriptomics technologies.
+
+```{r, fig.width=5, fig.height=5}
+pubs_on_map2(species, zoom = "europe", facet_by = "species", ncol = 5)
+```
+
+Looks like some French labs are quite interested in unconventional model organisms. That's consistent with our collaboration with that French lab on the jellyfish Clytia project. I still wonder why. Is it a French thing?
+
+### USA
+Also a plot just for America. I did not encounter a publication in this spreadsheet that is from Hawaii or Alaska, but I'll include Hawaii and Alaska in the map anyway in case I get one in the future.
+
+```{r}
+pubs_on_map2(sheet, zoom = "usa")
+```
+
+```{r}
+pubs_per_capita(sheet, "usa")
+```
+
+```{r, fig.width=5, fig.height=4}
+pubs_on_map2(species, zoom = "usa", facet_by = "species", ncol = 3)
+```
+
+ZFIN is based in Eugene, Oregon. GEISHA is based in Tempe, Arizona. GXD is based in JAX, Bar Harbor, Maine. There're a number of Drosophila projects from Berkeley. And we see that on this map.
+
+# Word cloud
+## Titles
+```{r}
+plot_wordcloud(sheet)
+```
+
+## Tissues
+```{r}
+plot_wordcloud(sheet, col_use = "tissue")
+```
+
+```{r}
+plot_wordcloud(sheet, col_use = "tissue", species_use = "Drosophila melanogaster")
+```
+
+```{r}
+plot_wordcloud(sheet, col_use = "tissue", species_use = "Mus musculus")
+```
+
+## Over time
+
+```{r}
+range(sheet$date_published)
+```
+
+```{r}
+plot_wordcloud(sheet, year_min = 1987, year_max = 1995)
+```
+
+```{r}
+plot_wordcloud(sheet, year_min = 1995, year_max = 2000)
+```
+
+```{r}
+plot_wordcloud(sheet, year_min = 2000, year_max = 2005)
+```
+
+```{r}
+plot_wordcloud(sheet, year_min = 2005, year_max = 2010)
+```
+
+```{r}
+plot_wordcloud(sheet, year_min = 2010, year_max = 2021)
+```
+
+## Department names
+```{r}
+institution_words <- readRDS("output/inst_words.rds")
+```
+
+```{r}
+plot_wordcloud(sheet, col_use = "department", other_stop_words = institution_words)
+```
+
+# Data availability
+
+How many of the resources are still available?
+```{r}
+hist_bool(sheet, still_available)
+```
+
+```{r}
+hist_bool_line(sheet, still_available)
+```
+
+It seems that more recent ones are more likely to be still available. The NAs are for those atlases that has never been made available. Well, actually that might not be the case, since the data from those papers has most likely now been deposited in one of the databases like GXD and ZFIN. It seems that the NAs tend to be older.
+```{r}
+test_year_bool(sheet, still_available)
+```
+
+Sort of suggestive that more recent atlases are more likely to be still available. 
+
+# Number of genes
+For the old enhancer and gene trap studies, there weren't genome annotations and number of lines was reported rather than genes. For old ISH atlases, the number of clones was reported.
+```{r, fig.width=4, fig.height=6}
+pubs_per_year(sheet, facet_by = "item_type")
+```
+
+Yeah, genes became prevalent later, and the prevalence of clones is quite transient. However, lines are not dead, since enhancer and gene traps are not dead since those are high throughput perturbations in addition to visualization.
+
+Do more recent studies tend to do more genes?
+
+```{r}
+sheet %>% 
+  filter(!str_detect(method, "collection"), item_type == "gene") %>% 
+  ggplot(aes(date_published, n_items)) +
+  geom_point()
+```
+
+Not really.
+
+I know that studies that do a particular type of genes tend to have fewer genes. Which types of genes?
+```{r}
+sheet %>% 
+  filter(!is.na(gene_type)) %>% 
+  pubs_per_cat("gene_type")
+```
+
+Are more recent publications more likely to focus on some type of genes?
+```{r}
+hist_bool(sheet, !is.na(gene_type))
+```
+
+```{r}
+test_year_bool(sheet, !is.na(gene_type))
+```
+
+I don't think so.

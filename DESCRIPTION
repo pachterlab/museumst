@@ -1,0 +1,15 @@
+Package: museumst
+Type: Package
+Title: Museum of Spatial Transcriptomics
+Version: 0.1.0
+Author: Lambda Moses
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
