@@ -1,8 +1,12 @@
 ---
-title: "Comparisons"
+title: "Comparisons between sheets"
 author: "Lambda Moses"
-date: "5/26/2020"
-output: html_document
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{comparisons}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -14,7 +18,10 @@ Here I compare different sheets and do the analysis for all sheets in the origin
 ```{r}
 library(museumst)
 library(gganimate)
-library(magick)
+library(purrr)
+library(dplyr)
+library(tidytext)
+library(tidyr)
 theme_set(theme_bw())
 ```
 
@@ -32,13 +39,8 @@ data_sheets <- data_sheets %>%
 
 See the number of publications; for original trilogy sheets, each dataset has its own row so often one publication has multiple rows.
 ```{r}
-publications <- data_sheets %>% 
-  select(date_published:journal, country:year, is_prequel) %>% 
-  distinct()
-anyDuplicated(publications$title[!is.na(publications$title)])
+publications <- get_pubs_df(data_sheets, "is_prequel")
 ```
-
-Duplication happens here because some papers have datasets on different sheets.
 
 ```{r}
 # For maps later in this notebook
@@ -67,9 +69,11 @@ ggplot(pubs_count, aes(years_since_first, n, color = is_prequel)) +
   scale_y_continuous(limits = c(0, max(pubs_count$n)))
 ```
 
-Here I'm making an animation on a map for prequel and original trilogy separately for number of publications per institution. 
+So far they seem pretty parallel (which most likely won't be the case when I make the LCM collection more complete), though I certainly don't think the current era has peaked yet. Based on this, I think the current era will be much greater than the prequel era.
 
-```{r}
+Here I'm making an animation on a map for prequel and original trilogy separately for number of publications per institution. These take a while to run to render all those frames, so not run for CRAN checks.
+
+```{r, eval=FALSE}
 world_prequel <- publications %>% 
   filter(is_prequel) %>% 
   pubs_on_map(inst_gc, city_gc, per_year = TRUE)
@@ -77,7 +81,7 @@ animate(world_prequel, nframes = 200)
 anim_save("output/world_prequel.gif")
 ```
 
-```{r}
+```{r, eval=FALSE}
 europe_prequel <- publications %>% 
   filter(is_prequel) %>% 
   pubs_on_map(inst_gc, city_gc, zoom = "europe", per_year = TRUE)
@@ -85,7 +89,7 @@ animate(europe_prequel, nframes = 200)
 anim_save("output/europe.gif")
 ```
 
-```{r}
+```{r, eval=FALSE}
 usa_prequel <- publications %>% 
   filter(is_prequel) %>% 
   pubs_on_map(inst_gc, city_gc, zoom = "usa", per_year = TRUE)
@@ -93,7 +97,7 @@ animate(usa_prequel, nframes = 200)
 anim_save("output/usa.gif")
 ```
 
-```{r}
+```{r, eval=FALSE}
 world_current <- publications %>% 
   filter(!is_prequel) %>% 
   pubs_on_map(inst_gc, city_gc, per_year = TRUE)
@@ -101,7 +105,7 @@ animate(world_current, nframes = 150)
 anim_save("output/world_current.gif")
 ```
 
-```{r}
+```{r, eval=FALSE}
 europe_current <- publications %>% 
   filter(!is_prequel) %>% 
   pubs_on_map(inst_gc, city_gc, per_year = TRUE, zoom = "europe")
@@ -109,7 +113,7 @@ animate(europe_current, nframes = 80)
 anim_save("output/europe_current.gif")
 ```
 
-```{r}
+```{r, eval=FALSE}
 usa_current <- publications %>% 
   filter(!is_prequel) %>% 
   pubs_on_map(inst_gc, city_gc, per_year = TRUE, zoom = "usa")
@@ -136,7 +140,7 @@ pubs_per_cat(current, sheet)
 
 Sheet over time
 ```{r, fig.width=4, fig.height=4}
-pubs_per_year(current, sheet, do_facet = TRUE)
+pubs_per_year(current, "sheet")
 ```
 
 
@@ -144,8 +148,7 @@ Species in all the current sheets. For prequels, it has already been plotted in 
 ```{r}
 species <- data_sheets %>%
   filter(!is_prequel, !is.na(species)) %>% 
-  select(year, title, journal, species, country, institution) %>% 
-  distinct()
+  unnest_cat(species)
 ```
 
 ```{r}
@@ -153,6 +156,12 @@ pubs_per_cat(species, species)
 ```
 
 I thought that there would be more mouse papers than human ones, but there're slightly more human ones.
+
+Another fun isotype plot:
+```{r}
+pubs_per_cat(species, species, n_top = 5, isotype = TRUE, img_unit = 5)
+```
+
 
 ```{r}
 pubs_per_cat(current2, country)
@@ -205,7 +214,7 @@ data_sheets %>%
   plot_wordcloud()
 ```
 
-Unlike in Prequel, "database" is not at all prominent here. Which words have the most different frequencies between prequel and current era data papers?
+Unlike in Prequel, "database" is not at all prominent here. Which words have the most different frequencies between prequel and current era data papers? Here I use proportion of words to normalize the different sizes of the corpus.
 ```{r}
 word_props <- publications %>% 
   select(title, is_prequel) %>% 
@@ -238,37 +247,23 @@ data_sheets %>%
 
 For current era data papers, which programming languages (if any stated in the paper) are the most popular?
 ```{r}
-langs <- data_sheets %>% 
-  select(year, title, language) %>% 
-  filter(!is.na(language)) %>% 
-  distinct() %>% 
-  mutate(language = str_split(language, "; ")) %>% 
-  unnest(cols = "language")
+# prequel sheet doesn't have programming language information anyway though it has that columnn
+langs <- unnest_cat(data_sheets, language)
 ```
 
 ```{r}
-lang_img <- readRDS("output/lang_img.rds")
-lang_img$image <- purrr::map(lang_img$image_paths, image_read)
-```
-
-```{r}
-langs %>% 
-  inner_join(lang_img, by = "language") %>% 
-  pubs_per_cat(language, isotype = TRUE, img_unit = 5)
+pubs_per_cat(langs, language, n_top = 5, isotype = TRUE, img_unit = 5)
 ```
 
 # Analysis
 ```{r}
 nms <- c("Analysis", "Prequel analysis")
-analysis_sheets <- map(nms, read_metadata)
-colnames_use <- map(analysis_sheets, names) %>% reduce(intersect)
-analysis_sheets <- map2_dfr(analysis_sheets, nms, ~ .x %>% mutate(sheet = .y) %>% 
-                          select(!!!syms(c(colnames_use, "sheet"))))
+analysis_sheets <- read_metadata(nms)
 ```
 
 Just to see how number of publications changed through time here
 ```{r}
-pubs_per_year(analysis_sheets, sheet, TRUE)
+pubs_per_year(analysis_sheets, "sheet")
 ```
 
 ```{r}
@@ -290,3 +285,7 @@ ggplot(ana_counts, aes(years_since_first, n, color = sheet)) +
 ```
 
 Again, in the current era, data analysis papers grow more than in the prequel era (if my collection is complete, which I'm not sure). I don't think we have reached the peak yet.
+
+```{r}
+sessionInfo()
+```
