@@ -110,6 +110,7 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
 #' if faceting by those. If facetting, then a column whose name is the value in
 #' `facet_by` must be present.
 #' @param facet_by Name of a column for facetting.
+#' @param binwidth Width of bins for the histogram in days.
 #' @return A ggplot2 object.
 #' @importFrom dplyr filter select
 #' @importFrom forcats fct_reorder
@@ -117,24 +118,29 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
 #' @importFrom ggplot2 geom_bar scale_x_continuous labs theme facet_wrap
 #' @importFrom scales breaks_pretty
 #' @export
-pubs_per_year <- function(pubs, facet_by = NULL) {
+pubs_per_year <- function(pubs, facet_by = NULL, binwidth = 365) {
   pubs <- pubs %>%
     filter(!journal %in% c("bioRxiv", "arXiv"))
   if (!is.null(facet_by)) {
     pubs <- pubs %>%
-      mutate(facets = fct_reorder(!!sym(facet_by), year, .fun = "min"))
+      mutate(facets = fct_reorder(!!sym(facet_by), date_published, .fun = "min"))
   }
-  p <- ggplot(pubs, aes(year)) +
-    geom_bar(width = 1) +
+  p <- ggplot(pubs, aes(date_published))
+  if (!is.null(facet_by)) {
+    p <- p +
+      geom_histogram(aes(fill = "all"), binwidth = binwidth,
+                     data = select(pubs, -facets),
+                     fill = "gray70", alpha = 0.5)
+  }
+  p <- p +
+    geom_histogram(binwidth = binwidth) +
     scale_y_continuous(expand = expansion(mult = c(0, 0.05)),
                        breaks = breaks_pretty()) +
-    scale_x_continuous(breaks = breaks_pretty(10)) +
+    scale_x_date(breaks = breaks_pretty(10)) +
     labs(y = "Number of publication") +
     theme(panel.grid.minor = element_blank(), legend.position = "none")
   if (!is.null(facet_by)) {
     p <- p +
-      geom_bar(aes(fill = "all"), width = 1, data = select(pubs, -facets),
-               fill = "gray70", alpha = 0.5) +
       facet_wrap(~ facets, ncol = 1)
   }
   p
@@ -534,13 +540,13 @@ cat_heatmap <- function(pubs, row_var, col_var, ...) {
 #'
 #' @inheritParams pubs_per_year
 #' @param col_use Which logical variable to plot. Tidyeval is supported.
-#' @param binwidth Width of bins for the histogram in days.
 #' @return A ggplot2 object
 #' @importFrom ggplot2 geom_histogram facet_grid
 #' @export
 hist_bool <- function(pubs, col_use, binwidth = 365) {
   col_use <- enquo(col_use)
   pubs <- pubs %>%
+    filter(!journal %in% c("bioRxiv", "arXiv")) %>%
     mutate(v = !!col_use)
   ggplot(pubs, aes(date_published)) +
     geom_histogram(aes(fill = 'all'), alpha = 0.7, fill = "gray70",
@@ -565,23 +571,18 @@ hist_bool <- function(pubs, col_use, binwidth = 365) {
 #' @importFrom tidyr complete
 #' @importFrom ggplot2 scale_x_continuous
 #' @export
-hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3) {
+hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, binwidth = 365) {
   col_use <- enquo(col_use)
-  if (!is.null(facet_by)) {
-    pubs <- pubs %>%
-      count(year, !!col_use, !!sym(facet_by)) %>%
-      complete(year = seq(min(year), max(year), 1), !!col_use, !!sym(facet_by),
-               fill = list(n = 0))
-  } else {
-    pubs <- pubs %>%
-      count(year, !!col_use) %>%
-      complete(year = seq(min(year), max(year), 1), !!col_use, fill = list(n = 0))
-  }
-  p <- ggplot(pubs, aes(year, n)) +
-    geom_col(width = 1, alpha = 0.5, fill = "gray90") +
-    geom_step(aes(color = !!col_use), direction = "mid") +
+  pubs <- pubs %>%
+    filter(!journal %in% c("bioRxiv", "arXiv")) %>%
+    mutate(v = !!col_use)
+  p <- ggplot(pubs, aes(date_published)) +
+    geom_histogram(aes(fill = 'all'), alpha = 0.7, fill = "gray90",
+                   data = select(pubs, -v), binwidth = binwidth) +
+    geom_freqpoly(aes(color = v), binwidth = binwidth) +
     scale_y_continuous(breaks = breaks_pretty(), expand = expansion(c(0, 0.05))) +
-    scale_x_continuous(breaks = breaks_pretty(10)) +
+    scale_x_date(breaks = breaks_pretty(10)) +
+    scale_color_discrete(name = as_name(col_use)) +
     theme(panel.grid.minor = element_blank(), legend.position = "top") +
     labs(y = "count")
   if (!is.null(facet_by)) {
@@ -601,6 +602,7 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3) {
 test_year_bool <- function(pubs, col_use) {
   col_use <- enquo(col_use)
   df <- pubs %>%
+    filter(!journal %in% c("bioRxiv", "arXiv")) %>%
     group_by(year) %>%
     summarize(prop = sum(!!col_use)/length(!!col_use))
   out <- lm(prop ~ year, data = df)

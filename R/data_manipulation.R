@@ -51,7 +51,10 @@ read_major_events <- function() {
   url_use <- "https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154"
   out <- read_sheet(url_use, sheet = "major events")
   out <- out %>%
-    mutate(image = system.file(paste0("images/", image), package = "museumst"))
+    mutate(image = map_chr(paste0("images/", image), system.file, package = "museumst"),
+           image = case_when(image == "" ~ NA_character_,
+                             TRUE ~ image),
+           date_published = as_date(date_published))
   out
 }
 
@@ -117,7 +120,7 @@ get_pubs_df <- function(sheet, other_cols = NULL) {
   out <- out %>%
     filter(!is.na(title)) %>%
     distinct()
-  if (anyDuplicated(out$title)) {
+  if (anyDuplicated(out$title[!is.na(out$title)])) {
     warning("Titles are duplicated. Consider changing other_cols.")
   }
   out

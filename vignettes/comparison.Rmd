@@ -22,6 +22,7 @@ library(purrr)
 library(dplyr)
 library(tidytext)
 library(tidyr)
+library(ggplot2)
 theme_set(theme_bw())
 ```
 
@@ -49,24 +50,21 @@ pubs_on_map2 <- partial(pubs_on_map, inst_gc = inst_gc, city_gc = city_gc)
 ```
 
 ```{r}
-pubs_count <- publications %>% 
-  filter(!journal %in% c("bioRxiv", "arXiv")) %>% 
-  count(year, is_prequel)
-ggplot(pubs_count, aes(year, n, color = is_prequel)) +
-  geom_line() +
-  scale_y_continuous(limits = c(0, max(pubs_count$n)))
+no_preprints <- publications %>% 
+  filter(!journal %in% c("bioRxiv", "arXiv"))
+ggplot(no_preprints, aes(date_published, color = is_prequel)) +
+  geom_freqpoly(binwidth = 365)
 ```
 
 Here we see that what's currently known as spatial transcriptomics is growing more than prequel spatial transcriptomics back in the 1990s and 2000s. Or maybe my prequel collection is incomplete, so I'm not so sure how big that peak is. What's more remarkable is the number of publications in 2020. Now it's near the end of May. We're almost half way through the year. Considering that most publications are from Western countries, for which December is the holiday season, I expect this number to double by the end of 2020.
 
 Let me plot these lines not with the absolute year, but how many years since the first publication in the category to see how quickly these things grew. This will definitely change once I make the LCM collection more complete. Since using LCM + transcriptomics started at least as early as 2001 (the oldest paper I can find that did this is from 2001), I would expect the FALSE curve to rise earlier than the TRUE curve.
 ```{r}
-pubs_count <- pubs_count %>% 
+days_from_start <- publications %>% 
   group_by(is_prequel) %>% 
-  mutate(years_since_first = year - min(year))
-ggplot(pubs_count, aes(years_since_first, n, color = is_prequel)) +
-  geom_line() +
-  scale_y_continuous(limits = c(0, max(pubs_count$n)))
+  mutate(days_since_first = as.numeric(date_published - min(date_published)))
+ggplot(days_from_start, aes(days_since_first, color = is_prequel)) +
+  geom_freqpoly(binwidth = 365)
 ```
 
 So far they seem pretty parallel (which most likely won't be the case when I make the LCM collection more complete), though I certainly don't think the current era has peaked yet. Based on this, I think the current era will be much greater than the prequel era.
@@ -267,21 +265,18 @@ pubs_per_year(analysis_sheets, "sheet")
 ```
 
 ```{r}
-ana_counts <- analysis_sheets %>% 
-  filter(!journal %in% c("bioRxiv", "arXiv")) %>% 
-  count(sheet, year)
-ggplot(ana_counts, aes(year, n, color = sheet)) +
-  geom_line() +
-  scale_y_continuous(limits = c(0, max(ana_counts$n)))
+no_preprints <- analysis_sheets %>% 
+  filter(!journal %in% c("bioRxiv", "arXiv"))
+ggplot(no_preprints, aes(date_published, color = sheet)) +
+  geom_freqpoly(binwidth = 365)
 ```
 
 ```{r}
-ana_counts <- ana_counts %>% 
+days_from_start <- analysis_sheets %>% 
   group_by(sheet) %>% 
-  mutate(years_since_first = year - min(year))
-ggplot(ana_counts, aes(years_since_first, n, color = sheet)) +
-  geom_line() +
-  scale_y_continuous(limits = c(0, max(ana_counts$n)))
+  mutate(days_since_first = as.numeric(date_published - min(date_published)))
+ggplot(days_from_start, aes(days_since_first, color = sheet)) +
+  geom_freqpoly(binwidth = 365)
 ```
 
 Again, in the current era, data analysis papers grow more than in the prequel era (if my collection is complete, which I'm not sure). I don't think we have reached the peak yet.

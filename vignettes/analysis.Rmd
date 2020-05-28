@@ -19,6 +19,7 @@ library(museumst)
 library(purrr)
 library(dplyr)
 library(zeallot)
+library(ggplot2)
 theme_set(theme_bw())
 ```
 
@@ -243,16 +244,15 @@ test_year_bool(sheet, !is.na(repo))
 Yep, it's very significant. How about whether the code is well-documented?
 
 ```{r, fig.width=4, fig.height=6}
-pubs_per_year(langs, "language")
+pubs_per_year(langs, "language", binwidth = 150)
 ```
 
-
-```{r}
+```{r, fig.width=5, fig.height=4}
 hist_bool_line(langs, documented, facet_by = "language") 
 ```
 
 It seems that R, Python, and C++ packages are more likely to be well-documented, and MATLAB ones are less likely. Is that MATLAB culture?
-```{r}
+```{r, fig.width=5, fig.height=4}
 hist_bool_line(langs, `CRAN/Bioc/pip/conda`, "language")
 ```
 

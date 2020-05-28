@@ -4,7 +4,7 @@
 \alias{hist_bool_line}
 \title{Plot outlines of histogram for a logical variable}
 \usage{
-hist_bool_line(pubs, col_use, facet_by = NULL, ncol = 3)
+hist_bool_line(pubs, col_use, facet_by = NULL, ncol = 3, binwidth = 365)
 }
 \arguments{
 \item{pubs}{A data frame with at least these columns:
@@ -19,6 +19,8 @@ if faceting by those. If facetting, then a column whose name is the value in
 \item{col_use}{Which logical variable to plot. Tidyeval is supported.}
 
 \item{facet_by}{Name of a column for facetting.}
+
+\item{binwidth}{Width of bins for the histogram in days.}
 }
 \description{
 Kind of like `hist_bool`, but instead of plotting TRUE, FALSE, and NA in 3
