@@ -12,20 +12,17 @@ knitr::opts_chunk$set(echo = TRUE)
 Here I compare different sheets and do the analysis for all sheets in the original trilogy together.
 
 ```{r}
-source("code/metadata_plotting.R")
+library(museumst)
 library(gganimate)
-theme_set(theme_bw())
 library(magick)
+theme_set(theme_bw())
 ```
 
 # Data
 How does the trend in number of papers in the original trilogy compare to that in the prequel?
 ```{r}
 nms <- c("Prequel", "Microdissection", "smFISH", "Array", "ISS", "No imaging")
-data_sheets <- map(nms, read_metadata)
-colnames_use <- map(data_sheets, names) %>% reduce(intersect)
-data_sheets <- map2_dfr(data_sheets, nms, ~ .x %>% mutate(sheet = .y) %>% 
-                          select(!!!syms(c(colnames_use, "sheet"))))
+data_sheets <- read_metadata(nms)
 ```
 
 ```{r}

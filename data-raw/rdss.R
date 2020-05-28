@@ -4,19 +4,21 @@ library(urbnmapr)
 library(readxl)
 library(rnaturalearth)
 library(googlesheets4)
+library(sf)
 species_img <- tibble(species = c("Mus musculus", "Drosophila melanogaster",
                                   "Danio rerio", "Ciona intestinalis", "Xenopus laevis",
                                   "Caenorhabditis elegans", "Arabidopsis thaliana",
                                   "Homo sapiens", "Platynereis dumereilii",
-                                  "Saccharomyces cerevisiae", "Gallus gallus"),
+                                  "Saccharomyces cerevisiae", "Gallus gallus",
+                                  "Drosophila virilis", "Xenopus tropicalis"),
                       image_paths = paste0("images/", c("mouse", "drosophila",
-                                                        "zebrafish", "ciona2",
+                                                        "zebrafish", "ciona",
                                                         "xenopus", "celegans",
                                                         "arabidopsis", "skull",
                                                         "platynereis", "yeast",
-                                                        "chicken"),
+                                                        "chicken", "virilis",
+                                                        "xenopus"),
                                            ".jpg"))
-saveRDS(species_img, "output/species_img.rds")
 
 lang_img <- tibble(language = c("C", "C++", "CUDA", "Java", "Mathematica",
                                 "MATLAB", "Python", "R", "Rust", "Scala"),
@@ -25,7 +27,6 @@ lang_img <- tibble(language = c("C", "C++", "CUDA", "Java", "Mathematica",
                                           "java.png", "mathematica.png",
                                           "matlab.jpg", "python.png", "Rlogo.png",
                                           "rust.png", "scala.png")))
-saveRDS(lang_img, "output/lang_img.rds")
 
 # American map with data for population per state
 usa <- get_urbn_map(sf = TRUE)
@@ -56,3 +57,11 @@ sheets <- read_metadata(c("Prequel", "smFISH", "Array", "ISS",
                           "Microdissection", "No imaging",
                           "Analysis", "Prequel analysis"))
 gcs <- geocode_first_time(sheets, cache = TRUE, cache_location = "inst")
+
+# Europe limits
+europe_poly <- matrix(c(30, 68, 30, 35, -7, 35, -7, 68, 30, 68),
+                      ncol = 2, byrow = TRUE)
+europe_limits <- st_polygon(list(europe_poly)) %>% st_sfc()
+europe_limits <- st_as_sf(europe_limits, crs = 4326)
+europe_limits <- st_transform(europe_limits, 3035)
+xylims <- st_bbox(europe_limits)

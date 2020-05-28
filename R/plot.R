@@ -1,38 +1,3 @@
-#' Read the metadata from Google Sheets
-#'
-#' To do: Cache and add an argument to update cache. Unlike the geocodes, this
-#' won't be stored in the data of this package since it's much faster to download
-#' the sheet than to geocode.
-#'
-#' @param sheet_use Name of the sheet(s) to read.
-#' @return A tibble for the sheet of interest.
-#' @importFrom googlesheets4 gs4_deauth read_sheet
-#' @importFrom dplyr mutate
-#' @importFrom magrittr %>%
-#' @importFrom lubridate year as_date
-#' @importFrom purrr map reduce map2_dfr
-#' @export
-read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS",
-                                        "Microdissection", "No imaging",
-                                        "Analysis", "Prequel analysis")) {
-  sheet_use <- match.arg(sheet_use, several.ok = TRUE)
-  gs4_deauth()
-  url_use <- "https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154"
-  if (length(sheet_use) > 1) {
-    sheets <- map(sheet_use, read_sheet, ss = url_use)
-    colnames_use <- map(sheets, names) %>% reduce(intersect)
-    sheets <- map2_dfr(sheets, sheet_use, ~ .x %>% mutate(sheet = .y) %>%
-                         select(!!!syms(c(colnames_use, "sheet")))) %>%
-      mutate(year = year(date_published),
-             date_published = as_date(date_published))
-    return(sheets)
-  } else {
-    read_sheet(url_use, sheet = sheet_use) %>%
-      mutate(year = year(date_published),
-             date_published = as_date(date_published))
-  }
-}
-
 #' Construct HTML image labels for time lines
 #'
 #' Internal, called by `plot_timeline`.
@@ -99,7 +64,7 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
                           expand_x = c(0.1, 0.1), expand_y = c(0.05, 0.05)) {
   events_df <- events_df %>%
     mutate(image = case_when(is.na(image) ~ NA_character_,
-                             TRUE ~ paste0("./images/", image)),
+                             TRUE ~ image),
            description = paste(year(date_published), description),
            lab = map2_chr(image, description,
                           ~ make_image_labs(.x, width, .y, description_width))) %>%
@@ -183,12 +148,16 @@ pubs_per_year <- function(pubs, facet_by = NULL) {
 #' number of publications.
 #'
 #' @param pubs A data frame at least with a column for the category of interest.
-#' If `isotype = TRUE`, then there should also be a column for images called "image",
-#' already read by magick as image pointers. Each row is a unique combination of
-#' the publication and the category of interest.
-#' @param category Column name to plot. Tidyeval is supported.
+#' @param category Column name to plot. Tidyeval is supported. If it's species
+#' or language, then
+#' @param n_top Number of top entries to plot. Especially useful for isotype.
 #' @param isotype Logical, whether to make isotype plot, like one icon stands for
 #' a certain number of publications.
+#' @param img_df A data frame with one column with the same name as `category`
+#' and another column called `image_paths` for path to the images. Relative path
+#' is fine since it will be internally converted to absolute path. This argument
+#' can be left as NULL if category is species or language, since in these two
+#' cases, the `img_df` is provided internally.
 #' @param img_unit Integer, how many publications for one icon.
 #' @return A ggplot2 object.
 #' @importFrom rlang enquo as_name
@@ -196,144 +165,57 @@ pubs_per_year <- function(pubs, facet_by = NULL) {
 #' @importFrom ggtextures geom_isotype_bar
 #' @importFrom grid unit
 #' @importFrom ggplot2 coord_flip theme element_blank
+#' @importFrom magick image_read
+#' @importFrom purrr map_chr map
 #' @export
-pubs_per_cat <- function(pubs, category, isotype = FALSE, img_unit = 5) {
+pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df = NULL,
+                         img_unit = NULL) {
   category <- enquo(category)
-  p <- pubs %>%
-    mutate(reordered = fct_infreq(!!category) %>% fct_rev()) %>%
-    ggplot(aes(reordered))
+  if (!is.null(n_top)) {
+    top <- pubs %>%
+      count(!!category) %>%
+      top_n(n_top, n) %>%
+      pull(!!category)
+    pubs <- pubs %>%
+      filter(!!category %in% top)
+  }
   if (isotype) {
-    p <- p +
+    if (as_name(category) == "species") {
+      img_df <- species_img %>%
+        mutate(image_paths = map_chr(image_paths, system.file, package = "museumst"))
+    } else if (as_name(category) == "language") {
+      img_df <- lang_img %>%
+        mutate(image_paths = system.file(image_paths, package = "museumst"))
+    }
+    img_df <- img_df %>%
+      mutate(image_paths = map_chr(image_paths, normalizePath, mustWork = TRUE),
+             image = map(image_paths, image_read))
+    pubs <- pubs %>%
+      left_join(img_df, by = as_name(category))
+    if (is.null(img_unit)) {
+      img_unit <- round(nrow(pubs)/20)
+      message("img_unit not supplied. Using heuristic value ", img_unit)
+    }
+    pubs <- pubs %>%
+      mutate(reordered = fct_infreq(!!category) %>% fct_rev())
+    p <- ggplot(pubs, aes(reordered)) +
       geom_isotype_bar(aes(image = image),
                        img_width = grid::unit(img_unit, "native"),
                        img_height = NULL,
                        nrow = 1, ncol = NA,
                        hjust = 0, vjust = 0.5)
   } else {
-    p <- p + geom_bar()
+    pubs <- pubs %>%
+      mutate(reordered = fct_infreq(!!category) %>% fct_rev())
+    p <- ggplot(pubs, aes(reordered)) + geom_bar()
   }
   p <- p +
     scale_y_continuous(expand = expansion(mult = c(0, 0.05)),
                        breaks = breaks_pretty()) +
-    labs(y = "Number of publications", x = rlang::as_name(category)) +
+    labs(y = "Number of publications", x = as_name(category)) +
     coord_flip() +
     theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank())
   p
-}
-
-geocode_inst <- function(sheet) {
-  # Geocode institutions
-  institution2 <- sheet %>%
-    select(country, city, institution) %>%
-    distinct() %>%
-    filter(!is.na(institution)) %>%
-    unite(col = "institution2", institution, city, country, remove = FALSE, sep = ", ") %>%
-    mutate(institution2 = str_remove(institution2, "NA, "))
-  institution_gc <- geocode(institution2$institution2)
-  institution_gc <- cbind(institution2, institution_gc)
-  institution_gc <- st_as_sf(institution_gc, coords = c("lon", "lat"), crs = st_crs(4326))
-  institution_gc
-}
-geocode_city <- function(sheet) {
-  # Geocode cities
-  cities <- sheet %>%
-    select(city, `state/province`, country) %>%
-    distinct() %>%
-    filter(!is.na(city)) %>%
-    unite(col = "city2", city, `state/province`, country, remove = FALSE, sep = ", ") %>%
-    mutate(city2 = str_remove(city2, "NA, "))
-  cities_gc <- geocode(cities$city2)
-  cities_gc <- cbind(cities, cities_gc)
-  cities_gc <- st_as_sf(cities_gc, coords = c("lon", "lat"), crs = st_crs(4326))
-  cities_gc
-}
-
-geocode_first_time <- function(sheet, cache = TRUE, cache_location = ".") {
-  if (cache) {
-    cache_location <- normalizePath(cache_location, mustWork = FALSE)
-    fn <- paste0(cache_location, "/geocode_cache.rds")
-  }
-  inst_gc <- geocode_inst(sheet)
-  city_gc <- geocode_city(sheet)
-  out <- list(inst_gc = inst_gc,
-              city_gc = city_gc)
-  if (cache) saveRDS(out, file = fn)
-  out
-}
-
-#' Geocode institutions and cities
-#'
-#' Get longitude and latitude of institutions and cities. If cache is used and
-#' there're some institutions or cities not already in the cache, those will be
-#' added.
-#'
-#' @param sheet The tibble read from Google Sheets, which has columns country,
-#' state/province, city, and institution.
-#' @param cache Logial, whether to cache.
-#' @param cache_location Where to save the cache
-#' @return A list of two sf data frames:
-#' \describe{
-#'   \item{inst_gc}{A sf data frame with columns city, institution, and geometry.}
-#'   \item{city_gc}{A sf data frame with columns country, state/province, city,
-#'   and geometry.}
-#' }
-#' @importFrom ggmap geocode
-#' @importFrom dplyr distinct
-#' @importFrom tidyr unite
-#' @importFrom stringr str_remove
-#' @importFrom sf st_as_sf st_crs st_polygon st_sfc st_transform st_bbox
-#' @importFrom zeallot %<-%
-#' @export
-geocode_inst_city <- function(sheet, cache = TRUE, cache_location = ".") {
-  if (cache) {
-    cache_location <- normalizePath(cache_location, mustWork = FALSE)
-    fn <- paste0(cache_location, "/geocode_cache.rds")
-    first_time <- !dir.exists(cache_location) | !file.exists(fn)
-    if (!dir.exists(cache_location)) dir.create(cache_location)
-    if (first_time) {
-      file.copy(system.file("geocode_cache.rds", package = "museumst"),
-                fn)
-      return(readRDS(fn))
-    } else {
-      # Get existing cache
-      c(inst_gc, city_gc) %<-% readRDS(fn)
-      # Check if there's new institution
-      sheet_inst <- sheet %>%
-        anti_join(inst_gc, by = c("country", "city", "institution"))
-      if (nrow(sheet_inst) > 0) {
-        inst_gc2 <- geocode_inst(sheet_inst)
-        inst_gc <- rbind(inst_gc, inst_gc2)
-        message("Added ", nrow(sheet_inst), " new institutions to cache.")
-        # Check if there's new city
-        sheet_city <- sheet %>%
-          anti_join(city_gc, by = c("country", "state/province", "city"))
-        if (nrow(sheet_city) > 0) {
-          city_gc2 <- geocode_city(sheet_city)
-          city_gc <- rbind(city_gc, city_gc2)
-          message("Added ", nrow(sheet_city), " new cities to cache.")
-        }
-        out <- list(inst_gc = inst_gc,
-                    city_gc = city_gc)
-        saveRDS(out, file = fn)
-        return(out)
-      } else {
-        out <- list(inst_gc = inst_gc,
-                    city_gc = city_gc)
-        return(out)
-      }
-    }
-  } else {
-    geocode_first_time(sheet, cache = FALSE)
-  }
-}
-
-get_europe_limits <- function() {
-  europe_poly <- matrix(c(30, 68, 30, 35, -7, 35, -7, 68, 30, 68),
-                        ncol = 2, byrow = TRUE)
-  europe_limits <- st_polygon(list(europe_poly)) %>% st_sfc()
-  europe_limits <- st_as_sf(europe_limits, crs = 4326)
-  europe_limits <- st_transform(europe_limits, 3035)
-  st_bbox(europe_limits)
 }
 
 #' Plot number of publications at each location
@@ -407,8 +289,6 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
     city_gc <- city_gc %>%
       filter(country %in% europe_countries) %>%
       mutate(geometry = st_transform(geometry, crs = crs_europe))
-    # Box centering on Western Europe
-    xylims <- get_europe_limits()
     # project on European transformation
     map_use <- st_transform(map_use, crs = crs_europe)
   } else if (zoom == "usa") {
@@ -552,7 +432,6 @@ pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
                            name = "# pub.\nper capita\n(log10)") +
       theme(panel.border = element_blank(), axis.title = element_blank())
     if (zoom == "europe") {
-      xylims <- get_europe_limits()
       p <- p +
         coord_sf(xlim = xylims[c("xmin", "xmax")], ylim = xylims[c("ymin", "ymax")],
                  crs = 3035)
@@ -609,7 +488,7 @@ plot_wordcloud <- function(sheet, col_use = title, species_use = "all",
     select(-species, -year) %>%
     distinct() %>%
     unnest_tokens(output = "word", input = !!col_use) %>%
-    anti_join(stop_words, by = "word") %>%
+    anti_join(tidytext::stop_words, by = "word") %>%
     count(word, name = "freq")
   if (!is.null(other_stop_words)) {
     df <- df %>%
@@ -654,15 +533,15 @@ cat_heatmap <- function(pubs, row_var, col_var, ...) {
 #' with time.
 #'
 #' @inheritParams pubs_per_year
-#' @param var_use Which logical variable to plot. Tidyeval is supported.
+#' @param col_use Which logical variable to plot. Tidyeval is supported.
 #' @param binwidth Width of bins for the histogram in days.
 #' @return A ggplot2 object
 #' @importFrom ggplot2 geom_histogram facet_grid
 #' @export
-hist_bool <- function(pubs, var_use, binwidth = 365) {
-  var_use <- enquo(var_use)
+hist_bool <- function(pubs, col_use, binwidth = 365) {
+  col_use <- enquo(col_use)
   pubs <- pubs %>%
-    mutate(v = !!var_use)
+    mutate(v = !!col_use)
   ggplot(pubs, aes(date_published)) +
     geom_histogram(aes(fill = 'all'), alpha = 0.7, fill = "gray70",
                    data = select(pubs, -v), binwidth = binwidth) +
@@ -686,21 +565,21 @@ hist_bool <- function(pubs, var_use, binwidth = 365) {
 #' @importFrom tidyr complete
 #' @importFrom ggplot2 scale_x_continuous
 #' @export
-hist_bool_line <- function(pubs, var_use, facet_by = NULL, ncol = 3) {
-  var_use <- enquo(var_use)
+hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3) {
+  col_use <- enquo(col_use)
   if (!is.null(facet_by)) {
     pubs <- pubs %>%
-      count(year, !!var_use, !!sym(facet_by)) %>%
-      complete(year = seq(min(year), max(year), 1), !!var_use, !!sym(facet_by),
+      count(year, !!col_use, !!sym(facet_by)) %>%
+      complete(year = seq(min(year), max(year), 1), !!col_use, !!sym(facet_by),
                fill = list(n = 0))
   } else {
     pubs <- pubs %>%
-      count(year, !!var_use) %>%
-      complete(year = seq(min(year), max(year), 1), !!var_use, fill = list(n = 0))
+      count(year, !!col_use) %>%
+      complete(year = seq(min(year), max(year), 1), !!col_use, fill = list(n = 0))
   }
   p <- ggplot(pubs, aes(year, n)) +
     geom_col(width = 1, alpha = 0.5, fill = "gray90") +
-    geom_step(aes(color = !!var_use), direction = "mid") +
+    geom_step(aes(color = !!col_use), direction = "mid") +
     scale_y_continuous(breaks = breaks_pretty(), expand = expansion(c(0, 0.05))) +
     scale_x_continuous(breaks = breaks_pretty(10)) +
     theme(panel.grid.minor = element_blank(), legend.position = "top") +
@@ -719,11 +598,11 @@ hist_bool_line <- function(pubs, var_use, facet_by = NULL, ncol = 3) {
 #' @inheritParams hist_bool
 #' @return A lm object is returned invisibly. The summary is printed to screen
 #' @importFrom dplyr group_by summarize
-test_year_bool <- function(pubs, var_use) {
-  var_use <- enquo(var_use)
+test_year_bool <- function(pubs, col_use) {
+  col_use <- enquo(col_use)
   df <- pubs %>%
     group_by(year) %>%
-    summarize(prop = sum(!!var_use)/length(!!var_use))
+    summarize(prop = sum(!!col_use)/length(!!col_use))
   out <- lm(prop ~ year, data = df)
   print(summary(out))
   invisible(out)

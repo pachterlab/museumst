@@ -20,6 +20,7 @@ Imports:
     googlesheets4,
     grid,
     lubridate,
+    magick,
     magrittr,
     purrr,
     rlang,
