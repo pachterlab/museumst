@@ -1,57 +1,45 @@
 ---
 title: "ISS"
 author: "Lambda Moses"
-date: "5/20/2020"
-output: html_document
-params:
-  sheet: "ISS"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ISS}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Here I explore the history and geography of spatial transcriptomics based on microdissection through the metadata I collected.
+Here I explore the history and geography of spatial transcriptomics based on in situ sequencing through the metadata I collected.
 ```{r}
-library(tidyverse)
-library(googlesheets4)
-library(lubridate)
-library(magick)
-library(scales)
+library(museumst)
+library(ggplot2)
 library(zeallot)
-source("code/metadata_plotting.R")
+library(purrr)
 theme_set(theme_bw())
 ```
 
 # Import data
 ```{r}
-gs4_deauth()
-sheet <- read_sheet("https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154", sheet = params$sheet)
-```
-
-Add the year column as this will be used for plotting rather than the full date.
-```{r}
-sheet <- sheet %>% 
-  mutate(year = year(date_published))
+sheet <- read_metadata("ISS")
 ```
 
 # Number of publications
 How many publications per year?
 ```{r}
 # Remove duplicates as different datasets in the same publication have their own rows
-publications <- sheet %>% 
-  select(year, title, journal, repo:department) %>% 
-  distinct()
-```
-
-```{r}
-anyDuplicated(publications$title)
+publications <- get_pubs_df(sheet, other_cols = "repo")
 ```
 
 How many publications are there in total in this sheet?
 ```{r}
 nrow(publications)
 ```
+
+That's not a lot. So seriously, take every trend in this notebook with a grain of salt!
 
 ```{r}
 # For maps later in this notebook
@@ -62,9 +50,7 @@ pubs_on_map2 <- partial(pubs_on_map, inst_gc = inst_gc, city_gc = city_gc)
 ## Overall
 Number of publications per year. Preprints are excluded from plots over years as it takes months to publish so the dates of the preprints are incoherent with those for the other papers. 
 ```{r}
-gs4_deauth()
-events <- read_sheet("https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154", sheet = "major events")
-events$date_published <- as_date(events$date_published)
+events <- read_major_events()
 ```
 
 ```{r, fig.width=5.5, fig.height=2}
@@ -74,56 +60,36 @@ events %>%
                 expand_x = c(0.1, 0.1), expand_y = c(0.05, 0.05))
 ```
 
-Is it bad to borrow the original figures from those historical papers? Well, here I sort of want to frame then as museum exhibits so it's all the cooler to have the original rather than my parody.
-
 ```{r}
-pubs_per_year(publications, break_width = 1)
+pubs_per_year(publications, binwidth = 200)
 ```
 
 ## By method
 How about when broken down by method (not for data analysis sheets)?
 
 ```{r}
-methods <- sheet %>% 
-  select(year, title, journal, method, country, institution) %>% 
-  distinct()
+methods <- unnest_cat(sheet, method)
 ```
 
 ```{r, fig.width=4, fig.height=3}
-pubs_per_year(methods, facet_by = "method", break_width = 1)
+pubs_per_year(methods, facet_by = "method", binwidth = 200)
 ```
 I don't know how much this actually says due to the small sample size. This is also kind of confusing since Geo-seq really is a form of LCM coupled with SMART-seq, so it should be categorized as LCM, but the authors gave it a new name. 
 
 ## By species
+
 ```{r}
-species_img <- readRDS("output/species_img.rds")
+species <- unnest_cat(sheet, species)
 ```
 
 ```{r}
-species <- sheet %>% 
-  select(year, title, species, country, institution) %>% 
-  distinct()
+pubs_per_cat(species, species)
 ```
 
 ```{r}
-unique(species$species)
+pubs_per_cat(species, species, isotype = TRUE, img_unit = 1)
 ```
 
-```{r}
-pubs_per_cat(species, category = "species")
-```
-
-```{r}
-species_img$image <- purrr::map(species_img$image_paths, image_read)
-```
-
-```{r}
-species %>% 
-  left_join(species_img, by = "species") %>% 
-  pubs_per_cat(category = "species", isotype = TRUE, img_unit = 1)
-```
-
-I debated for a while which image to use for humans. In order to avoid racist and sexist connotations, I picked the skull as non-experts can't tell the race and sex from the skull. If you think it's bad to use a skull, then I'll use a Black, Hispanic, Middle Eastern, North African, Central Asian, or South Asian woman's portrait. I stand with the oppressed.
 
 ## By journal
 ```{r}
@@ -132,9 +98,9 @@ sort(table(publications$journal))
 
 ## Location
 ### General
-Just some barplots for number of publications per institution, city, and country. I think city is more informative than country, since obviously, for instance, San Francisco is very different from Anchorage, though they are both in the US. Just within the US, there are regions that are very innovative, and regions that are more repressive. Well, even LA has very different neighborhoods... I just think it's not fair to judge people by whether there's a strong country behind them. First of all, different regions within a countries are not the same. Second, it's not fair to consider someone dumb just because their country is poor and weak; all else being equal, I would admire the person from the poor country more since they had to work harder to get here. I don't care which country is behind you. Right is right, wrong is wrong. Anyway, this is not the place to ramble about politics.
+Just some barplots for number of publications per institution, city, and country. 
 ```{r}
-pubs_per_cat(publications, "country")
+pubs_per_cat(publications, country)
 ```
 
 How about per capita? Actually this probably does not say much since many researchers in the West are immigrants. Then it raises the burning political question of who counts as the "population".
@@ -147,17 +113,17 @@ Why is Israel doing so great? Why not freedom to Palestine? Yeah, freedom to Pal
 
 How about country over time? There might not be enough publications to show a trend.
 ```{r, fig.height=3, fig.width=4}
-pubs_per_year(publications, facet_by = "country")
+pubs_per_year(publications, facet_by = "country", binwidth = 200)
 ```
 Now look at cities. 
 
 ```{r}
-pubs_per_cat(publications, "city")
+pubs_per_cat(publications, city)
 ```
 
 Institutions
 ```{r}
-pubs_per_cat(publications, "institution")
+pubs_per_cat(publications, institution)
 ```
 
 OK, now here comes the maps!
@@ -176,9 +142,6 @@ Break down by species
 ```{r, fig.width=5, fig.height=4}
 pubs_on_map2(species, facet_by = "species", ncol = 2)
 ```
-
-
-Probably this does not tell us much since there's only 1 study for some species. Again, we see the received wisdom that research is mostly confined to the West, especially Western Europe, west coast of the US, and New England, but not as much in the other parts of the "West".
 
 By method
 ```{r, fig.width=5, fig.height=4}
@@ -231,7 +194,7 @@ sheet %>%
   ggplot(aes(n)) +
   geom_bar() +
   scale_y_continuous(expand = expansion(c(0, 0.05))) +
-  scale_x_continuous(breaks = breaks_width(1))
+  scale_x_continuous(breaks = scales::breaks_width(1))
 ```
 
 # Word cloud
@@ -270,59 +233,40 @@ range(sheet$date_published)
 Probably not worth the effort to split by time period.
 
 ## Department names
-```{r}
-institution_words <- readRDS("output/inst_words.rds")
-```
 
 ```{r}
-plot_wordcloud(sheet, col_use = "department", other_stop_words = institution_words)
+plot_wordcloud(sheet, department, other_stop_words = inst_words)
 ```
 
 ## Downstream analyses
 ```{r}
-plot_wordcloud(sheet, "downstream")
+plot_wordcloud(sheet, downstream)
 ```
 
 # Programming languages
 ```{r}
-langs <- sheet %>% 
-  select(year, title, language) %>% 
-  filter(!is.na(language)) %>% 
-  distinct() %>% 
-  mutate(language = str_split(language, "; ")) %>% 
-  unnest(cols = "language")
+langs <- unnest_cat(sheet, language)
 ```
 
 ```{r}
-lang_img <- readRDS("output/lang_img.rds")
-lang_img$image <- purrr::map(lang_img$image_paths, image_read)
-```
-
-```{r}
-langs %>% 
-  inner_join(lang_img, by = "language") %>% 
-  pubs_per_cat(category = "language", isotype = TRUE, img_unit = 1)
+pubs_per_cat(langs, language, isotype = TRUE, img_unit = 1)
 ```
 
 # Data and code availability
 
 How many publications have provided a code repo?
 ```{r}
-ggplot(publications, aes(year, color = !is.na(repo))) +
-  geom_freqpoly(binwidth = 1)
+hist_bool(publications, !is.na(repo), binwidth = 200)
 ```
 
+Since data availability status can differ among datasets for the same publications, here the number of datasets is used.
 ```{r}
-ggplot(sheet, aes(year, color = has_matrix)) +
-  geom_freqpoly(binwidth = 1)
+hist_bool(sheet, has_matrix, binwidth = 200)
 ```
 
-Is this significant? Probably not. Here I fit a linear model to use year to predict proportion of publications with repo or accession and test if the coefficients are 0.
+Is this significant? Probably not. Here I fit a linear model to use year to predict proportion of publications with repo and test if the coefficients are 0.
 ```{r}
-pub_repos <- publications %>% 
-  group_by(year) %>% 
-  summarize(prop_repo = sum(!is.na(repo))/length(repo))
-summary(lm(prop_repo ~ year, data = pub_repos))
+test_year_bool(publications, !is.na(repo))
 ```
 
 # Number of genes and cells

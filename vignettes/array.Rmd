@@ -2,7 +2,6 @@
 title: "Array"
 author: "Lambda Moses"
 date: "`r Sys.Date()`"
-output: html_document
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{array}
@@ -14,7 +13,7 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Here I explore the history and geography of spatial transcriptomics based on microdissection through the metadata I collected.
+Here I explore the history and geography of spatial transcriptomics based on array capture through the metadata I collected.
 ```{r}
 library(museumst)
 library(zeallot)
@@ -202,7 +201,7 @@ sheet %>%
   ggplot(aes(n)) +
   geom_bar() +
   scale_y_continuous(expand = expansion(c(0, 0.05))) +
-  scale_x_continuous(breaks = breaks_width(1))
+  scale_x_continuous(breaks = scales::breaks_width(1))
 ```
 
 # Word cloud

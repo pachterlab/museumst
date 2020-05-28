@@ -13,7 +13,7 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Here I explore the history and geography of spatial transcriptomics based on microdissection through the metadata I collected.
+Here I explore the history and geography of spatial transcriptomics data analysis method through the metadata I collected.
 ```{r}
 library(museumst)
 library(purrr)
@@ -79,10 +79,6 @@ These are the species the computational methods were demonstrated on
 
 ```{r}
 species <- unnest_cat(sheet, species)
-```
-
-```{r}
-unique(species$species)
 ```
 
 ```{r}

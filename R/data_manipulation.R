@@ -92,6 +92,7 @@ unnest_cat <- function(sheet, col_use, other_cols = NULL) {
   names(out)[names(out) == "col_new"] <- as_name(col_use)
   # Check that the combination of title and category of interest is not duplicated
   check <- out %>%
+    filter(!is.na(title)) %>%
     select(title, !!col_use)
   if (anyDuplicated(check)) {
     warning("Combination of title and ", as_name(col_use), " is duplicated. ",
