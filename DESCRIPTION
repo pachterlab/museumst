@@ -14,6 +14,7 @@ Imports:
     forcats,
     gganimate,
     ggplot2,
+    ggmap,
     ggrepel,
     ggtext,
     ggtextures,
@@ -28,13 +29,13 @@ Imports:
     scales,
     sf,
     stringr,
+    stats,
     tidyr,
     tidytext,
     wordcloud2,
     zeallot
 Suggests: 
     knitr,
-    magick,
     rmarkdown
 VignetteBuilder: knitr
 Depends: 
