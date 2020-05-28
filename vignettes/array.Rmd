@@ -4,7 +4,7 @@ author: "Lambda Moses"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{array}
+  %\VignetteIndexEntry{Array}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -19,6 +19,7 @@ library(museumst)
 library(zeallot)
 library(ggplot2)
 library(purrr)
+library(dplyr)
 theme_set(theme_bw())
 ```
 

@@ -19,6 +19,7 @@ library(museumst)
 library(zeallot)
 library(ggplot2)
 library(purrr)
+library(dplyr)
 theme_set(theme_bw())
 ```
 

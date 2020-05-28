@@ -21,6 +21,7 @@ library(ggplot2)
 library(zeallot)
 library(purrr)
 library(stringr)
+library(dplyr)
 theme_set(theme_bw())
 ```
 

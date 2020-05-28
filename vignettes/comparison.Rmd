@@ -23,6 +23,8 @@ library(dplyr)
 library(tidytext)
 library(tidyr)
 library(ggplot2)
+library(forcats)
+library(zeallot)
 theme_set(theme_bw())
 ```
 

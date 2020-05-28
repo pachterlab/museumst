@@ -1,12 +1,12 @@
 ---
 title: "Microdissection"
 author: "Lambda Moses"
-date: "5/20/2020"
-output: html_document
-params:
-  sheet: "Microdissection"
-  datasets: FALSE
-  is_analysis: FALSE
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Microdissection}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -19,6 +19,7 @@ library(museumst)
 library(ggplot2)
 library(zeallot)
 library(purrr)
+library(dplyr)
 theme_set(theme_bw())
 ```
 
