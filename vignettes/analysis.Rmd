@@ -4,7 +4,7 @@ author: "Lambda Moses"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{foo}
+  %\VignetteIndexEntry{analysis}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -16,7 +16,8 @@ knitr::opts_chunk$set(echo = TRUE)
 Here I explore the history and geography of spatial transcriptomics based on microdissection through the metadata I collected.
 ```{r}
 library(museumst)
-library(tidyverse)
+library(purrr)
+library(dplyr)
 library(zeallot)
 theme_set(theme_bw())
 ```
