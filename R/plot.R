@@ -27,6 +27,36 @@ make_image_labs <- function(image_path, width, description, description_width) {
 #' The time line is plotted horizontally with ticks for years. The labels with
 #' images and descriptions are above and/or below that line.
 #'
+#' These are the sources of images that are not stated to be under public domain
+#' found online with filter "free to share and use".
+#' No changes were made to the images unless indicated. The author and license,
+#' if found, are listed here as well.
+#'
+#' \describe{
+#'   \item{drosophila.jpg}{http://gompel.org/images-2/drosophilidae}
+#'   \item{zebrafish.jpg}{https://thumbs.dreamstime.com/m/zebrafish-zebra-barb-danio-rerio-freshwater-aquarium-fish-isolated-white-background-50201849.jpg}
+#'   \item{ciona.jpg}{http://www.habitas.org.uk/marinelife/tunicata/cioints.jpg}
+#'   \item{xenopus.jpg}{https://en.wikipedia.org/wiki/African_clawed_frog#/media/File:Xenopus_laevis_02.jpg
+#'     by Brian Gratwicke. License: https://creativecommons.org/licenses/by/2.0/
+#'   }
+#'   \item{celegans.jpg}{https://en.wikipedia.org/wiki/Caenorhabditis_elegans#/media/File:Adult_Caenorhabditis_elegans.jpg
+#'     by Kbradnam at English Wikipedia. License: https://creativecommons.org/licenses/by-sa/2.5/
+#'     A smaller version of the original is used here.
+#'   }
+#'   \item{arabidopsis.jpg}{http://parts.igem.org/wiki/images/b/bd/Plants_Arabidopsis_thaliana_400px.jpg}
+#'   \item{skull.jpg}{http://pngimg.com/download/42558 License: https://creativecommons.org/licenses/by-nc/4.0/
+#'     The original was compressed and converted to jpg here.
+#'   }
+#'   \item{platynereis.jpg}{https://en.wikipedia.org/wiki/Epitoky#/media/File:PlatynereisDumeriliiFemaleEpitoke.tif
+#'     By Martin Gühmann. A smaller jpg version of the original is used here.
+#'     License: https://creativecommons.org/licenses/by-sa/4.0/
+#'   }
+#'   \item{yeast.jpg}{https://en.wikipedia.org/wiki/Shmoo#/media/File:Shmoos_s_cerevisiae.jpg
+#'     By Pilarbini. This is a smaller version of the original.
+#'     License: https://creativecommons.org/licenses/by-sa/4.0/deed.en
+#'   }
+#' }
+#'
 #' @param events_df A data frame with at least these columns:
 #' \describe{
 #'   \item{image}{Paths to the images to use in the label. NA for items without
@@ -155,7 +185,8 @@ pubs_per_year <- function(pubs, facet_by = NULL, binwidth = 365) {
 #'
 #' @param pubs A data frame at least with a column for the category of interest.
 #' @param category Column name to plot. Tidyeval is supported. If it's species
-#' or language, then
+#' or language, then img_df does not have to be supplied for isotype plot since
+#' the images are supplied internally.
 #' @param n_top Number of top entries to plot. Especially useful for isotype.
 #' @param isotype Logical, whether to make isotype plot, like one icon stands for
 #' a certain number of publications.
@@ -187,10 +218,10 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
       filter(!!category %in% top)
   }
   if (isotype) {
-    if (as_name(category) == "species") {
+    if (quo_name(category) == "species") {
       img_df <- species_img %>%
         mutate(image_paths = map_chr(image_paths, system.file, package = "museumst"))
-    } else if (as_name(category) == "language") {
+    } else if (quo_name(category) == "language") {
       img_df <- lang_img %>%
         mutate(image_paths = system.file(image_paths, package = "museumst"))
     }
@@ -219,7 +250,7 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
   p <- p +
     scale_y_continuous(expand = expansion(mult = c(0, 0.05)),
                        breaks = breaks_pretty()) +
-    labs(y = "Number of publications", x = as_name(category)) +
+    labs(y = "Number of publications", x = quo_name(category)) +
     coord_flip() +
     theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank())
   p
@@ -519,6 +550,7 @@ plot_wordcloud <- function(sheet, col_use = title, species_use = "all",
 #' @return A base R heatmap is plotted to the current device.
 #' @importFrom dplyr pull
 #' @importFrom tidyr pivot_wider
+#' @importFrom stats heatmap
 #' @export
 cat_heatmap <- function(pubs, row_var, col_var, ...) {
   rv <- enquo(row_var)
@@ -571,6 +603,7 @@ hist_bool <- function(pubs, col_use, binwidth = 365) {
 #' @inheritParams pubs_per_year
 #' @importFrom tidyr complete
 #' @importFrom ggplot2 scale_x_continuous
+#' @importFrom rlang quo_name
 #' @export
 hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, binwidth = 365) {
   col_use <- enquo(col_use)
@@ -583,7 +616,7 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, binwidth = 
     geom_freqpoly(aes(color = v), binwidth = binwidth) +
     scale_y_continuous(breaks = breaks_pretty(), expand = expansion(c(0, 0.05))) +
     scale_x_date(breaks = breaks_pretty(10)) +
-    scale_color_discrete(name = as_name(col_use)) +
+    scale_color_discrete(name = quo_name(col_use)) +
     theme(panel.grid.minor = element_blank(), legend.position = "top") +
     labs(y = "count")
   if (!is.null(facet_by)) {
@@ -600,6 +633,7 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, binwidth = 
 #' @inheritParams hist_bool
 #' @return A lm object is returned invisibly. The summary is printed to screen
 #' @importFrom dplyr group_by summarize
+#' @importFrom stats lm
 #' @export
 test_year_bool <- function(pubs, col_use) {
   col_use <- enquo(col_use)
