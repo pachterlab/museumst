@@ -174,7 +174,7 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
   if (!is.null(n_top)) {
     top <- pubs %>%
       count(!!category) %>%
-      top_n(n_top, n) %>%
+      filter(row_number(desc(n)) <= n_top) %>%
       pull(!!category)
     pubs <- pubs %>%
       filter(!!category %in% top)
