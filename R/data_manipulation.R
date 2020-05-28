@@ -67,6 +67,7 @@ read_major_events <- function() {
 #' @param other_cols Character vector of other columns to include.
 #' @return A data frame with one row per category of interest. NAs are removed.
 #' @importFrom stringr str_split
+#' @importFrom tidyr unnest
 #' @export
 unnest_cat <- function(sheet, col_use, other_cols = NULL) {
   col_use <- enquo(col_use)
