@@ -74,6 +74,8 @@ geocode_inst_city <- function(sheet, cache = TRUE, cache_location = ".") {
     } else {
       # Get existing cache
       c(inst_gc, city_gc) %<-% readRDS(fn)
+      sheet <- sheet %>%
+        filter(!is.na(city), !is.na(institution))
       # Check if there's new institution
       sheet_inst <- sheet %>%
         anti_join(inst_gc, by = c("country", "city", "institution"))
