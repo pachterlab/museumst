@@ -15,39 +15,23 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Here I explore the history and geography of spatial transcriptomics based on microdissection through the metadata I collected.
 ```{r}
-library(tidyverse)
-library(googlesheets4)
-library(lubridate)
-library(magick)
-library(scales)
+library(museumst)
+library(ggplot2)
 library(zeallot)
-source("code/metadata_plotting.R")
+library(purrr)
 theme_set(theme_bw())
 ```
 
 # Import data
 ```{r}
-gs4_deauth()
-sheet <- read_sheet("https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154", sheet = params$sheet)
-```
-
-Add the year column as this will be used for plotting rather than the full date.
-```{r}
-sheet <- sheet %>% 
-  mutate(year = year(date_published))
+sheet <- read_metadata("Microdissection")
 ```
 
 # Number of publications
 How many publications per year?
 ```{r}
 # Remove duplicates as different datasets in the same publication have their own rows
-publications <- sheet %>% 
-  select(year, title, journal, accession, repo:department) %>% 
-  distinct()
-```
-
-```{r}
-anyDuplicated(publications$title)
+publications <- get_pubs_df(sheet, other_cols = c("repo", "accession"))
 ```
 
 How many publications are there in total in this sheet?
@@ -64,15 +48,13 @@ pubs_on_map2 <- partial(pubs_on_map, inst_gc = inst_gc, city_gc = city_gc)
 ## Overall
 Number of publications per year. Preprints are excluded from plots over years as it takes months to publish so the dates of the preprints are incoherent with those for the other papers. 
 ```{r}
-gs4_deauth()
-events <- read_sheet("https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154", sheet = "major events")
-events$date_published <- as_date(events$date_published)
+events <- read_major_events()
 ```
 
-```{r, fig.width=5.5, fig.height=5.5}
+```{r, fig.width=5.5, fig.height=4.5}
 events %>% 
   filter(category == "microdissection") %>% 
-  plot_timeline(c(0.7, -1, 0.5, -0.3, 0.7, -1, 2, -1.5, 1.35), 
+  plot_timeline(c(0.3, -0.3, 0.5, -0.3, 0.3, -0.7, 1, -0.9, 0.5), 
                 expand_x = c(0.1, 0.1), expand_y = c(0.05, 0.05))
 ```
 
@@ -88,60 +70,30 @@ How about when broken down by method (not for data analysis sheets)?
 Get this into another R Markdown file since the analysis ones don't have the method column. For LCM, this should be taken with a grain of salt, since I don't think my collection of LCM papers is complete. LCM started far earlier than this. Because even I don't believe this myself, I don't think this figure will go into the paper. 
 
 I'm not sure if many of those papers even count as spatial since they simply used H&E to get a ROI, use LCM to isolate it for RNA-seq, that's it, sort of forgetting about the spatial part. But Niche-seq is also used this way and those who made Niche-seq called it spatial. I guess it's just that you know where the sample comes from in the tissue and what's next to it. Well, suppose you say, "I'm visiting LA. Not just LA, but more specifically Little Bangladesh." Is that spatial? I know where Little Bangladesh is and what's around it. I don't think geostatisticians will consider that statement spatial, because it does not use spatial statistics, just like you can fit non-spatial linear regression models to data from different neighborhoods though you know where those neighborhoods are. I suppose it's just an example of how the same word has different meanings in different context, and I'll stick to the LCM context since so far, spatial statistics has not be all that widely used in transcriptomics.
-```{r, include=params$sheet == "Prequel", eval = params$sheet == "Prequel"}
-methods <- sheet %>% 
-  mutate(method = str_split(method, pattern = ";|,\\s")) %>% 
-  select(date_published, method, country, institution) %>% 
-  unnest(cols = "method")
-```
 
-```{r, include=params$datasets, eval=params$datasets}
-methods <- sheet %>% 
-  select(year, title, journal, method, country, institution) %>% 
-  distinct()
+```{r}
+methods <- unnest_cat(sheet, method)
 ```
 
 ```{r, fig.width=4, fig.height=8}
 pubs_per_year(methods, facet_by = "method")
 ```
-I don't know how much this actually says due to the small sample size. This is also kind of confusing since Geo-seq really is a form of LCM coupled with SMART-seq, so it should be categorized as LCM, but the authors gave it a new name. 
+
+I don't know how much this actually says due to the small sample size. 
 
 ## By species
+
 ```{r}
-species_img <- readRDS("output/species_img.rds")
+species <- unnest_cat(sheet, species)
 ```
 
 ```{r}
-species <- sheet %>% 
-  select(year, title, species, country, institution) %>% 
-  distinct()
+pubs_per_cat(species, species)
 ```
 
 ```{r}
-unique(species$species)
+pubs_per_cat(species, species, n_top = 5, isotype = TRUE, img_unit = 2)
 ```
-
-```{r}
-pubs_per_cat(species, category = "species")
-```
-
-```{r}
-top_species <- species %>% 
-  count(species) %>%
-  top_n(5, n) %>% 
-  arrange(desc(n)) %>% 
-  pull(species)
-species_img$image <- purrr::map(species_img$image_paths, image_read)
-```
-
-```{r}
-species %>% 
-  filter(species %in% top_species) %>% 
-  left_join(species_img, by = "species") %>% 
-  pubs_per_cat(category = "species", isotype = TRUE, img_unit = 2)
-```
-
-I debated for a while which image to use for humans. In order to avoid racist and sexist connotations, I picked the skull as non-experts can't tell the race and sex from the skull. If you think it's bad to use a skull, then I'll use a Black, Hispanic, Middle Eastern, North African, Central Asian, or South Asian woman's portrait. I stand with the oppressed.
 
 ## By journal
 ```{r}
@@ -150,9 +102,9 @@ sort(table(publications$journal))
 
 ## Location
 ### General
-Just some barplots for number of publications per institution, city, and country. I think city is more informative than country, since obviously, for instance, San Francisco is very different from Anchorage, though they are both in the US. Just within the US, there are regions that are very innovative, and regions that are more repressive. Well, even LA has very different neighborhoods... I just think it's not fair to judge people by whether there's a strong country behind them. First of all, different regions within a countries are not the same. Second, it's not fair to consider someone dumb just because their country is poor and weak; all else being equal, I would admire the person from the poor country more since they had to work harder to get here. I don't care which country is behind you. Right is right, wrong is wrong. Anyway, this is not the place to ramble about politics.
+Just some barplots for number of publications per institution, city, and country. 
 ```{r}
-pubs_per_cat(publications, "country")
+pubs_per_cat(publications, country)
 ```
 
 How about per capita? Actually this probably does not say much since many researchers in the West are immigrants. Then it raises the burning political question of who counts as the "population".
@@ -161,8 +113,6 @@ How about per capita? Actually this probably does not say much since many resear
 pubs_per_capita(publications, plot = "bar")
 ```
 
-Why is Israel doing so great? Why not freedom to Palestine? Yeah, freedom to Palestine!
-
 How about country over time? There might not be enough publications to show a trend.
 ```{r, fig.height=8, fig.width=4}
 pubs_per_year(publications, facet_by = "country")
@@ -170,12 +120,12 @@ pubs_per_year(publications, facet_by = "country")
 Now look at cities. 
 
 ```{r}
-pubs_per_cat(publications, "city")
+pubs_per_cat(publications, city)
 ```
 
 Institutions
 ```{r}
-pubs_per_cat(publications, "institution")
+pubs_per_cat(publications, institution)
 ```
 
 12345678, U, C, L, A, UCLA fight fight fight! We beat 'SC in this plot!
@@ -205,10 +155,10 @@ By method
 pubs_on_map2(methods, facet_by = "method")
 ```
 
-I suppose this merely tells us where those techniques were invented andn how they spread. For instance, voxelation of the brain did not spread outside UCLA to my best knowledge, while Tomo-seq and Niche-seq sort of spread beyond the lab where they originated. 
+I suppose this merely tells us where those techniques were invented and how they spread. For instance, voxelation of the brain did not spread outside UCLA to my best knowledge, while Tomo-seq and Niche-seq sort of spread beyond the lab where they originated. 
 
 ### Europe
-Plot a map just for Europe. A problem here is that if I simply filter the `world` sf object, I'll get some islands away from what we usually think is Europe. Kind of feel bad for Russians since Russia is so large that it makes the map look bad and I don't have a paper from Russia in this spreadsheet. 
+Plot a map just for Europe. A problem here is that if I simply filter the `world` sf object, I'll get some islands away from what we usually think is Europe. Alas, the sad legacy of colonialism! Kind of feel bad for Russians since Russia is so large that it makes the map look bad and I don't have a paper from Russia in this spreadsheet. 
 
 ```{r}
 pubs_on_map2(publications, zoom = "europe")
@@ -257,7 +207,7 @@ sheet %>%
   ggplot(aes(n)) +
   geom_bar() +
   scale_y_continuous(expand = expansion(c(0, 0.05))) +
-  scale_x_continuous(breaks = breaks_width(1))
+  scale_x_continuous(breaks = scales::breaks_width(1))
 ```
 
 # Word cloud
@@ -306,12 +256,9 @@ plot_wordcloud(sheet, year_min = 2015, year_max = 2021)
 ```
 
 ## Department names
-```{r}
-institution_words <- readRDS("output/inst_words.rds")
-```
 
 ```{r}
-plot_wordcloud(sheet, col_use = "department", other_stop_words = institution_words)
+plot_wordcloud(sheet, col_use = "department", other_stop_words = inst_words)
 ```
 
 ## Downstream analyses
@@ -321,52 +268,32 @@ plot_wordcloud(sheet, "downstream")
 
 # Programming languages
 ```{r}
-langs <- sheet %>% 
-  select(year, title, language) %>% 
-  filter(!is.na(language)) %>% 
-  distinct() %>% 
-  mutate(language = str_split(language, "; ")) %>% 
-  unnest(cols = "language")
+langs <- unnest_cat(sheet, language)
 ```
 
 ```{r}
-lang_img <- readRDS("output/lang_img.rds")
-lang_img$image <- purrr::map(lang_img$image_paths, image_read)
-```
-
-```{r}
-langs %>% 
-  inner_join(lang_img, by = "language") %>% 
-  pubs_per_cat(category = "language", isotype = TRUE, img_unit = 5)
+pubs_per_cat(langs, language, isotype = TRUE, img_unit = 5)
 ```
 
 # Data and code availability
 
 How many publications have provided a code repo?
 ```{r}
-ggplot(publications, aes(year, color = !is.na(repo))) +
-  geom_freqpoly(binwidth = 1)
+hist_bool(publications, !is.na(repo))
 ```
 
 How many publications have provided an accession for sequencing data?
 ```{r}
-ggplot(publications, aes(year, color = !is.na(accession))) +
-  geom_freqpoly(binwidth = 1)
+hist_bool(publications, !is.na(accession))
 ```
 
-It seems that more recent publications are more likely to provide an accession and repo. Is this significant? Here I fit a linear model to use year to predict proportion of publications with repo or accession and test if the coefficients are 0.
+It seems that more recent publications are more likely to provide an accession. Is this significant? Here I fit a linear model to use year to predict proportion of publications with repo or accession and test if the coefficients are 0.
 ```{r}
-pub_repos <- publications %>% 
-  group_by(year) %>% 
-  summarize(prop_repo = sum(!is.na(repo))/length(repo))
-summary(lm(prop_repo ~ year, data = pub_repos))
+test_year_bool(publications, !is.na(repo))
 ```
 
 ```{r}
-pub_acc <- publications %>% 
-  group_by(year) %>% 
-  summarize(prop_acc = sum(!is.na(accession))/length(accession))
-summary(lm(prop_acc ~ year, data = pub_acc))
+test_year_bool(publications, !is.na(accession))
 ```
 
-So there sort of is a positive association between year and whether accession is available, and more recent publications are more likely to have accessions.
+So there is a positive association between when the paper was published and whether accession is available, and more recent publications are more likely to have accessions.

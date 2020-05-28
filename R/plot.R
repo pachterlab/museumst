@@ -173,6 +173,7 @@ pubs_per_year <- function(pubs, facet_by = NULL, binwidth = 365) {
 #' @importFrom ggplot2 coord_flip theme element_blank
 #' @importFrom magick image_read
 #' @importFrom purrr map_chr map
+#' @importFrom dplyr row_number desc inner_join
 #' @export
 pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df = NULL,
                          img_unit = NULL) {
@@ -197,7 +198,7 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
       mutate(image_paths = map_chr(image_paths, normalizePath, mustWork = TRUE),
              image = map(image_paths, image_read))
     pubs <- pubs %>%
-      left_join(img_df, by = as_name(category))
+      inner_join(img_df, by = as_name(category))
     if (is.null(img_unit)) {
       img_unit <- round(nrow(pubs)/20)
       message("img_unit not supplied. Using heuristic value ", img_unit)
@@ -599,13 +600,13 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, binwidth = 
 #' @inheritParams hist_bool
 #' @return A lm object is returned invisibly. The summary is printed to screen
 #' @importFrom dplyr group_by summarize
+#' @export
 test_year_bool <- function(pubs, col_use) {
   col_use <- enquo(col_use)
   df <- pubs %>%
     filter(!journal %in% c("bioRxiv", "arXiv")) %>%
-    group_by(year) %>%
-    summarize(prop = sum(!!col_use)/length(!!col_use))
-  out <- lm(prop ~ year, data = df)
+    mutate(bool_use = !!col_use)
+  out <- lm(bool_use ~ date_published, data = df)
   print(summary(out))
   invisible(out)
 }
