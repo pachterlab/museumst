@@ -24,7 +24,7 @@ lang_img <- tibble(language = c("C", "C++", "CUDA", "Java", "Mathematica",
                                 "MATLAB", "Python", "R", "Rust", "Scala"),
                    image_paths = paste0("images/",
                                         c("c.png", "CPlusPlus.jpg", "cuda.png",
-                                          "java.png", "mathematica.png",
+                                          "java.png", "mathematica.jpg",
                                           "matlab.jpg", "python.png", "Rlogo.png",
                                           "rust.png", "scala.png")))
 
