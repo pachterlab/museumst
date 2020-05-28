@@ -113,7 +113,7 @@ get_pubs_df <- function(sheet, other_cols = NULL) {
     out <- sheet %>%
       select(date_published, year, title, journal, language:department)
   }
-  out <- sheet %>%
+  out <- out %>%
     filter(!is.na(title)) %>%
     distinct()
   if (anyDuplicated(out$title)) {
