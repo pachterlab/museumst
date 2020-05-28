@@ -17,7 +17,8 @@ pubs_per_cat(
 \item{pubs}{A data frame at least with a column for the category of interest.}
 
 \item{category}{Column name to plot. Tidyeval is supported. If it's species
-or language, then}
+or language, then img_df does not have to be supplied for isotype plot since
+the images are supplied internally.}
 
 \item{n_top}{Number of top entries to plot. Especially useful for isotype.}
 
