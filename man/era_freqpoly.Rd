@@ -16,6 +16,8 @@ There must be one row per publication or per method or species for each title
 if faceting by those. If facetting, then a column whose name is the value in
 `facet_by` must be present.}
 
+\item{col_use}{Which logical variable to plot. Tidyeval is supported.}
+
 \item{since_first}{Logical. Whether to plot days after the first publication
 appeared.}
 

@@ -26,6 +26,9 @@ Can be character, factor, or logical. Tidyeval is supported.}
 \item{other_stop_words}{A character vector for other stop words besides the
 stop_words data frame that comes with tidytext.}
 }
+\value{
+A ggplot2 object.
+}
 \description{
 Compare word frequencies between current era and prequel
 }
