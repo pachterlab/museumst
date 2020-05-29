@@ -43,6 +43,7 @@ Imports:
 Suggests: 
     broom,
     knitr,
+    rgeos,
     rmarkdown
 VignetteBuilder: knitr
 Depends: 
