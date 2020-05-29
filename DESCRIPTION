@@ -1,12 +1,17 @@
 Package: museumst
 Type: Package
 Title: Museum of Spatial Transcriptomics
-Version: 0.1.0
-Author: Lambda Moses
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: MIT + file LICENSE
+Version: 0.0.0.9000
+Authors@R: 
+    c(person("Lambda", "Moses", email = "dlu2@caltech.edu", 
+    role = c("aut", "cre"),
+    comment = c(ORCID = "0000-0002-7092-9427")),
+    person("Lior", "Pachter", email = "lpachter@caltech.edu",
+    role = c("aut", "ths"),
+    comment = c(ORCID = "0000-0002-9164-6231")))
+Description: 
+    Museum of Spatial Transcriptomics
+License: BSD_2_clause + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
