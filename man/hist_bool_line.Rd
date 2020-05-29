@@ -20,6 +20,8 @@ if faceting by those. If facetting, then a column whose name is the value in
 
 \item{facet_by}{Name of a column for facetting.}
 
+\item{ncol}{Number of columns in facetted plot.}
+
 \item{binwidth}{Width of bins for the histogram in days.}
 }
 \description{
