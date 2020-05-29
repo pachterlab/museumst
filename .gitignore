@@ -4,3 +4,6 @@
 .Ruserdata
 inst/doc
 docs
+museumst.Rcheck/
+museumst*.tar.gz
+museumst*.tgz
