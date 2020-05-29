@@ -320,9 +320,10 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
   if (zoom == "world") {
     map_use <- ne_countries(scale = "small", returnclass = "sf")
     # use Robinson projection
-    map_use <- st_transform(map_use, 54030)
+    robin <- "+proj=robin +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m no_defs"
+    map_use <- st_transform(map_use, robin)
     inst_count <- inst_count %>%
-      mutate(geometry = st_transform(geometry, 54030))
+      mutate(geometry = st_transform(geometry, robin))
   } else if (zoom == "europe") {
     map_use <- ne_countries(scale = "medium", returnclass = "sf")
     crs_europe <- 3035
@@ -431,7 +432,8 @@ pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
     if (zoom == "world") {
       map_use <- ne_countries(scale = "small", returnclass = "sf")
       if (plot == "choropleth") {
-        map_use <- st_transform(map_use, 54030)
+        robin <- "+proj=robin +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m no_defs"
+        map_use <- st_transform(map_use, robin)
       }
     } else {
       map_use <- ne_countries(scale = "medium", returnclass = "sf")
