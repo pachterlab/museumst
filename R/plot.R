@@ -92,6 +92,7 @@ make_image_labs <- function(image_path, width, description, description_width) {
 #' @export
 plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
                           expand_x = c(0.1, 0.1), expand_y = c(0.05, 0.05)) {
+  image <- date_published <- description <- lab <- vjusts <- NULL
   events_df <- events_df %>%
     mutate(image = case_when(is.na(image) ~ NA_character_,
                              TRUE ~ image),
@@ -149,6 +150,7 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
 #' @importFrom scales breaks_pretty
 #' @export
 pubs_per_year <- function(pubs, facet_by = NULL, binwidth = 365) {
+  journal <- date_published <- facets <- NULL
   pubs <- pubs %>%
     filter(!journal %in% c("bioRxiv", "arXiv"))
   if (!is.null(facet_by)) {
@@ -208,6 +210,7 @@ pubs_per_year <- function(pubs, facet_by = NULL, binwidth = 365) {
 #' @export
 pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df = NULL,
                          img_unit = NULL) {
+  n <- reordered <- image <- NULL
   category <- enquo(category)
   if (!is.null(n_top)) {
     top <- pubs %>%
@@ -218,6 +221,7 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
       filter(!!category %in% top)
   }
   if (isotype) {
+    image_paths <- NULL
     if (quo_name(category) == "species") {
       img_df <- species_img %>%
         mutate(image_paths = map_chr(image_paths, system.file, package = "museumst"))
@@ -312,6 +316,7 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
     left_join(inst_gc, by = c("country", "city", "institution"))
   city_gc <- city_gc %>%
     semi_join(inst_count, by = c("country", "city"))
+  country <- geometry <- NULL
   if (zoom == "world") {
     map_use <- ne_countries(scale = "small", returnclass = "sf")
     # use Robinson projection
@@ -345,11 +350,13 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
     size_break_width <- ceiling((max(inst_count$n, na.rm = TRUE) -
                                    min(inst_count$n, na.rm = TRUE))/4)
   }
+  n <- NULL
   p <- ggplot() +
     geom_sf(data = map_use) +
     scale_size_area(name = "Number of\npublications",
                     breaks = breaks_width(size_break_width)) +
     theme(panel.border = element_blank(), axis.title = element_blank())
+  institution2 <- city <- NULL
   if (facet_by == "none") {
     if (per_year) {
       p <- p +
@@ -392,6 +399,7 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
                crs = crs_europe)
   }
   if (per_year) {
+    year <- NULL
     p <- p +
       transition_states(year, state_length = 5, transition_length = 1) +
       labs(title = "{closest_state}") +
@@ -413,7 +421,7 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
 #' the US.
 #' @param plot Whether to plot choropleth or bar plot.
 #' @return A ggplot2 object.
-#' @importFrom ggplot2 scale_fill_distiller
+#' @importFrom ggplot2 scale_fill_distiller geom_col
 #' @export
 pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
                             plot = c("choropleth", "bar")) {
@@ -431,6 +439,8 @@ pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
         map_use <- st_transform(map_use, 3035)
       }
     }
+    country <- per_capita <- pop_est <- country_full <- n <- `state/province` <-
+      `2019` <- state_name <- area <- NULL
     pubs_count <- pubs %>%
       mutate(country_full = case_when(country == "USA" ~ "United States",
                                       country == "UK" ~ "United Kingdom",
@@ -530,6 +540,7 @@ cat_heatmap <- function(pubs, row_var, col_var, ...) {
 #' @importFrom ggplot2 geom_histogram facet_grid
 #' @export
 hist_bool <- function(pubs, col_use, binwidth = 365) {
+  date_published <- journal <- v <- NULL
   col_use <- enquo(col_use)
   pubs <- pubs %>%
     filter(!journal %in% c("bioRxiv", "arXiv")) %>%
@@ -560,6 +571,7 @@ hist_bool <- function(pubs, col_use, binwidth = 365) {
 #' @importFrom rlang quo_name
 #' @export
 hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, binwidth = 365) {
+  date_published <- journal <- v <- NULL
   col_use <- enquo(col_use)
   pubs <- pubs %>%
     filter(!journal %in% c("bioRxiv", "arXiv")) %>%
@@ -587,9 +599,10 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, binwidth = 
 #' @inheritParams hist_bool
 #' @return A lm object is returned invisibly. The summary is printed to screen
 #' @importFrom dplyr group_by summarize
-#' @importFrom stats lm
+#' @importFrom stats glm
 #' @export
 test_year_bool <- function(pubs, col_use) {
+  journal <- NULL
   col_use <- enquo(col_use)
   df <- pubs %>%
     filter(!journal %in% c("bioRxiv", "arXiv")) %>%
@@ -610,11 +623,14 @@ test_year_bool <- function(pubs, col_use) {
 #' for this purposes.
 #'
 #' @inheritParams pubs_per_year
+#' @inheritParams hist_bool
 #' @param since_first Logical. Whether to plot days after the first publication
 #' appeared.
 #' @return A ggplot2 object
 #' @importFrom ggplot2 scale_color_discrete geom_freqpoly scale_fill_discrete
+#' @export
 era_freqpoly <- function(pubs, col_use, since_first = FALSE, binwidth = 365) {
+  journal <- date_published <- days_since_first <- NULL
   col_use <- enquo(col_use)
   no_preprints <- pubs %>%
     filter(!journal %in% c("bioRxiv", "arXiv"))

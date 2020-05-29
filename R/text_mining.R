@@ -14,7 +14,7 @@
 #' @param other_stop_words A character vector for other stop words besides the
 #' stop_words data frame that comes with tidytext.
 #' @param seed Random seed to use.
-#' @param ... Other arguments passed to \link{\code{wordcloud::wordcloud}}.
+#' @param ... Other arguments passed to \code{\link{wordcloud}}.
 #' @return A html widget.
 #' @importFrom dplyr distinct anti_join
 #' @importFrom tidytext unnest_tokens
@@ -25,6 +25,7 @@ plot_wordcloud <- function(sheet, col_use = title, species_use = "all",
                            year_min = NA, year_max = NA,
                            other_stop_words = NULL, seed = 1,
                            scale = c(6, 0.1), min.freq = 1, ...) {
+  title <- year <- species <- word <- NULL
   col_use <- enquo(col_use)
   df <- sheet %>%
     select(title, year, species, !!col_use) %>%
@@ -59,8 +60,14 @@ plot_wordcloud <- function(sheet, col_use = title, species_use = "all",
 #' @inheritParams pubs_per_cat
 #' @param era Which column indicates whether the item is from prequel or current era.
 #' Can be character, factor, or logical. Tidyeval is supported.
+#' @return A ggplot2 object.
+#' @importFrom dplyr ungroup
+#' @importFrom ggplot2 geom_abline coord_equal
+#' @importFrom ggrepel geom_text_repel
+#' @export
 word_prop_scatter <- function(pubs, col_use = title, era = sheet, n_top = 20,
                               other_stop_words = NULL) {
+  date_published <- word <- n <- title <- sheet <- prop <- label <- NULL
   col_use <- enquo(col_use)
   era <- enquo(era)
   eras <- pubs %>% pull(!!era) %>% unique()
