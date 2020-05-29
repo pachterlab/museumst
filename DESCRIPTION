@@ -10,7 +10,8 @@ Authors@R:
     role = c("aut", "ths"),
     comment = c(ORCID = "0000-0002-9164-6231")))
 Description: 
-    Museum of Spatial Transcriptomics
+    Functions and notebooks to analyze metadata about publications in spatial
+    transcriptomics from 1987 to present.
 License: BSD_2_clause + file LICENSE
 Encoding: UTF-8
 LazyData: true
