@@ -1,4 +1,5 @@
 geocode_inst <- function(sheet) {
+  country <- city <- institution <- NULL
   # Geocode institutions
   institution2 <- sheet %>%
     select(country, city, institution) %>%
@@ -12,6 +13,7 @@ geocode_inst <- function(sheet) {
   institution_gc
 }
 geocode_city <- function(sheet) {
+  city <- `state/province` <- country <- city2 <- NULL
   # Geocode cities
   cities <- sheet %>%
     select(city, `state/province`, country) %>%
@@ -34,7 +36,7 @@ geocode_first_time <- function(sheet, cache = TRUE, cache_location = ".") {
   city_gc <- geocode_city(sheet)
   out <- list(inst_gc = inst_gc,
               city_gc = city_gc)
-  if (cache) saveRDS(out, file = fn)
+  if (cache) saveRDS(out, file = fn, version = 2)
   out
 }
 
@@ -62,6 +64,7 @@ geocode_first_time <- function(sheet, cache = TRUE, cache_location = ".") {
 #' @importFrom zeallot %<-%
 #' @export
 geocode_inst_city <- function(sheet, cache = TRUE, cache_location = ".") {
+  city <- institution <- NULL
   if (cache) {
     cache_location <- normalizePath(cache_location, mustWork = FALSE)
     fn <- paste0(cache_location, "/geocode_cache.rds")
