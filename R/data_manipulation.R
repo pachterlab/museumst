@@ -15,6 +15,7 @@
 read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS",
                                         "Microdissection", "No imaging",
                                         "Analysis", "Prequel analysis")) {
+  date_published <- NULL
   sheet_use <- match.arg(sheet_use, several.ok = TRUE)
   gs4_deauth()
   url_use <- "https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154"
@@ -47,6 +48,7 @@ read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS",
 #' to the images of interest on your computer for plotting time lines.
 #' @export
 read_major_events <- function() {
+  image <- date_published <-NULL
   gs4_deauth()
   url_use <- "https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154"
   out <- read_sheet(url_use, sheet = "major events")
@@ -73,10 +75,12 @@ read_major_events <- function() {
 #' @importFrom tidyr unnest
 #' @export
 unnest_cat <- function(sheet, col_use, other_cols = NULL) {
+  col_new <- NULL
   col_use <- enquo(col_use)
   out <- sheet %>%
     filter(!is.na(!!col_use)) %>%
     mutate(col_new = str_split(!!col_use, pattern = "(;|,)\\s"))
+  date_published <- year <- title <- journal <- country <- city <- institution <- NULL
   if (!is.null(other_cols)) {
     out <- out %>%
       select(date_published, year, title, journal, col_new, country, city,
@@ -108,8 +112,10 @@ unnest_cat <- function(sheet, col_use, other_cols = NULL) {
 #'
 #' @inheritParams unnest_cat
 #' @return A data frame with one row per publication.
+#' @importFrom rlang syms
 #' @export
 get_pubs_df <- function(sheet, other_cols = NULL) {
+  date_published <- year <- title <- journal <- language <- department <- NULL
   if (!is.null(other_cols)) {
     out <- sheet %>%
       select(date_published, year, title, journal, language:department,
