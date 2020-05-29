@@ -204,7 +204,7 @@ plot_wordcloud(sheet)
 plot_wordcloud(sheet, tissue)
 ```
 
-```{r, fig.height=5, fig.width=5}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, tissue, species_use = "Drosophila melanogaster")
 ```
 
@@ -219,7 +219,7 @@ range(sheet$date_published)
 ```
 
 ```{r, fig.height=7, fig.width=7}
-plot_wordcloud(sheet, year_min = 1987, year_max = 1995)
+plot_wordcloud(sheet, year_min = 1987, year_max = 1995, scale = c(4, 0.1))
 ```
 
 ```{r, fig.height=6, fig.width=6}
@@ -235,7 +235,7 @@ plot_wordcloud(sheet, year_min = 2005, year_max = 2010)
 ```
 
 ```{r, fig.height=6, fig.width=6}
-plot_wordcloud(sheet, year_min = 2010, year_max = 2021)
+plot_wordcloud(sheet, year_min = 2010, year_max = 2021, scale = c(5, 0.1))
 ```
 
 ## Department names

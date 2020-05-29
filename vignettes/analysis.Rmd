@@ -211,7 +211,7 @@ plot_wordcloud(sheet, year_min = 2015, year_max = 2021)
 
 ```{r, fig.height=7, fig.width=7}
 plot_wordcloud(sheet, col_use = "department", other_stop_words = inst_words,
-              scale = c(6, 0.1))
+              scale = c(5, 0.1))
 ```
 
 # Programming languages

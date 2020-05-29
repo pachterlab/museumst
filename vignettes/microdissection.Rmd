@@ -220,11 +220,11 @@ plot_wordcloud(sheet)
 So not all use of the term "spatial" in the current era is from ST.
 
 ```{r, fig.height=7, fig.width=7}
-plot_wordcloud(sheet, species_use = "Mus musculus")
+plot_wordcloud(sheet, species_use = "Mus musculus", scale = c(5, 0.1))
 ```
 
 ```{r, fig.height=7, fig.width=7}
-plot_wordcloud(sheet, species_use = "Homo sapiens")
+plot_wordcloud(sheet, species_use = "Homo sapiens", scale = c(5, 0.1))
 ```
 
 ## Tissues

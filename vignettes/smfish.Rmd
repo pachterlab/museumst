@@ -257,7 +257,7 @@ plot_wordcloud(sheet, col_use = "department", other_stop_words = inst_words)
 That's because Long Cai used to be in CCE, though later he moved to BBE.
 
 ## Downstream analyses
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet, downstream)
 ```
 

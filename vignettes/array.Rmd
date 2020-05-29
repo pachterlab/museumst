@@ -221,22 +221,22 @@ plot_wordcloud(sheet, species_use = "Homo sapiens")
 I think the prominence of "spatial" is probably driven by ST.
 
 ## Tissues
-```{r, fig.height=5, fig.width=5}
-plot_wordcloud(sheet, col_use = "tissue", scale = c(6, 0.1))
+```{r, fig.height=6, fig.width=6}
+plot_wordcloud(sheet, col_use = "tissue", scale = c(5, 0.1))
 ```
 
 ```{r}
-plot_wordcloud(sheet, species_use = "Mus musculus", col_use = "tissue", scale = c(6, 0.1))
+plot_wordcloud(sheet, species_use = "Mus musculus", col_use = "tissue", scale = c(5, 0.1))
 ```
 
 ```{r, fig.height=5, fig.width=5}
-plot_wordcloud(sheet, species_use = "Homo sapiens", col_use = "tissue", scale = c(6, 0.1))
+plot_wordcloud(sheet, species_use = "Homo sapiens", col_use = "tissue", scale = c(5, 0.1))
 ```
 
 ## Department names
 
-```{r, fig.height=5, fig.width=5}
-plot_wordcloud(sheet, col_use = "department", other_stop_words = inst_words, scale = c(6, 0.1))
+```{r, fig.height=6, fig.width=6}
+plot_wordcloud(sheet, col_use = "department", other_stop_words = inst_words, scale = c(5, 0.1))
 ```
 
 I think that's driven by Department of Gene Technology from Sweden

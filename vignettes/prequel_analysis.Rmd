@@ -189,7 +189,7 @@ plot_wordcloud(sheet, summary)
 ```
 
 ```{r, fig.height=6, fig.width=6}
-plot_wordcloud(sheet, core_principle)
+plot_wordcloud(sheet, core_principle, scale = c(5, 0.1))
 ```
 
 That "bag" comes from bag of words.
@@ -202,7 +202,7 @@ plot_wordcloud(sheet, tissue)
 No-brainer (pun intended). Of course it's brain from ABA, since I left the tissue colum empty for whole Drosophila embryos.
 
 ## By species
-```{r, fig.height=5, fig.width=5}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, species_use = "Drosophila melanogaster")
 ```
 
@@ -231,7 +231,7 @@ plot_wordcloud(sheet, year_min = 2015, year_max = 2021)
 
 ### Summaries
 ```{r, fig.height=6, fig.width=6}
-plot_wordcloud(sheet, summary, year_min = 2001, year_max = 2010)
+plot_wordcloud(sheet, summary, year_min = 2001, year_max = 2010, scale = c(5, 0.1))
 ```
 
 ```{r, fig.height=6, fig.width=6}
@@ -240,7 +240,7 @@ plot_wordcloud(sheet, summary, year_min = 2010, year_max = 2015)
 
 That 2009 is from the 2009 bag of words method.
 
-```{r, fig.height=6, fig.width=6}
+```{r, fig.height=7, fig.width=7}
 plot_wordcloud(sheet, summary, year_min = 2015, year_max = 2021)
 ```
 

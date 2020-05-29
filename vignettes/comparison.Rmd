@@ -226,7 +226,7 @@ word_prop_scatter(publications, title, era = era)
 
 Cool. It seems that the more frequent words diverge more from y = x. Here we see in the current era, there's more emphasis on single cell, transcriptomics, and the word "spatial", while in the prequel era, there was more emphasis on database, patterns, and the very notion of "gene expression". Is it that the prequel era grew in the same period when the human and mouse genomes were sequenced and culminated around the same time when the human reference genome was published; back then gene expression was considered really cool, though now this notion is so common place that we no longer make a big deal out of it? Is this why the "spatial" and "single cell" are emphasized, because it's been so hard that we make a big deal out of it when it's done? Well, I don't think many people emphasize H&E in a title, though even if it's central to a paper, because it's so easy and cheap. They would rather say "pathology" or "diagnostics" since the cool part is not H&E, but the insights of the pathologist who analyzed the images. Will there be a day when "spatial" is so common place that people no longer make a big deal out of it, and mention it just like saying "I texted my friend", which is pretty trivial now, though texting was once a big deal?
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=6, fig.height=6}
 data_sheets %>% 
   filter(era == "current") %>% 
   plot_wordcloud(tissue, min.freq = 1)
