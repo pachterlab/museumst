@@ -32,9 +32,10 @@ Imports:
     stats,
     tidyr,
     tidytext,
-    wordcloud2,
+    wordcloud,
     zeallot
 Suggests: 
+    broom,
     knitr,
     rmarkdown
 VignetteBuilder: knitr

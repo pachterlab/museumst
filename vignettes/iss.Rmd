@@ -200,29 +200,31 @@ sheet %>%
 
 # Word cloud
 ## Titles
-```{r}
-plot_wordcloud(sheet)
+```{r, fig.height=5, fig.width=5}
+plot_wordcloud(sheet, scale = c(8, 0.1))
 ```
 
-```{r}
-plot_wordcloud(sheet, species_use = "Mus musculus")
+```{r, fig.height=5, fig.width=5}
+plot_wordcloud(sheet, species_use = "Mus musculus", scale = c(7, 0.1))
 ```
 
-```{r}
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet, species_use = "Homo sapiens")
 ```
 
 ## Tissues
-```{r}
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet, col_use = "tissue")
 ```
 
-```{r}
+I think that's in part due to STARmap, but a ISS preprint that demonstrated the scalability of a preprocessing pipeline also used the cortex.
+
+```{r, fig.height=4, fig.width=4}
 plot_wordcloud(sheet, species_use = "Mus musculus", col_use = "tissue")
 ```
 
 ```{r}
-plot_wordcloud(sheet, species_use = "Homo sapiens", col_use = "tissue")
+plot_wordcloud(sheet, species_use = "Homo sapiens", col_use = "tissue", scale = c(5, 0.1))
 ```
 
 ## Over time
@@ -236,11 +238,11 @@ Probably not worth the effort to split by time period.
 ## Department names
 
 ```{r}
-plot_wordcloud(sheet, department, other_stop_words = inst_words)
+plot_wordcloud(sheet, department, other_stop_words = inst_words, scale = c(5, 0.1))
 ```
 
 ## Downstream analyses
-```{r}
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet, downstream)
 ```
 
@@ -265,7 +267,7 @@ Since data availability status can differ among datasets for the same publicatio
 hist_bool(sheet, has_matrix, binwidth = 200)
 ```
 
-Is this significant? Probably not. Here I fit a linear model to use year to predict proportion of publications with repo and test if the coefficients are 0.
+Is this significant? Probably not. 
 ```{r}
 test_year_bool(publications, !is.na(repo))
 ```

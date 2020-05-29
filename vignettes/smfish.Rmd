@@ -205,29 +205,30 @@ sheet %>%
 
 # Word cloud
 ## Titles
-```{r}
+```{r, fig.height=4, fig.width=4}
 plot_wordcloud(sheet)
 ```
 
-```{r}
+Yeah, single cell.
+```{r, fig.height=4, fig.width=4}
 plot_wordcloud(sheet, species_use = "Mus musculus")
 ```
 
-```{r}
+```{r, fig.height=4, fig.width=4}
 plot_wordcloud(sheet, species_use = "Homo sapiens")
 ```
 
 ## Tissues
-```{r}
+```{r, fig.height=4, fig.width=4}
 plot_wordcloud(sheet, tissue)
 ```
 
 That 2 comes from U-2 OS, which was used many times to test MERFISH.
-```{r}
+```{r, fig.height=4, fig.width=4}
 plot_wordcloud(sheet, tissue, species_use = "Mus musculus")
 ```
 
-```{r}
+```{r, fig.height=4, fig.width=4}
 plot_wordcloud(sheet, tissue, species_use = "Homo sapiens")
 ```
 
@@ -239,24 +240,24 @@ Those are all about cell culture. I look forward to seeing this used on more rea
 range(sheet$date_published)
 ```
 
-```{r}
+```{r, fig.height=4, fig.width=4}
 plot_wordcloud(sheet, year_min = 2012, year_max = 2016)
 ```
 
-```{r}
+```{r, fig.height=4, fig.width=4}
 plot_wordcloud(sheet, year_min = 2016, year_max = 2021)
 ```
 
 ## Department names
 
-```{r}
+```{r, fig.height=4, fig.width=4}
 plot_wordcloud(sheet, col_use = "department", other_stop_words = inst_words)
 ```
 
 That's because Long Cai used to be in CCE, though later he moved to BBE.
 
 ## Downstream analyses
-```{r}
+```{r, fig.height=4, fig.width=4}
 plot_wordcloud(sheet, downstream)
 ```
 
@@ -282,7 +283,7 @@ Here one paper can have multiple datasets and the availability status of the dat
 hist_bool(sheet, has_matrix)
 ```
 
-It seems that more recent publications are more likely to provide a repo, but not data. Is this significant? Here I fit a linear model to use year to predict proportion of publications with repo or accession and test if the coefficients are 0.
+It seems that more recent publications are more likely to provide a repo, but not data. Is this significant? Here I fit a logistic regression model to use date published to predict whether publications have repo or accession and test if the coefficients are 0.
 ```{r}
 test_year_bool(publications, !is.na(repo))
 ```

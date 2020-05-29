@@ -167,7 +167,7 @@ pubs_per_year <- function(pubs, facet_by = NULL, binwidth = 365) {
     scale_y_continuous(expand = expansion(mult = c(0, 0.05)),
                        breaks = breaks_pretty()) +
     scale_x_date(breaks = breaks_pretty(10)) +
-    labs(y = "Number of publication") +
+    labs(y = "Number of publication", x = "Date published") +
     theme(panel.grid.minor = element_blank(), legend.position = "none")
   if (!is.null(facet_by)) {
     p <- p +
@@ -223,7 +223,7 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
         mutate(image_paths = map_chr(image_paths, system.file, package = "museumst"))
     } else if (quo_name(category) == "language") {
       img_df <- lang_img %>%
-        mutate(image_paths = system.file(image_paths, package = "museumst"))
+        mutate(image_paths = map_chr(image_paths, system.file, package = "museumst"))
     }
     img_df <- img_df %>%
       mutate(image_paths = map_chr(image_paths, normalizePath, mustWork = TRUE),
@@ -488,53 +488,6 @@ pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
   p
 }
 
-#' Plot word cloud for a column
-#'
-#' Plots a word cloud for columns in the metadata that don't have a controlled
-#' vocabulary. I guess maybe I should start using a controlled vocabulary.
-#'
-#' @param sheet The sheet read in from Google Sheets as a tibble.
-#' @param col_use Which column to break down into words for word cloud. Tidyeval
-#' is supported.
-#' @param species_use Which species to filter by.
-#' @param year_min Minimum year. The range of years will be >= year_min and
-#' < year_max.
-#' @param year_max Maximum year.
-#' @param other_stop_words A character vector for other stop words besides the
-#' stop_words data frame that comes with tidytext.
-#' @return A html widget.
-#' @importFrom dplyr distinct anti_join
-#' @importFrom tidytext unnest_tokens
-#' @importFrom wordcloud2 wordcloud2
-#' @export
-plot_wordcloud <- function(sheet, col_use = title, species_use = "all",
-                           year_min = NA, year_max = NA,
-                           other_stop_words = NULL) {
-  col_use <- enquo(col_use)
-  df <- sheet %>%
-    select(title, year, species, !!col_use) %>%
-    filter(!is.na(!!col_use))
-  if (species_use != "all") {
-    df <- df %>%
-      filter(species == species_use)
-  }
-  if (!is.na(year_min) && !is.na(year_max)) {
-    df <- df %>%
-      filter(year >= year_min, year < year_max)
-  }
-  df <- df %>%
-    select(-species, -year) %>%
-    distinct() %>%
-    unnest_tokens(output = "word", input = !!col_use) %>%
-    anti_join(tidytext::stop_words, by = "word") %>%
-    count(word, name = "freq")
-  if (!is.null(other_stop_words)) {
-    df <- df %>%
-      filter(!word %in% other_stop_words)
-  }
-  wordcloud2(df, minRotation = -pi/2, maxRotation = -pi/2, shuffle = FALSE)
-}
-
 #' Plot heatmap to show relationship between two categorical variables
 #'
 #' For instance, are papers for certain techniques more likely to be in certain
@@ -601,6 +554,7 @@ hist_bool <- function(pubs, col_use, binwidth = 365) {
 #'
 #' @inheritParams hist_bool
 #' @inheritParams pubs_per_year
+#' @inheritParams pubs_on_map
 #' @importFrom tidyr complete
 #' @importFrom ggplot2 scale_x_continuous
 #' @importFrom rlang quo_name
@@ -618,7 +572,7 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, binwidth = 
     scale_x_date(breaks = breaks_pretty(10)) +
     scale_color_discrete(name = quo_name(col_use)) +
     theme(panel.grid.minor = element_blank(), legend.position = "top") +
-    labs(y = "count")
+    labs(y = "count", x = "date published")
   if (!is.null(facet_by)) {
     p <- p + facet_wrap(vars(!!sym(facet_by)), ncol = ncol)
   }
@@ -627,8 +581,8 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, binwidth = 
 
 #' Test whether something is associated with time
 #'
-#' Fits a linear model with lm to use year to predict proportion of a logical
-#' variable is TRUE, and tests whether beta is 0.
+#' Fits a logistic regression model with glm to use year to predict proportion
+#' of a logical variable is TRUE, and tests whether beta is 0.
 #'
 #' @inheritParams hist_bool
 #' @return A lm object is returned invisibly. The summary is printed to screen
@@ -639,8 +593,43 @@ test_year_bool <- function(pubs, col_use) {
   col_use <- enquo(col_use)
   df <- pubs %>%
     filter(!journal %in% c("bioRxiv", "arXiv")) %>%
-    mutate(bool_use = !!col_use)
-  out <- lm(bool_use ~ date_published, data = df)
+    mutate(bool_use  = !!col_use)
+  out <- glm(bool_use ~ date_published, data = df, family = "binomial")
   print(summary(out))
   invisible(out)
+}
+
+#' Prequel vs current binned over time
+#'
+#' Plots freqpoly for prequel vs current, with an option to start both at the
+#' date when the first publication in the category appeared. The point here is
+#' not to compare to the distribution of everything, like in hist_bool, or to
+#' compare when things started, like when I plotted a histogram of different
+#' methods over time, but to compare the height of the histograms and how steeply
+#' they rise and fall. So I think freqpoly may be better than blocky histograms
+#' for this purposes.
+#'
+#' @inheritParams pubs_per_year
+#' @param since_first Logical. Whether to plot days after the first publication
+#' appeared.
+#' @return A ggplot2 object
+#' @importFrom ggplot2 scale_color_discrete geom_freqpoly scale_fill_discrete
+era_freqpoly <- function(pubs, col_use, since_first = FALSE, binwidth = 365) {
+  col_use <- enquo(col_use)
+  no_preprints <- pubs %>%
+    filter(!journal %in% c("bioRxiv", "arXiv"))
+  if (since_first) {
+    days_from_start <- pubs %>%
+      group_by(!!col_use) %>%
+      mutate(days_since_first = as.numeric(date_published - min(date_published)))
+    p <- ggplot(days_from_start, aes(days_since_first)) +
+      labs(x = "Days since the first publication")
+  } else {
+    p <- ggplot(no_preprints, aes(date_published)) +
+      labs(x = "Date published")
+  }
+  p <- p +
+    geom_freqpoly(binwidth = binwidth, aes(color = !!col_use)) +
+    scale_color_discrete(name = quo_name(col_use))
+  p
 }

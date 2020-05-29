@@ -25,6 +25,9 @@ library(tidyr)
 library(ggplot2)
 library(forcats)
 library(zeallot)
+library(scales)
+library(ggrepel)
+library(broom)
 theme_set(theme_bw())
 ```
 
@@ -37,12 +40,15 @@ data_sheets <- read_metadata(nms)
 
 ```{r}
 data_sheets <- data_sheets %>% 
-  mutate(is_prequel = sheet == "Prequel")
+  mutate(era = case_when(sheet == "Prequel" ~ "prequel",
+                         TRUE ~ "current"))
 ```
+
+## Number of publications over time
 
 See the number of publications; for original trilogy sheets, each dataset has its own row so often one publication has multiple rows.
 ```{r}
-publications <- get_pubs_df(data_sheets, "is_prequel")
+publications <- get_pubs_df(data_sheets, "era")
 ```
 
 ```{r}
@@ -52,21 +58,14 @@ pubs_on_map2 <- partial(pubs_on_map, inst_gc = inst_gc, city_gc = city_gc)
 ```
 
 ```{r}
-no_preprints <- publications %>% 
-  filter(!journal %in% c("bioRxiv", "arXiv"))
-ggplot(no_preprints, aes(date_published, color = is_prequel)) +
-  geom_freqpoly(binwidth = 365)
+era_freqpoly(publications, era)
 ```
 
 Here we see that what's currently known as spatial transcriptomics is growing more than prequel spatial transcriptomics back in the 1990s and 2000s. Or maybe my prequel collection is incomplete, so I'm not so sure how big that peak is. What's more remarkable is the number of publications in 2020. Now it's near the end of May. We're almost half way through the year. Considering that most publications are from Western countries, for which December is the holiday season, I expect this number to double by the end of 2020.
 
 Let me plot these lines not with the absolute year, but how many years since the first publication in the category to see how quickly these things grew. This will definitely change once I make the LCM collection more complete. Since using LCM + transcriptomics started at least as early as 2001 (the oldest paper I can find that did this is from 2001), I would expect the FALSE curve to rise earlier than the TRUE curve.
 ```{r}
-days_from_start <- publications %>% 
-  group_by(is_prequel) %>% 
-  mutate(days_since_first = as.numeric(date_published - min(date_published)))
-ggplot(days_from_start, aes(days_since_first, color = is_prequel)) +
-  geom_freqpoly(binwidth = 365)
+era_freqpoly(publications, era, since_first = TRUE)
 ```
 
 So far they seem pretty parallel (which most likely won't be the case when I make the LCM collection more complete), though I certainly don't think the current era has peaked yet. Based on this, I think the current era will be much greater than the prequel era.
@@ -75,7 +74,7 @@ Here I'm making an animation on a map for prequel and original trilogy separatel
 
 ```{r, eval=FALSE}
 world_prequel <- publications %>% 
-  filter(is_prequel) %>% 
+  filter(era == "prequel") %>% 
   pubs_on_map(inst_gc, city_gc, per_year = TRUE)
 animate(world_prequel, nframes = 200)
 anim_save("output/world_prequel.gif")
@@ -83,7 +82,7 @@ anim_save("output/world_prequel.gif")
 
 ```{r, eval=FALSE}
 europe_prequel <- publications %>% 
-  filter(is_prequel) %>% 
+  filter(era == "prequel") %>% 
   pubs_on_map(inst_gc, city_gc, zoom = "europe", per_year = TRUE)
 animate(europe_prequel, nframes = 200)
 anim_save("output/europe.gif")
@@ -91,7 +90,7 @@ anim_save("output/europe.gif")
 
 ```{r, eval=FALSE}
 usa_prequel <- publications %>% 
-  filter(is_prequel) %>% 
+  filter(era == "prequel") %>% 
   pubs_on_map(inst_gc, city_gc, zoom = "usa", per_year = TRUE)
 animate(usa_prequel, nframes = 200)
 anim_save("output/usa.gif")
@@ -99,7 +98,7 @@ anim_save("output/usa.gif")
 
 ```{r, eval=FALSE}
 world_current <- publications %>% 
-  filter(!is_prequel) %>% 
+  filter(era == "current") %>% 
   pubs_on_map(inst_gc, city_gc, per_year = TRUE)
 animate(world_current, nframes = 150)
 anim_save("output/world_current.gif")
@@ -107,7 +106,7 @@ anim_save("output/world_current.gif")
 
 ```{r, eval=FALSE}
 europe_current <- publications %>% 
-  filter(!is_prequel) %>% 
+  filter(era == "current") %>% 
   pubs_on_map(inst_gc, city_gc, per_year = TRUE, zoom = "europe")
 animate(europe_current, nframes = 80)
 anim_save("output/europe_current.gif")
@@ -115,7 +114,7 @@ anim_save("output/europe_current.gif")
 
 ```{r, eval=FALSE}
 usa_current <- publications %>% 
-  filter(!is_prequel) %>% 
+  filter(era == "current") %>% 
   pubs_on_map(inst_gc, city_gc, per_year = TRUE, zoom = "usa")
 animate(usa_current)
 anim_save("output/usa_current.gif")
@@ -124,13 +123,13 @@ anim_save("output/usa_current.gif")
 ## For all original trilogy data
 ```{r}
 current <- data_sheets %>% 
-  filter(!is_prequel) %>% 
+  filter(era == "current") %>% 
   select(date_published:journal, country:year, sheet) %>% 
   distinct()
 ```
 
 ```{r}
-current2 <- publications %>% filter(!is_prequel)
+current2 <- publications %>% filter(era == "current")
 ```
 
 How many per sheet? Again, I definitely don't think the LCM collection (within Microdissection) is anywhere close to complete, so microdissection is definitely the most popular one so far. Maybe after I make the LCM collection more complete, I should plot the LCM collection separately.
@@ -140,7 +139,7 @@ pubs_per_cat(current, sheet)
 
 Sheet over time
 ```{r, fig.width=4, fig.height=4}
-pubs_per_year(current, "sheet")
+pubs_per_year(current, "sheet", binwidth = 120)
 ```
 
 
@@ -208,42 +207,41 @@ pubs_on_map2(current, zoom = "europe")
 pubs_on_map2(current, zoom = "usa")
 ```
 
-```{r}
+### Text mining titles
+```{r, fig.width=5, fig.height=5}
 data_sheets %>% 
   filter(!is_prequel) %>% 
-  plot_wordcloud()
+  plot_wordcloud(min.freq = 1, scale = c(10, 0.1))
 ```
 
-Unlike in Prequel, "database" is not at all prominent here. Which words have the most different frequencies between prequel and current era data papers? Here I use proportion of words to normalize the different sizes of the corpus.
+Unlike in Prequel, "database" is not at all prominent here. Which words have the most different frequencies between prequel and current era data papers? Here I use proportion of words to normalize the different sizes of the corpus. The most extreme case is when a word is used a lot in one era and not used at all in the other.
 ```{r}
-word_props <- publications %>% 
-  select(title, is_prequel) %>% 
-  distinct() %>% 
-  unnest_tokens("word", "title") %>% 
-  anti_join(stop_words, by = "word") %>% 
-  count(is_prequel, word) %>% 
-  group_by(is_prequel) %>% 
-  mutate(prop = n/sum(n)) %>% 
-  pivot_wider(names_from = is_prequel, values_from = prop, values_fill = list(prop = 0)) %>% 
-  mutate(dif = abs(`TRUE` - `FALSE`)) %>% 
-  top_n(20, dif) %>% 
-  pivot_longer(c("TRUE", "FALSE"), names_to = "is_prequel", values_to = "prop") %>% 
-  filter(prop > 0) %>% 
-  mutate(word = fct_reorder(word, dif))
+publications %>% 
+  count(era)
 ```
 
 ```{r}
-word_props %>% 
-  ggplot(aes(prop, word, fill = is_prequel)) +
-  geom_col(position = position_dodge(0.8)) +
-  scale_x_continuous(expand = expansion(c(0, 0.05)))
+word_prop_scatter(publications, title, era = era)
 ```
 
-```{r}
+Cool. It seems that the more frequent words diverge more from y = x. Here we see in the current era, there's more emphasis on single cell, transcriptomics, and the word "spatial", while in the prequel era, there was more emphasis on database, patterns, and the very notion of "gene expression". Is it that the prequel era grew in the same period when the human and mouse genomes were sequenced and culminated around the same time when the human reference genome was published; back then gene expression was considered really cool, though now this notion is so common place that we no longer make a big deal out of it? Is this why the "spatial" and "single cell" are emphasized, because it's been so hard that we make a big deal out of it when it's done? Well, I don't think many people emphasize H&E in a title, though even if it's central to a paper, because it's so easy and cheap. They would rather say "pathology" or "diagnostics" since the cool part is not H&E, but the insights of the pathologist who analyzed the images. Will there be a day when "spatial" is so common place that people no longer make a big deal out of it, and mention it just like saying "I texted my friend", which is pretty trivial now, though texting was once a big deal?
+
+```{r, fig.width=5, fig.height=5}
 data_sheets %>% 
   filter(!is_prequel) %>% 
-  plot_wordcloud("tissue")
+  plot_wordcloud(tissue, min.freq = 1, scale = c(10, 0.1))
 ```
+
+Also compare tissues in the current era to those in prequel:
+```{r}
+tissues <- unnest_cat(data_sheets, tissue, other_cols = "era")
+```
+
+```{r}
+word_prop_scatter(tissues, tissue, era)
+```
+
+It seems that there's more Drosophila in the prequel era. But also mouse tissues other than the brain, such as the retina and genitourinary tracts (the "tract" and "system" are probably from the GUDMAP atlas). The "bulb" comes from mouse olfactory bulb, which is the go to organ to test array capture based techniques. Cell cultures also showed up here. But also note "cancer", since spatial transcriptomics in tumors is not possible with prequel era technology (except LCM, which I include in current era though the oldest LCM transcriptomics study I found is from 2001) because tumors don't have a stereotypical structure. Actually I already knew this as I was curating the papers, long before making this plot, but this plot confirms my suspicions.
 
 For current era data papers, which programming languages (if any stated in the paper) are the most popular?
 ```{r}
@@ -255,6 +253,13 @@ langs <- unnest_cat(data_sheets, language)
 pubs_per_cat(langs, language, n_top = 5, isotype = TRUE, img_unit = 5)
 ```
 
+Just imagining MathWorks getting mad at me for making a pattern out of their logo. Finally, how about department names?
+```{r}
+word_prop_scatter(publications, department, era, other_stop_words = inst_words)
+```
+
+I already know that prequel era and current era institutions are different, and that there's more emphasis on developmental biology in the prequel era. Here "zoology" makes sense, since there're more "weird" species in the prequel era, like Ciona intestinalis. The "medical" also makes sense, since many current era datasets (more specifically, ST) are from clinical biopsies or autopsies, such as for cancer, gingivis, and ALS.
+
 # Analysis
 ```{r}
 nms <- c("Analysis", "Prequel analysis")
@@ -263,25 +268,43 @@ analysis_sheets <- read_metadata(nms)
 
 Just to see how number of publications changed through time here
 ```{r}
-pubs_per_year(analysis_sheets, "sheet")
+pubs_per_year(analysis_sheets, "sheet", binwidth = 180)
 ```
 
 ```{r}
-no_preprints <- analysis_sheets %>% 
-  filter(!journal %in% c("bioRxiv", "arXiv"))
-ggplot(no_preprints, aes(date_published, color = sheet)) +
-  geom_freqpoly(binwidth = 365)
+era_freqpoly(analysis_sheets, sheet)
 ```
 
 ```{r}
-days_from_start <- analysis_sheets %>% 
-  group_by(sheet) %>% 
-  mutate(days_since_first = as.numeric(date_published - min(date_published)))
-ggplot(days_from_start, aes(days_since_first, color = sheet)) +
-  geom_freqpoly(binwidth = 365)
+era_freqpoly(analysis_sheets, sheet, since_first = TRUE)
 ```
 
 Again, in the current era, data analysis papers grow more than in the prequel era (if my collection is complete, which I'm not sure). I don't think we have reached the peak yet.
+
+Here, again, I'll compare word frequency between current era analysis and prequel analysis
+```{r}
+word_prop_scatter(analysis_sheets, era = sheet)
+```
+
+Just like for the datasets, there's more emphasis on pattern and gene expression in prequel analysis, and more emphasis on single cell and the very word "spatial" in the current era. For gene expression in prequel analysis, note that most papers from that era in this collection are about automatic classification and annotation of gene expression patterns, so it makes sense to mention "gene expression".
+
+How about summaries of the methods?
+```{r}
+word_prop_scatter(analysis_sheets, summary)
+```
+
+Take this with a grain of salt since what I wrote in the summaries in part depends on my mood. Like when I was tired, I would be more concise, and when I was happy, I would be more verbose. Here we see in the current era, with single cell resolution, "cell" is more emphasized, while the BDGP atlas and ABA are not single cell resolution so the word "voxel" is used instead. 
+
+Again, since both prequel analysis and current era analysis sheets have only about 60 titles, I think the dataset is too small for helpful modeling of how word frequencies change through time.
+
+Finally, department names.
+```{r}
+word_prop_scatter(analysis_sheets, department, other_stop_words = inst_words, n_top = 15)
+```
+
+We see that a lot of the prequel analysis is from computer science departments. I wonder whether this reflects a sociological change, since biologists trained as recently as the 2000s often don't have much computational background and it seems that in the 2010s, especially after about 2015, biology has been becoming more and more computational, so more of the data analysis methods were developed within biology departments. I don't know if this trend is real of whether it's simply the timeline of my personal journy from experimental biology to computational biology. Back in the first half of 2015, I did H&E and Masson's trichrome staining. In September 2015, I changed lab, intending to learn bioinformatics, learnt R, and then started analyzing phenotype data from mouse cohorts before getting into GWAS in late 2016. So probably I only see biology becoming more and more computational because the sort of biology I've been dealing with became more and more computational. Or maybe it is real, since back in 2017, Eleazar Eskin told me about his idea of doing a master's program for postdoc biologists who want to catch up with the computational stuff, and then in 2018, the first time I TA'ed, it was the sort of intro to molecular biology class that I have taken back in my sophomore year in college (2014), and to my surprise, my section only had 2 students and the professor was dismayed that these days some "biologists" are actually mathematicians who don't even know how to do PCR. I was surprised that this class wasn't full and mandatory for biology majors, as was the case when I was a sophomore.
+
+These are some visual explorations. Burning question: are the differences statistically significant? I think these plots are already compelling enough for now. I may need to look more into text mining literature to see what kind of tests are the best.
 
 ```{r}
 sessionInfo()

@@ -161,8 +161,6 @@ pubs_on_map2(publications, zoom = "europe")
 pubs_per_capita(publications, "europe")
 ```
 
-I didn't realize that Switzerland and Netherlands were pretty great. Again, this is a small sample size, so I take this with a grain of salt until I plot the other sheets. 
-
 ```{r}
 pubs_on_map2(species, zoom = "europe", facet_by = "species")
 ```
@@ -207,39 +205,43 @@ sheet %>%
 
 # Word cloud
 ## Titles
-```{r}
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet)
 ```
 
-```{r}
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet, species_use = "Mus musculus")
 ```
 
-```{r}
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet, species_use = "Homo sapiens")
 ```
 
+I think the prominence of "spatial" is probably driven by ST.
+
 ## Tissues
-```{r}
-plot_wordcloud(sheet, col_use = "tissue")
+```{r, fig.height=5, fig.width=5}
+plot_wordcloud(sheet, col_use = "tissue", scale = c(8, 0.1))
 ```
 
 ```{r}
-plot_wordcloud(sheet, species_use = "Mus musculus", col_use = "tissue")
+plot_wordcloud(sheet, species_use = "Mus musculus", col_use = "tissue", scale = c(6, 0.1))
 ```
 
-```{r}
-plot_wordcloud(sheet, species_use = "Homo sapiens", col_use = "tissue")
+```{r, fig.height=5, fig.width=5}
+plot_wordcloud(sheet, species_use = "Homo sapiens", col_use = "tissue", scale = c(8, 0.1))
 ```
 
 ## Department names
 
-```{r}
-plot_wordcloud(sheet, col_use = "department", other_stop_words = inst_words)
+```{r, fig.height=5, fig.width=5}
+plot_wordcloud(sheet, col_use = "department", other_stop_words = inst_words, scale = c(7, 0.1))
 ```
 
+I think that's driven by Department of Gene Technology from Sweden
+
 ## Downstream analyses
-```{r}
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet, "downstream")
 ```
 

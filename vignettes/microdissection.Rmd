@@ -213,28 +213,30 @@ sheet %>%
 
 # Word cloud
 ## Titles
-```{r}
-plot_wordcloud(sheet)
+```{r, fig.height=5, fig.width=5}
+plot_wordcloud(sheet, scale = c(6, 0.1))
 ```
 
-```{r}
+So not all use of the term "spatial" in the current era is from ST.
+
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet, species_use = "Mus musculus")
 ```
 
-```{r}
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet, species_use = "Homo sapiens")
 ```
 
 ## Tissues
-```{r}
-plot_wordcloud(sheet, col_use = "tissue")
+```{r, fig.height=4, fig.width=4}
+plot_wordcloud(sheet, col_use = "tissue", scale = c(8, 0.1))
 ```
 
-```{r}
-plot_wordcloud(sheet, species_use = "Mus musculus", col_use = "tissue")
+```{r, fig.height=4, fig.width=4}
+plot_wordcloud(sheet, species_use = "Mus musculus", col_use = "tissue", scale = c(8, 0.1))
 ```
 
-```{r}
+```{r, fig.height=4, fig.width=4}
 plot_wordcloud(sheet, species_use = "Homo sapiens", col_use = "tissue")
 ```
 
@@ -244,26 +246,26 @@ plot_wordcloud(sheet, species_use = "Homo sapiens", col_use = "tissue")
 range(sheet$date_published)
 ```
 
-```{r}
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet, year_min = 2002, year_max = 2010)
 ```
 
-```{r}
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet, year_min = 2010, year_max = 2015)
 ```
 
-```{r}
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet, year_min = 2015, year_max = 2021)
 ```
 
 ## Department names
 
-```{r}
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet, col_use = "department", other_stop_words = inst_words)
 ```
 
 ## Downstream analyses
-```{r}
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet, "downstream")
 ```
 
@@ -288,7 +290,7 @@ How many publications have provided an accession for sequencing data?
 hist_bool(publications, !is.na(accession))
 ```
 
-It seems that more recent publications are more likely to provide an accession. Is this significant? Here I fit a linear model to use year to predict proportion of publications with repo or accession and test if the coefficients are 0.
+It seems that more recent publications are more likely to provide an accession. Is this significant? Here I fit a logistic regression model using date published to predict whether accession is available and test if the coefficients are 0.
 ```{r}
 test_year_bool(publications, !is.na(repo))
 ```
@@ -297,4 +299,4 @@ test_year_bool(publications, !is.na(repo))
 test_year_bool(publications, !is.na(accession))
 ```
 
-So there is a positive association between when the paper was published and whether accession is available, and more recent publications are more likely to have accessions.
+So there sort of is a positive association between when the paper was published and whether accession is available, and more recent publications are more likely to have accessions.
