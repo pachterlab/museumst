@@ -138,7 +138,7 @@ pubs_per_cat(current, sheet)
 ```
 
 Sheet over time
-```{r, fig.width=4, fig.height=4}
+```{r, fig.width=6, fig.height=6}
 pubs_per_year(current, "sheet", binwidth = 120)
 ```
 
@@ -166,11 +166,11 @@ pubs_per_cat(species, species, n_top = 5, isotype = TRUE, img_unit = 5)
 pubs_per_cat(current2, country)
 ```
 
-```{r, fig.width=4, fig.height=4}
+```{r, fig.width=6, fig.height=6}
 pubs_per_cat(current2, city)
 ```
 
-```{r, fig.width=4, fig.height=6}
+```{r, fig.width=6, fig.height=9}
 pubs_per_cat(current2, institution)
 ```
 
@@ -211,7 +211,7 @@ pubs_on_map2(current, zoom = "usa")
 ```{r, fig.width=5, fig.height=5}
 data_sheets %>% 
   filter(era == "current") %>% 
-  plot_wordcloud(min.freq = 1, scale = c(10, 0.1))
+  plot_wordcloud(min.freq = 1)
 ```
 
 Unlike in Prequel, "database" is not at all prominent here. Which words have the most different frequencies between prequel and current era data papers? Here I use proportion of words to normalize the different sizes of the corpus. The most extreme case is when a word is used a lot in one era and not used at all in the other.
@@ -229,7 +229,7 @@ Cool. It seems that the more frequent words diverge more from y = x. Here we see
 ```{r, fig.width=5, fig.height=5}
 data_sheets %>% 
   filter(era == "current") %>% 
-  plot_wordcloud(tissue, min.freq = 1, scale = c(10, 0.1))
+  plot_wordcloud(tissue, min.freq = 1)
 ```
 
 Also compare tissues in the current era to those in prequel:

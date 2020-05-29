@@ -52,7 +52,7 @@ Number of publications per year. Preprints are excluded from plots over years as
 events <- read_major_events()
 ```
 
-```{r, fig.width=5.5, fig.height=2}
+```{r, fig.width=7, fig.height=3}
 events %>% 
   filter(category == "array") %>% 
   plot_timeline(rep(c(1, -1), length.out = nrow(.)), 
@@ -72,9 +72,10 @@ How about when broken down by method (not for data analysis sheets)?
 methods <- unnest_cat(sheet, method)
 ```
 
-```{r, fig.width=4, fig.height=3}
+```{r, fig.width=6, fig.height=4}
 pubs_per_year(methods, facet_by = "method", binwidth = 150)
 ```
+
 I don't know how much this actually says due to the small sample size. This is also kind of confusing since Geo-seq really is a form of LCM coupled with SMART-seq, so it should be categorized as LCM, but the authors gave it a new name. 
 
 ## By species
@@ -87,7 +88,7 @@ species <- unnest_cat(sheet, species)
 pubs_per_cat(species, species)
 ```
 
-```{r, fig.width=4, fig.height=2}
+```{r, fig.width=6, fig.height=3}
 pubs_per_cat(species, species, isotype = TRUE, img_unit = 1)
 ```
 
@@ -139,12 +140,12 @@ pubs_per_capita(publications)
 ```
 
 Break down by species
-```{r, fig.width=5, fig.height=2}
+```{r, fig.width=8, fig.height=3}
 pubs_on_map2(species, facet_by = "species")
 ```
 
 By method
-```{r, fig.width=5, fig.height=2}
+```{r, fig.width=8, fig.height=4}
 pubs_on_map2(methods, facet_by = "method")
 ```
 
@@ -213,7 +214,7 @@ plot_wordcloud(sheet)
 plot_wordcloud(sheet, species_use = "Mus musculus")
 ```
 
-```{r, fig.height=5, fig.width=5}
+```{r, fig.height=7, fig.width=7}
 plot_wordcloud(sheet, species_use = "Homo sapiens")
 ```
 
@@ -221,7 +222,7 @@ I think the prominence of "spatial" is probably driven by ST.
 
 ## Tissues
 ```{r, fig.height=5, fig.width=5}
-plot_wordcloud(sheet, col_use = "tissue", scale = c(8, 0.1))
+plot_wordcloud(sheet, col_use = "tissue", scale = c(6, 0.1))
 ```
 
 ```{r}
@@ -229,13 +230,13 @@ plot_wordcloud(sheet, species_use = "Mus musculus", col_use = "tissue", scale = 
 ```
 
 ```{r, fig.height=5, fig.width=5}
-plot_wordcloud(sheet, species_use = "Homo sapiens", col_use = "tissue", scale = c(8, 0.1))
+plot_wordcloud(sheet, species_use = "Homo sapiens", col_use = "tissue", scale = c(6, 0.1))
 ```
 
 ## Department names
 
 ```{r, fig.height=5, fig.width=5}
-plot_wordcloud(sheet, col_use = "department", other_stop_words = inst_words, scale = c(7, 0.1))
+plot_wordcloud(sheet, col_use = "department", other_stop_words = inst_words, scale = c(6, 0.1))
 ```
 
 I think that's driven by Department of Gene Technology from Sweden

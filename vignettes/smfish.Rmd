@@ -52,7 +52,7 @@ Number of publications per year. Preprints are excluded from plots over years as
 events <- read_major_events()
 ```
 
-```{r, fig.width=5.5, fig.height=3}
+```{r, fig.width=8, fig.height=4}
 events %>% 
   filter(category == "smFISH") %>% 
   plot_timeline(c(0.8, -0.5, 0.6, -0.5, 1, 0.6, -0.4, 0.7), 
@@ -70,7 +70,7 @@ How about when broken down by method (not for data analysis sheets)?
 methods <- unnest_cat(sheet, method)
 ```
 
-```{r, fig.width=4, fig.height=8}
+```{r, fig.width=6, fig.height=12}
 pubs_per_year(methods, facet_by = "method")
 ```
 
@@ -84,7 +84,7 @@ species <- unnest_cat(sheet, species)
 pubs_per_cat(species, species)
 ```
 
-```{r, fig.width=4, fig.height=2}
+```{r, fig.width=6, fig.height=3}
 pubs_per_cat(species, species, isotype = TRUE, img_unit = 1)
 ```
 
@@ -107,7 +107,7 @@ pubs_per_capita(publications, plot = "bar")
 ```
 
 How about country over time? There might not be enough publications to show a trend.
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 pubs_per_year(publications, facet_by = "country")
 ```
 
@@ -144,7 +144,7 @@ pubs_on_map2(species, facet_by = "species", ncol = 2)
 ```
 
 By method
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=8, fig.height=8}
 pubs_on_map2(methods, facet_by = "method")
 ```
 
@@ -161,13 +161,13 @@ pubs_on_map2(publications, zoom = "europe")
 pubs_per_capita(publications, "europe")
 ```
 
-```{r, fig.width=4, fig.height=2.5}
+```{r, fig.width=6, fig.height=4}
 pubs_on_map2(species, zoom = "europe", facet_by = "species")
 ```
 
 Maybe I just made this plot for fun. Not sure what to say about it.
 
-```{r, fig.width=5, fig.height=4}
+```{r, fig.width=6, fig.height=6}
 pubs_on_map2(methods, zoom = "europe", facet_by = "method", ncol = 2)
 ```
 
@@ -188,7 +188,7 @@ pubs_per_capita(publications, "usa")
 pubs_on_map2(species, zoom = "usa", facet_by = "species", ncol = 2)
 ```
 
-```{r, fig.width=5, fig.height=4}
+```{r, fig.width=8, fig.height=6}
 pubs_on_map2(methods, zoom = "usa", facet_by = "method")
 ```
 
@@ -205,16 +205,16 @@ sheet %>%
 
 # Word cloud
 ## Titles
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet)
 ```
 
 Yeah, single cell.
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, species_use = "Mus musculus")
 ```
 
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, species_use = "Homo sapiens")
 ```
 
@@ -224,7 +224,7 @@ plot_wordcloud(sheet, tissue)
 ```
 
 That 2 comes from U-2 OS, which was used many times to test MERFISH.
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, tissue, species_use = "Mus musculus")
 ```
 
@@ -244,13 +244,13 @@ range(sheet$date_published)
 plot_wordcloud(sheet, year_min = 2012, year_max = 2016)
 ```
 
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, year_min = 2016, year_max = 2021)
 ```
 
 ## Department names
 
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, col_use = "department", other_stop_words = inst_words)
 ```
 

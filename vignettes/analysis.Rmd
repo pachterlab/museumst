@@ -62,7 +62,7 @@ category <- unnest_cat(sheet, category)
 pubs_per_cat(category, category)
 ```
 
-```{r, fig.width=4, fig.height=8}
+```{r, fig.width=6, fig.height=12}
 pubs_per_year(category, facet_by = "category")
 ```
 
@@ -110,7 +110,7 @@ pubs_per_capita(sheet, plot = "bar")
 ```
 
 How about country over time? There might not be enough publications to show a trend.
-```{r, fig.height=8, fig.width=4}
+```{r, fig.height=12, fig.width=6}
 pubs_per_year(sheet, facet_by = "country")
 ```
 Now look at cities. 
@@ -135,7 +135,7 @@ pubs_per_capita(sheet)
 ```
 
 Break down by species
-```{r, fig.width=5, fig.height=3}
+```{r, fig.width=8, fig.height=4}
 pubs_on_map2(species, facet_by = "species")
 ```
 
@@ -169,22 +169,22 @@ pubs_on_map2(sheet, zoom = "usa")
 pubs_per_capita(sheet, "usa")
 ```
 
-```{r, fig.width=5, fig.height=2}
+```{r, fig.width=8, fig.height=3}
 pubs_on_map2(species, zoom = "usa", facet_by = "species")
 ```
 
 # Word cloud
 ## Titles
-```{r, fig.height=5, fig.width=5}
+```{r, fig.height=7, fig.width=7}
 plot_wordcloud(sheet)
 ```
 
 ## Summaries
-```{r, fig.height=5, fig.width=5}
+```{r, fig.height=7, fig.width=7}
 plot_wordcloud(sheet, summary)
 ```
 
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=7, fig.width=7}
 plot_wordcloud(sheet, core_principle, scale = c(5, 0.1))
 ```
 
@@ -199,17 +199,17 @@ plot_wordcloud(sheet, tissue)
 range(sheet$date_published)
 ```
 
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, year_min = 2009, year_max = 2015, scale = c(5, 0.1))
 ```
 
-```{r, fig.height=5, fig.width=5}
+```{r, fig.height=7, fig.width=7}
 plot_wordcloud(sheet, year_min = 2015, year_max = 2021)
 ```
 
 ## Department names
 
-```{r, fig.height=5, fig.width=5}
+```{r, fig.height=7, fig.width=7}
 plot_wordcloud(sheet, col_use = "department", other_stop_words = inst_words,
               scale = c(6, 0.1))
 ```
@@ -240,16 +240,16 @@ test_year_bool(sheet, !is.na(repo))
 
 Yep, it's significant. How about whether the code is well-documented?
 
-```{r, fig.width=4, fig.height=6}
+```{r, fig.width=6, fig.height=9}
 pubs_per_year(langs, "language", binwidth = 150)
 ```
 
-```{r, fig.width=5, fig.height=4}
+```{r, fig.width=8, fig.height=6}
 hist_bool_line(langs, documented, facet_by = "language") 
 ```
 
 It seems that R, Python, and C++ packages are more likely to be well-documented, and MATLAB ones are less likely. Is that MATLAB culture?
-```{r, fig.width=5, fig.height=4}
+```{r, fig.width=8, fig.height=6}
 hist_bool_line(langs, `CRAN/Bioc/pip/conda`, "language")
 ```
 

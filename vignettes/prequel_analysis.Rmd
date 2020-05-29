@@ -64,7 +64,7 @@ category <- unnest_cat(sheet, category)
 pubs_per_cat(category, category)
 ```
 
-```{r, fig.width=4, fig.height=8}
+```{r, fig.width=6, fig.height=12}
 pubs_per_year(category, facet_by = "category")
 ```
 
@@ -109,7 +109,7 @@ pubs_per_capita(sheet, plot = "bar")
 ```
 
 How about country over time? There might not be enough publications to show a trend.
-```{r, fig.height=8, fig.width=4}
+```{r, fig.height=9, fig.width=6}
 pubs_per_year(sheet, facet_by = "country")
 ```
 
@@ -139,7 +139,7 @@ pubs_per_capita(sheet)
 ```
 
 Break down by species
-```{r, fig.width=4, fig.height=8}
+```{r, fig.width=6, fig.height=10}
 pubs_on_map2(species, facet_by = "species", ncol = 1)
 ```
 
@@ -179,16 +179,16 @@ pubs_on_map2(species, zoom = "usa", facet_by = "species")
 
 # Word cloud
 ## Titles
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet)
 ```
 
 ## Summaries
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, summary)
 ```
 
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, core_principle)
 ```
 
@@ -202,11 +202,11 @@ plot_wordcloud(sheet, tissue)
 No-brainer (pun intended). Of course it's brain from ABA, since I left the tissue colum empty for whole Drosophila embryos.
 
 ## By species
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet, species_use = "Drosophila melanogaster")
 ```
 
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, species_use = "Mus musculus")
 ```
 
@@ -217,30 +217,30 @@ range(sheet$date_published)
 ```
 
 ### Titles
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, year_min = 2001, year_max = 2010)
 ```
 
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, year_min = 2010, year_max = 2015)
 ```
 
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, year_min = 2015, year_max = 2021)
 ```
 
 ### Summaries
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, summary, year_min = 2001, year_max = 2010)
 ```
 
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, summary, year_min = 2010, year_max = 2015)
 ```
 
 That 2009 is from the 2009 bag of words method.
 
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, summary, year_min = 2015, year_max = 2021)
 ```
 
@@ -248,6 +248,6 @@ NMF rose to fame.
 
 ## Department names
 
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, col_use = "department", other_stop_words = inst_words)
 ```

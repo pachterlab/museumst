@@ -52,7 +52,7 @@ Number of publications per year. Preprints are excluded from plots over years as
 events <- read_major_events()
 ```
 
-```{r, fig.width=5.5, fig.height=4.5}
+```{r, fig.width=8, fig.height=7}
 events %>% 
   filter(category == "microdissection") %>% 
   plot_timeline(c(0.3, -0.3, 0.5, -0.3, 0.3, -0.7, 1, -0.9, 0.5), 
@@ -76,7 +76,7 @@ I'm not sure if many of those papers even count as spatial since they simply use
 methods <- unnest_cat(sheet, method)
 ```
 
-```{r, fig.width=4, fig.height=8}
+```{r, fig.width=6, fig.height=12}
 pubs_per_year(methods, facet_by = "method")
 ```
 
@@ -115,7 +115,7 @@ pubs_per_capita(publications, plot = "bar")
 ```
 
 How about country over time? There might not be enough publications to show a trend.
-```{r, fig.height=8, fig.width=4}
+```{r, fig.height=12, fig.width=6}
 pubs_per_year(publications, facet_by = "country")
 ```
 Now look at cities. 
@@ -144,7 +144,7 @@ pubs_per_capita(publications)
 ```
 
 Break down by species
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=8, fig.height=8}
 pubs_on_map2(species, facet_by = "species")
 ```
 
@@ -152,7 +152,7 @@ pubs_on_map2(species, facet_by = "species")
 Probably this does not tell us much since there's only 1 study for some species. Again, we see the received wisdom that research is mostly confined to the West, especially Western Europe, west coast of the US, and New England, but not as much in the other parts of the "West".
 
 By method
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=8, fig.height=8}
 pubs_on_map2(methods, facet_by = "method")
 ```
 
@@ -171,13 +171,13 @@ pubs_per_capita(publications, "europe")
 
 I didn't realize that Switzerland and Netherlands were pretty great. Again, this is a small sample size, so I take this with a grain of salt until I plot the other sheets. From the other sheets, I already know that Sweden, the UK, and Germany have many contributions. 
 
-```{r, fig.width=4, fig.height=5}
+```{r, fig.width=6, fig.height=8}
 pubs_on_map2(species, zoom = "europe", facet_by = "species")
 ```
 
 Maybe I just made this plot for fun. Not sure what to say about it.
 
-```{r, fig.width=5, fig.height=4}
+```{r, fig.width=8, fig.height=6}
 pubs_on_map2(methods, zoom = "europe", facet_by = "method")
 ```
 
@@ -192,11 +192,11 @@ pubs_on_map2(publications, zoom = "usa")
 pubs_per_capita(publications, "usa")
 ```
 
-```{r, fig.width=5, fig.height=4}
+```{r, fig.width=8, fig.height=6}
 pubs_on_map2(species, zoom = "usa", facet_by = "species")
 ```
 
-```{r, fig.width=5, fig.height=4}
+```{r, fig.width=8, fig.height=6}
 pubs_on_map2(methods, zoom = "usa", facet_by = "method")
 ```
 
@@ -213,30 +213,30 @@ sheet %>%
 
 # Word cloud
 ## Titles
-```{r, fig.height=5, fig.width=5}
-plot_wordcloud(sheet, scale = c(6, 0.1))
+```{r, fig.height=7, fig.width=7}
+plot_wordcloud(sheet)
 ```
 
 So not all use of the term "spatial" in the current era is from ST.
 
-```{r, fig.height=5, fig.width=5}
+```{r, fig.height=7, fig.width=7}
 plot_wordcloud(sheet, species_use = "Mus musculus")
 ```
 
-```{r, fig.height=5, fig.width=5}
+```{r, fig.height=7, fig.width=7}
 plot_wordcloud(sheet, species_use = "Homo sapiens")
 ```
 
 ## Tissues
-```{r, fig.height=4, fig.width=4}
-plot_wordcloud(sheet, col_use = "tissue", scale = c(8, 0.1))
+```{r, fig.height=5, fig.width=5}
+plot_wordcloud(sheet, col_use = "tissue")
 ```
 
-```{r, fig.height=4, fig.width=4}
-plot_wordcloud(sheet, species_use = "Mus musculus", col_use = "tissue", scale = c(8, 0.1))
+```{r, fig.height=5, fig.width=5}
+plot_wordcloud(sheet, species_use = "Mus musculus", col_use = "tissue")
 ```
 
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=5, fig.width=5}
 plot_wordcloud(sheet, species_use = "Homo sapiens", col_use = "tissue")
 ```
 
@@ -246,21 +246,21 @@ plot_wordcloud(sheet, species_use = "Homo sapiens", col_use = "tissue")
 range(sheet$date_published)
 ```
 
-```{r, fig.height=5, fig.width=5}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet, year_min = 2002, year_max = 2010)
 ```
 
-```{r, fig.height=5, fig.width=5}
+```{r, fig.height=7, fig.width=7}
 plot_wordcloud(sheet, year_min = 2010, year_max = 2015)
 ```
 
-```{r, fig.height=5, fig.width=5}
+```{r, fig.height=7, fig.width=7}
 plot_wordcloud(sheet, year_min = 2015, year_max = 2021)
 ```
 
 ## Department names
 
-```{r, fig.height=5, fig.width=5}
+```{r, fig.height=7, fig.width=7}
 plot_wordcloud(sheet, col_use = "department", other_stop_words = inst_words)
 ```
 
