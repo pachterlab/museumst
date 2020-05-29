@@ -22,6 +22,6 @@ if faceting by those. If facetting, then a column whose name is the value in
 A lm object is returned invisibly. The summary is printed to screen
 }
 \description{
-Fits a linear model with lm to use year to predict proportion of a logical
-variable is TRUE, and tests whether beta is 0.
+Fits a logistic regression model with glm to use year to predict proportion
+of a logical variable is TRUE, and tests whether beta is 0.
 }
