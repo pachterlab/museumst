@@ -1,22 +1,5 @@
-#' Read the metadata from Google Sheets
-#'
-#' To do: Cache and add an argument to update cache. Unlike the geocodes, this
-#' won't be stored in the data of this package since it's much faster to download
-#' the sheet than to geocode.
-#'
-#' @param sheet_use Name of the sheet(s) to read.
-#' @return A tibble for the sheet of interest.
-#' @importFrom googlesheets4 gs4_deauth read_sheet
-#' @importFrom dplyr mutate
-#' @importFrom magrittr %>%
-#' @importFrom lubridate year as_date
-#' @importFrom purrr map reduce map2_dfr
-#' @export
-read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS",
-                                        "Microdissection", "No imaging",
-                                        "Analysis", "Prequel analysis")) {
+read_metadata_fresh <- function(sheet_use) {
   date_published <- NULL
-  sheet_use <- match.arg(sheet_use, several.ok = TRUE)
   gs4_deauth()
   url_use <- "https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154"
   if (length(sheet_use) > 1) {
@@ -31,6 +14,84 @@ read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS",
     read_sheet(url_use, sheet = sheet_use) %>%
       mutate(year = year(date_published),
              date_published = as_date(date_published))
+  }
+}
+
+#' Read the metadata from Google Sheets
+#'
+#' To do: Cache and add an argument to update cache. Unlike the geocodes, this
+#' won't be stored in the data of this package since it's much faster to download
+#' the sheet than to geocode.
+#'
+#' @inheritParams geocode_inst_city
+#' @param sheet_use Name of the sheet(s) to read.
+#' @param update Logical, whether to update. If not, then a file contained within
+#' this package is read. This file is updated with each version of this package.
+#' If TRUE, then the data is directly downloaded from Google Sheets, which is guaranteed
+#' to be up to date.
+#' @return A tibble for the sheet of interest.
+#' @importFrom googlesheets4 gs4_deauth read_sheet
+#' @importFrom googledrive drive_deauth drive_get
+#' @importFrom dplyr mutate group_split
+#' @importFrom magrittr %>%
+#' @importFrom lubridate year as_date
+#' @importFrom purrr map reduce map2_dfr
+#' @export
+read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS",
+                                        "Microdissection", "No imaging",
+                                        "Analysis", "Prequel analysis"),
+                          cache = TRUE, cache_location = "./sheets_cache",
+                          update = FALSE) {
+  sheet_use <- match.arg(sheet_use, several.ok = TRUE)
+  sheet_use2 <- str_replace(sheet_use, "\\s", "_")
+  if (cache) {
+    cache_location <- normalizePath(cache_location, mustWork = FALSE)
+    if (!dir.exists(cache_location)) dir.create(cache_location)
+    fn <- paste0(cache_location, "/", sheet_use2, ".rds")
+    fn_inst <- system.file(paste0("sheets_cache/", sheet_use2, ".rds"),
+                           package = "museumst")
+    inds <- !file.exists(fn)
+    if (!update) {
+      if (any(inds)) {
+        file.copy(fn_inst[inds], fn[inds])
+      }
+      out <- map_dfr(fn, readRDS)
+      return(out)
+    } else {
+      # Check if the sheet is newer than the version that comes with this package
+      url_use <- "https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154"
+      drive_deauth()
+      metas <- drive_get(url_use)
+      updated <- metas$drive_resource[[1]]$modifiedTime
+      cache_updated <- file.mtime(fn)
+      cache_updated[inds] <- file.mtime(fn_inst[inds])
+      need_update <- cache_updated < updated
+      if (any(need_update)) {
+        out <- read_metadata_fresh(sheet_use[need_update])
+        out_save <- out %>%
+          group_split(sheet)
+        fn_save <- paste0(cache_location, "/", sort(sheet_use2[need_update]), ".rds")
+        for (i in seq_along(out_save)) {
+          saveRDS(out_savce[[i]], fn_save[i])
+        }
+      }
+      need_cp <- !need_update & inds
+      if (any(!need_update)) {
+        if (any(need_cp)) {
+          file.copy(fn_inst[need_cp], fn[need_cp])
+        }
+        out2 <- map_dfr(fn[!need_update], readRDS)
+      }
+      if (any(need_update) && !all(need_update)) {
+        out <- rbind(out, out2)
+      }
+      if (all(!need_update)) {
+        out <- out2
+      }
+      return(out)
+    }
+  } else {
+    read_metadata_fresh(sheet_use)
   }
 }
 

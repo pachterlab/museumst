@@ -56,7 +56,7 @@ saveRDS(institution_words, "output/inst_words.rds")
 sheets <- read_metadata(c("Prequel", "smFISH", "Array", "ISS",
                           "Microdissection", "No imaging",
                           "Analysis", "Prequel analysis"))
-gcs <- geocode_first_time(sheets, cache = TRUE, cache_location = "inst")
+gcs <- geocode_inst_city(sheets, cache = TRUE, cache_location = "inst")
 
 # Europe limits
 europe_poly <- matrix(c(30, 68, 30, 35, -7, 35, -7, 68, 30, 68),
@@ -65,3 +65,14 @@ europe_limits <- st_polygon(list(europe_poly)) %>% st_sfc()
 europe_limits <- st_as_sf(europe_limits, crs = 4326)
 europe_limits <- st_transform(europe_limits, 3035)
 xylims <- st_bbox(europe_limits)
+
+# Cache sheets
+sheet_use <- c("Prequel", "smFISH", "Array", "ISS",
+               "Microdissection", "No imaging",
+               "Analysis", "Prequel analysis")
+sheets <- read_metadata_fresh(sheet_use = sheet_use)
+sheets <- sheets %>%
+  group_split(sheet)
+fns <- str_replace(sort(sheet_use), "\\s", "_")
+map2(sheets, fns, ~ saveRDS(.x, file = paste0("inst/sheets_cache/", .y, ".rds"),
+                            version = 2))
