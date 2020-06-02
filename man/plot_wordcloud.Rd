@@ -39,7 +39,7 @@ stop_words data frame that comes with tidytext.}
 
 \item{min.freq}{words with frequency below min.freq will not be plotted}
 
-\item{...}{Other arguments passed to \code{\link{wordcloud}}.}
+\item{...}{Other arguments passed to \code{wordcloud::wordcloud}.}
 }
 \value{
 A html widget.
