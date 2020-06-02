@@ -76,4 +76,6 @@ map2(sheets, fns, ~ saveRDS(.x, file = paste0("inst/sheets_cache/", .y, ".rds"),
                             version = 2))
 
 # Get the internal copy of major events sheet
-read_major_events(update = TRUE)
+url_use <- "https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154"
+events <- read_sheet(url_use, "major events")
+saveRDS(events, "inst/major_events.rds", version = 2)

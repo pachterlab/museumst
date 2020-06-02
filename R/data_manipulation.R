@@ -123,17 +123,17 @@ read_major_events <- function(update = FALSE) {
     if (file.mtime(fn_inst) < metas$drive_resource[[1]]$modifiedTime) {
       gs4_deauth()
       out <- read_sheet(url_use, sheet = "major events")
-      out <- out %>%
-        mutate(image = map_chr(paste0("images/", image), system.file, package = "museumst"),
-               image = case_when(image == "" ~ NA_character_,
-                                 TRUE ~ image),
-               date_published = as_date(date_published))
     } else {
       out <- readRDS(fn_inst)
     }
   } else {
     out <- readRDS(fn_inst)
   }
+  out <- out %>%
+    mutate(image = map_chr(paste0("images/", image), system.file, package = "museumst"),
+           image = case_when(image == "" ~ NA_character_,
+                             TRUE ~ image),
+           date_published = as_date(date_published))
   out
 }
 
