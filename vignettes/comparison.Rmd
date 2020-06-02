@@ -28,6 +28,7 @@ library(zeallot)
 library(scales)
 library(ggrepel)
 library(broom)
+library(sf)
 theme_set(theme_bw())
 ```
 

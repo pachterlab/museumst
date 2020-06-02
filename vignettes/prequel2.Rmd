@@ -22,6 +22,7 @@ library(zeallot)
 library(purrr)
 library(stringr)
 library(dplyr)
+library(sf)
 theme_set(theme_bw())
 ```
 
