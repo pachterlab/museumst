@@ -59,6 +59,15 @@ jobs:
           Rscript -e "remotes::install_github('r-hub/sysreqs')"
           sysreqs=$(Rscript -e "cat(sysreqs::sysreq_commands('DESCRIPTION'))")
           sudo -s eval "$sysreqs"
+          sudo apt-get install gdal-bin libgdal-dev
+
+        if: runner.os == 'macOS'
+        run: |
+          brew install imagemagick@6
+          brew install udunits
+          brew install libgit2
+          brew install libssh2
+          brew install gdal
 
       - name: Install dependencies
         run: |
