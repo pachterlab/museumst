@@ -46,6 +46,7 @@ Suggests:
     rnaturalearth,
     sf,
     tidytext,
+    transformr,
     wordcloud
 VignetteBuilder: knitr
 Depends: 
