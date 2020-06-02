@@ -95,7 +95,7 @@ geocode_inst_city <- function(sheet, cache = TRUE, cache_location = ".") {
         }
         out <- list(inst_gc = inst_gc,
                     city_gc = city_gc)
-        saveRDS(out, file = fn)
+        saveRDS(out, file = fn, version = 2)
         return(out)
       } else {
         out <- list(inst_gc = inst_gc,
