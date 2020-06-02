@@ -7,9 +7,9 @@ geocode_inst <- function(sheet) {
     filter(!is.na(institution)) %>%
     unite(col = "institution2", institution, city, country, remove = FALSE, sep = ", ") %>%
     mutate(institution2 = str_remove(institution2, "NA, "))
-  institution_gc <- geocode(institution2$institution2)
+  institution_gc <- ggmap::geocode(institution2$institution2)
   institution_gc <- cbind(institution2, institution_gc)
-  institution_gc <- st_as_sf(institution_gc, coords = c("lon", "lat"), crs = st_crs(4326))
+  institution_gc <- sf::st_as_sf(institution_gc, coords = c("lon", "lat"), crs = sf::st_crs(4326))
   institution_gc
 }
 geocode_city <- function(sheet) {
@@ -21,9 +21,9 @@ geocode_city <- function(sheet) {
     filter(!is.na(city)) %>%
     unite(col = "city2", city, `state/province`, country, remove = FALSE, sep = ", ") %>%
     mutate(city2 = str_remove(city2, "NA, "))
-  cities_gc <- geocode(cities$city2)
+  cities_gc <- ggmap::geocode(cities$city2)
   cities_gc <- cbind(cities, cities_gc)
-  cities_gc <- st_as_sf(cities_gc, coords = c("lon", "lat"), crs = st_crs(4326))
+  cities_gc <- sf::st_as_sf(cities_gc, coords = c("lon", "lat"), crs = sf::st_crs(4326))
   cities_gc
 }
 
@@ -56,14 +56,13 @@ geocode_first_time <- function(sheet, cache = TRUE, cache_location = ".") {
 #'   \item{city_gc}{A sf data frame with columns country, state/province, city,
 #'   and geometry.}
 #' }
-#' @importFrom ggmap geocode
 #' @importFrom dplyr distinct
 #' @importFrom tidyr unite
 #' @importFrom stringr str_remove
-#' @importFrom sf st_as_sf st_crs st_polygon st_sfc st_transform st_bbox
 #' @importFrom zeallot %<-%
 #' @export
 geocode_inst_city <- function(sheet, cache = TRUE, cache_location = ".") {
+  .pkg_check("ggmap")
   city <- institution <- NULL
   if (cache) {
     cache_location <- normalizePath(cache_location, mustWork = FALSE)

@@ -18,34 +18,35 @@ LazyData: true
 Imports:
     dplyr,
     forcats,
-    gganimate,
     ggplot2,
-    ggmap,
     ggrepel,
-    ggtext,
-    ggtextures,
     googlesheets4,
+    googledrive,
     grid,
     lubridate,
-    magick,
     magrittr,
     purrr,
     rlang,
-    rnaturalearth,
     scales,
-    sf,
     stringr,
     stats,
     tidyr,
-    tidytext,
-    wordcloud,
     zeallot
 Suggests: 
     broom,
+    gganimate,
+    ggmap,
+    ggtext,
+    ggtextures,
     knitr,
+    magick,
     rgeos,
     rmarkdown,
-    rnaturalearthdata
+    rnaturalearthdata,
+    rnaturalearth,
+    sf,
+    tidytext,
+    wordcloud
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)

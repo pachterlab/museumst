@@ -14,17 +14,17 @@
 #' @param other_stop_words A character vector for other stop words besides the
 #' stop_words data frame that comes with tidytext.
 #' @param seed Random seed to use.
-#' @param ... Other arguments passed to \code{\link{wordcloud}}.
+#' @param ... Other arguments passed to \code{wordcloud::wordcloud}.
 #' @return A html widget.
 #' @importFrom dplyr distinct anti_join
-#' @importFrom tidytext unnest_tokens
-#' @importFrom wordcloud wordcloud
 #' @importFrom scales brewer_pal
 #' @export
 plot_wordcloud <- function(sheet, col_use = title, species_use = "all",
                            year_min = NA, year_max = NA,
                            other_stop_words = NULL, seed = 1,
                            scale = c(6, 0.1), min.freq = 1, ...) {
+  .pkg_check("tidytext")
+  .pkg_check("wordcloud")
   title <- year <- species <- word <- NULL
   col_use <- enquo(col_use)
   df <- sheet %>%
@@ -41,7 +41,7 @@ plot_wordcloud <- function(sheet, col_use = title, species_use = "all",
   df <- df %>%
     select(-species, -year) %>%
     distinct() %>%
-    unnest_tokens(output = "word", input = !!col_use) %>%
+    tidytext::unnest_tokens(output = "word", input = !!col_use) %>%
     anti_join(tidytext::stop_words, by = "word") %>%
     count(word, name = "freq")
   if (!is.null(other_stop_words)) {
@@ -49,9 +49,10 @@ plot_wordcloud <- function(sheet, col_use = title, species_use = "all",
       filter(!word %in% other_stop_words)
   }
   set.seed(seed)
-  wordcloud(words = df$word, freq = df$freq, scale = scale, min.freq = min.freq,
-            colors = brewer_pal(palette = "Dark2")(8),
-            random.color = TRUE, ...)
+  wordcloud::wordcloud(words = df$word, freq = df$freq, scale = scale,
+                       min.freq = min.freq,
+                       colors = brewer_pal(palette = "Dark2")(8),
+                       random.color = TRUE, ...)
 }
 
 #' Compare word frequencies between current era and prequel
@@ -67,6 +68,7 @@ plot_wordcloud <- function(sheet, col_use = title, species_use = "all",
 #' @export
 word_prop_scatter <- function(pubs, col_use = title, era = sheet, n_top = 20,
                               other_stop_words = NULL) {
+  .pkg_check("tidytext")
   date_published <- word <- n <- title <- sheet <- prop <- label <- NULL
   col_use <- enquo(col_use)
   era <- enquo(era)
@@ -76,7 +78,7 @@ word_prop_scatter <- function(pubs, col_use = title, era = sheet, n_top = 20,
   freqs <- pubs %>%
     filter(!is.na(!!col_use)) %>%
     select(date_published, !!col_use, !!era) %>%
-    unnest_tokens("word", input = !!col_use) %>%
+    tidytext::unnest_tokens("word", input = !!col_use) %>%
     anti_join(tidytext::stop_words, by = "word") %>%
     count(!!era, word) %>%
     # Calculate the proportion

@@ -42,8 +42,9 @@ Instead of using a child document for the shared part, I still decided to copy t
 
 To do: 
 
+  * Cache the entire sheet as well, and won't query Google Sheet itself unless user chooses to update
   * More defensive programming
-  * Move dependencies for isotype plot, timeline, and maps to Suggests (maybe)
+  * Move dependencies for isotype plot, timeline, and maps to Suggests
   * Polish user interface
   * Build shiny app for exploring this metadata
   * Put the vignettes on a RStudio Cloud project for those who do code to play around with. The entire package repo will be there so the user can also change the code and make other plots.

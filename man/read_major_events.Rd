@@ -4,7 +4,14 @@
 \alias{read_major_events}
 \title{Read the major events sheet}
 \usage{
-read_major_events()
+read_major_events(update = FALSE)
+}
+\arguments{
+\item{update}{Logical, whether to update cache. If not, then the cache is read,
+and if the cache is absent, then a file contained within
+this package is read. This file within the package is updated with each
+version of this package. If TRUE, then the data is directly downloaded from
+Google Sheets, which is guaranteed to be up to date.}
 }
 \value{
 A tibble. In the returned tibble, the image column will be the paths

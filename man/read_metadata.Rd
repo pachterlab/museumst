@@ -6,11 +6,24 @@
 \usage{
 read_metadata(
   sheet_use = c("Prequel", "smFISH", "Array", "ISS", "Microdissection", "No imaging",
-    "Analysis", "Prequel analysis")
+    "Analysis", "Prequel analysis"),
+  cache = TRUE,
+  cache_location = "./sheets_cache",
+  update = FALSE
 )
 }
 \arguments{
 \item{sheet_use}{Name of the sheet(s) to read.}
+
+\item{cache}{Logial, whether to cache.}
+
+\item{cache_location}{Where to save the cache}
+
+\item{update}{Logical, whether to update cache. If not, then the cache is read,
+and if the cache is absent, then a file contained within
+this package is read. This file within the package is updated with each
+version of this package. If TRUE, then the data is directly downloaded from
+Google Sheets, which is guaranteed to be up to date.}
 }
 \value{
 A tibble for the sheet of interest.

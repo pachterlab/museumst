@@ -71,8 +71,9 @@ sheet_use <- c("Prequel", "smFISH", "Array", "ISS",
                "Microdissection", "No imaging",
                "Analysis", "Prequel analysis")
 sheets <- read_metadata_fresh(sheet_use = sheet_use)
-sheets <- sheets %>%
-  group_split(sheet)
-fns <- str_replace(sort(sheet_use), "\\s", "_")
+fns <- str_replace(sheet_use, "\\s", "_")
 map2(sheets, fns, ~ saveRDS(.x, file = paste0("inst/sheets_cache/", .y, ".rds"),
                             version = 2))
+
+# Get the internal copy of major events sheet
+read_major_events(update = TRUE)

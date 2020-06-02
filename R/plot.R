@@ -88,10 +88,10 @@ make_image_labs <- function(image_path, width, description, description_width) {
 #' @importFrom lubridate floor_date ceiling_date
 #' @importFrom ggplot2 ggplot geom_point aes geom_hline geom_segment scale_x_date
 #' expansion scale_y_continuous theme_void annotate
-#' @importFrom ggtext geom_richtext
 #' @export
 plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
                           expand_x = c(0.1, 0.1), expand_y = c(0.05, 0.05)) {
+  .pkg_check("ggtext")
   image <- date_published <- description <- lab <- vjusts <- NULL
   events_df <- events_df %>%
     mutate(image = case_when(is.na(image) ~ NA_character_,
@@ -115,7 +115,7 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
     geom_point(aes(x = date_published), y = 0) +
     geom_hline(yintercept = 0) +
     geom_segment(aes(x = date_published, y = 0, xend = date_published, yend = ys)) +
-    geom_richtext(aes(x = date_published, y = ys, label = lab, vjust = vjusts),
+    ggtext::geom_richtext(aes(x = date_published, y = ys, label = lab, vjust = vjusts),
                   color = "blue", fill = "white") +
     scale_x_date(expand = expansion(expand_x)) +
     scale_y_continuous(expand = expansion(expand_y)) +
@@ -201,10 +201,8 @@ pubs_per_year <- function(pubs, facet_by = NULL, binwidth = 365) {
 #' @return A ggplot2 object.
 #' @importFrom rlang enquo as_name
 #' @importFrom forcats fct_infreq fct_rev
-#' @importFrom ggtextures geom_isotype_bar
 #' @importFrom grid unit
 #' @importFrom ggplot2 coord_flip theme element_blank
-#' @importFrom magick image_read
 #' @importFrom purrr map_chr map
 #' @importFrom dplyr row_number desc inner_join
 #' @export
@@ -221,6 +219,8 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
       filter(!!category %in% top)
   }
   if (isotype) {
+    .pkg_check("magick")
+    .pkg_check("ggtextures")
     image_paths <- NULL
     if (quo_name(category) == "species") {
       img_df <- species_img %>%
@@ -231,7 +231,7 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
     }
     img_df <- img_df %>%
       mutate(image_paths = map_chr(image_paths, normalizePath, mustWork = TRUE),
-             image = map(image_paths, image_read))
+             image = map(image_paths, magick::image_read))
     pubs <- pubs %>%
       inner_join(img_df, by = as_name(category))
     if (is.null(img_unit)) {
@@ -241,7 +241,7 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
     pubs <- pubs %>%
       mutate(reordered = fct_infreq(!!category) %>% fct_rev())
     p <- ggplot(pubs, aes(reordered)) +
-      geom_isotype_bar(aes(image = image),
+      ggtextures::geom_isotype_bar(aes(image = image),
                        img_width = grid::unit(img_unit, "native"),
                        img_height = NULL,
                        nrow = 1, ncol = NA,
@@ -287,9 +287,7 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
 #' @return A ggplot2 object
 #' @importFrom rlang !!!
 #' @importFrom dplyr left_join count semi_join vars
-#' @importFrom rnaturalearth ne_countries
 #' @importFrom ggplot2 geom_sf scale_size_area scale_color_viridis_c coord_sf
-#' @importFrom gganimate transition_states enter_fade exit_fade
 #' @importFrom scales breaks_width
 #' @importFrom ggrepel geom_label_repel
 #' @export
@@ -299,7 +297,12 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
                         ncol = 3, label_cities = TRUE,
                         per_year = FALSE) {
   zoom <- match.arg(zoom)
+  .pkg_check("sf")
+  .pkg_check("rnaturalearth")
+  .pkg_check("rnaturalearthdata")
+  .pkg_check("rgeos")
   if (per_year) {
+    .pkg_check("gganimate")
     vars_count <- c("country", "city", "institution", "year")
     label_cities <- FALSE
   } else {
@@ -318,32 +321,32 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
     semi_join(inst_count, by = c("country", "city"))
   country <- geometry <- NULL
   if (zoom == "world") {
-    map_use <- ne_countries(scale = "small", returnclass = "sf")
+    map_use <- rnaturalearth::ne_countries(scale = "small", returnclass = "sf")
     # use Robinson projection
     robin <- "+proj=robin +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m no_defs"
-    map_use <- st_transform(map_use, robin)
+    map_use <- sf::st_transform(map_use, robin)
     inst_count <- inst_count %>%
-      mutate(geometry = st_transform(geometry, robin))
+      mutate(geometry = sf::st_transform(geometry, robin))
   } else if (zoom == "europe") {
-    map_use <- ne_countries(scale = "medium", returnclass = "sf")
+    map_use <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
     crs_europe <- 3035
     inst_count <- inst_count %>%
       filter(country %in% europe_countries) %>%
-      mutate(geometry = st_transform(geometry, crs = crs_europe))
+      mutate(geometry = sf::st_transform(geometry, crs = crs_europe))
     city_gc <- city_gc %>%
       filter(country %in% europe_countries) %>%
-      mutate(geometry = st_transform(geometry, crs = crs_europe))
+      mutate(geometry = sf::st_transform(geometry, crs = crs_europe))
     # project on European transformation
-    map_use <- st_transform(map_use, crs = crs_europe)
+    map_use <- sf::st_transform(map_use, crs = crs_europe)
   } else if (zoom == "usa") {
     map_use <- usa_w_pop
     crs_usa <- 2163
     inst_count <- inst_count %>%
       filter(country == "USA") %>%
-      mutate(geometry = st_transform(geometry, crs = crs_usa))
+      mutate(geometry = sf::st_transform(geometry, crs = crs_usa))
     city_gc <- city_gc %>%
       filter(country == "USA") %>%
-      mutate(geometry = st_transform(geometry, crs = crs_usa))
+      mutate(geometry = sf::st_transform(geometry, crs = crs_usa))
   }
   if (max(inst_count$n, na.rm = TRUE) < 4) {
     size_break_width <- 1
@@ -402,10 +405,10 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
   if (per_year) {
     year <- NULL
     p <- p +
-      transition_states(year, state_length = 5, transition_length = 1) +
+      gganimate::transition_states(year, state_length = 5, transition_length = 1) +
       labs(title = "{closest_state}") +
-      enter_fade() +
-      exit_fade()
+      gganimate::enter_fade() +
+      gganimate::exit_fade()
   }
   p
 }
@@ -426,19 +429,23 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
 #' @export
 pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
                             plot = c("choropleth", "bar")) {
+  .pkg_check("sf")
+  .pkg_check("rnaturalearth")
+  .pkg_check("rnaturalearthdata")
+  .pkg_check("rgeos")
   zoom <- match.arg(zoom)
   plot <- match.arg(plot)
   if (zoom != "usa") {
     if (zoom == "world") {
-      map_use <- ne_countries(scale = "small", returnclass = "sf")
+      map_use <- rnaturalearth::ne_countries(scale = "small", returnclass = "sf")
       if (plot == "choropleth") {
         robin <- "+proj=robin +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m no_defs"
-        map_use <- st_transform(map_use, robin)
+        map_use <- sf::st_transform(map_use, robin)
       }
     } else {
-      map_use <- ne_countries(scale = "medium", returnclass = "sf")
+      map_use <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
       if (plot == "choropleth") {
-        map_use <- st_transform(map_use, 3035)
+        map_use <- sf::st_transform(map_use, 3035)
       }
     }
     country <- per_capita <- pop_est <- country_full <- n <- `state/province` <-
@@ -599,7 +606,7 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, binwidth = 
 #' of a logical variable is TRUE, and tests whether beta is 0.
 #'
 #' @inheritParams hist_bool
-#' @return A lm object is returned invisibly. The summary is printed to screen
+#' @return A glm object is returned invisibly. The summary is printed to screen
 #' @importFrom dplyr group_by summarize
 #' @importFrom stats glm
 #' @export

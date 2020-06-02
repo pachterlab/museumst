@@ -4,11 +4,9 @@ read_metadata_fresh <- function(sheet_use) {
   url_use <- "https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154"
   if (length(sheet_use) > 1) {
     sheets <- map(sheet_use, read_sheet, ss = url_use)
-    colnames_use <- map(sheets, names) %>% reduce(intersect)
-    sheets <- map2_dfr(sheets, sheet_use, ~ .x %>% mutate(sheet = .y) %>%
-                         select(!!!syms(c(colnames_use, "sheet")))) %>%
-      mutate(year = year(date_published),
-             date_published = as_date(date_published))
+    sheets <- map(sheets, ~ .x %>%
+                    mutate(year = year(date_published),
+                           date_published = as_date(date_published)))
     return(sheets)
   } else {
     read_sheet(url_use, sheet = sheet_use) %>%
@@ -25,10 +23,11 @@ read_metadata_fresh <- function(sheet_use) {
 #'
 #' @inheritParams geocode_inst_city
 #' @param sheet_use Name of the sheet(s) to read.
-#' @param update Logical, whether to update. If not, then a file contained within
-#' this package is read. This file is updated with each version of this package.
-#' If TRUE, then the data is directly downloaded from Google Sheets, which is guaranteed
-#' to be up to date.
+#' @param update Logical, whether to update cache. If not, then the cache is read,
+#' and if the cache is absent, then a file contained within
+#' this package is read. This file within the package is updated with each
+#' version of this package. If TRUE, then the data is directly downloaded from
+#' Google Sheets, which is guaranteed to be up to date.
 #' @return A tibble for the sheet of interest.
 #' @importFrom googlesheets4 gs4_deauth read_sheet
 #' @importFrom googledrive drive_deauth drive_get
@@ -36,6 +35,7 @@ read_metadata_fresh <- function(sheet_use) {
 #' @importFrom magrittr %>%
 #' @importFrom lubridate year as_date
 #' @importFrom purrr map reduce map2_dfr
+#' @importFrom stringr str_replace
 #' @export
 read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS",
                                         "Microdissection", "No imaging",
@@ -55,8 +55,7 @@ read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS",
       if (any(inds)) {
         file.copy(fn_inst[inds], fn[inds])
       }
-      out <- map_dfr(fn, readRDS)
-      return(out)
+      out <- map(fn, readRDS)
     } else {
       # Check if the sheet is newer than the version that comes with this package
       url_use <- "https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154"
@@ -68,11 +67,9 @@ read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS",
       need_update <- cache_updated < updated
       if (any(need_update)) {
         out <- read_metadata_fresh(sheet_use[need_update])
-        out_save <- out %>%
-          group_split(sheet)
         fn_save <- paste0(cache_location, "/", sort(sheet_use2[need_update]), ".rds")
-        for (i in seq_along(out_save)) {
-          saveRDS(out_savce[[i]], fn_save[i])
+        for (i in seq_along(out)) {
+          saveRDS(out[[i]], fn_save[i])
         }
       }
       need_cp <- !need_update & inds
@@ -80,19 +77,26 @@ read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS",
         if (any(need_cp)) {
           file.copy(fn_inst[need_cp], fn[need_cp])
         }
-        out2 <- map_dfr(fn[!need_update], readRDS)
+        out2 <- map(fn[!need_update], readRDS)
       }
       if (any(need_update) && !all(need_update)) {
-        out <- rbind(out, out2)
+        out <- c(out, out2)
       }
       if (all(!need_update)) {
         out <- out2
       }
-      return(out)
     }
   } else {
-    read_metadata_fresh(sheet_use)
+    out <- read_metadata_fresh(sheet_use)
   }
+  if (length(out) > 1) {
+    colnames_use <- map(out, names) %>% reduce(intersect)
+    out <- map2_dfr(out, sheet_use, ~ .x %>% mutate(sheet = .y) %>%
+                         select(!!!syms(c(colnames_use, "sheet"))))
+  } else {
+    out <- out[[1]]
+  }
+  out
 }
 
 #' Read the major events sheet
@@ -105,19 +109,31 @@ read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS",
 #' used are under some form of Creative Commons license, and a corresponding link
 #' to the license is in the license column.
 #'
+#' @inheritParams read_metadata
 #' @return A tibble. In the returned tibble, the image column will be the paths
 #' to the images of interest on your computer for plotting time lines.
 #' @export
-read_major_events <- function() {
+read_major_events <- function(update = FALSE) {
   image <- date_published <-NULL
-  gs4_deauth()
-  url_use <- "https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154"
-  out <- read_sheet(url_use, sheet = "major events")
-  out <- out %>%
-    mutate(image = map_chr(paste0("images/", image), system.file, package = "museumst"),
-           image = case_when(image == "" ~ NA_character_,
-                             TRUE ~ image),
-           date_published = as_date(date_published))
+  fn_inst <- system.file("major_events.rds", package = "museumst")
+  if (update) {
+    url_use <- "https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154"
+    drive_deauth()
+    metas <- drive_get(url_use)
+    if (file.mtime(fn_inst) < metas$drive_resource[[1]]$modifiedTime) {
+      gs4_deauth()
+      out <- read_sheet(url_use, sheet = "major events")
+      out <- out %>%
+        mutate(image = map_chr(paste0("images/", image), system.file, package = "museumst"),
+               image = case_when(image == "" ~ NA_character_,
+                                 TRUE ~ image),
+               date_published = as_date(date_published))
+    } else {
+      out <- readRDS(fn_inst)
+    }
+  } else {
+    out <- readRDS(fn_inst)
+  }
   out
 }
 

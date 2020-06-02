@@ -19,7 +19,7 @@ if faceting by those. If facetting, then a column whose name is the value in
 \item{col_use}{Which logical variable to plot. Tidyeval is supported.}
 }
 \value{
-A lm object is returned invisibly. The summary is printed to screen
+A glm object is returned invisibly. The summary is printed to screen
 }
 \description{
 Fits a logistic regression model with glm to use year to predict proportion
