@@ -142,6 +142,7 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
 #' `facet_by` must be present.
 #' @param facet_by Name of a column for facetting.
 #' @param binwidth Width of bins for the histogram in days.
+#' @param preprints Logical, whether preprints should be included.
 #' @return A ggplot2 object.
 #' @importFrom dplyr filter select
 #' @importFrom forcats fct_reorder
@@ -149,10 +150,13 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
 #' @importFrom ggplot2 geom_bar scale_x_continuous labs theme facet_wrap
 #' @importFrom scales breaks_pretty
 #' @export
-pubs_per_year <- function(pubs, facet_by = NULL, binwidth = 365) {
+pubs_per_year <- function(pubs, facet_by = NULL, binwidth = 365,
+                          preprints = FALSE) {
   journal <- date_published <- facets <- NULL
-  pubs <- pubs %>%
-    filter(!journal %in% c("bioRxiv", "arXiv"))
+  if (!preprints) {
+    pubs <- pubs %>%
+      filter(!journal %in% c("bioRxiv", "arXiv"))
+  }
   if (!is.null(facet_by)) {
     pubs <- pubs %>%
       mutate(facets = fct_reorder(!!sym(facet_by), date_published, .fun = "min"))
@@ -548,11 +552,14 @@ cat_heatmap <- function(pubs, row_var, col_var, ...) {
 #' @return A ggplot2 object
 #' @importFrom ggplot2 geom_histogram facet_grid
 #' @export
-hist_bool <- function(pubs, col_use, binwidth = 365) {
+hist_bool <- function(pubs, col_use, binwidth = 365, preprints = FALSE) {
   date_published <- journal <- v <- NULL
   col_use <- enquo(col_use)
+  if (!preprints) {
+    pubs <- pubs %>%
+      filter(!journal %in% c("bioRxiv", "arXiv"))
+  }
   pubs <- pubs %>%
-    filter(!journal %in% c("bioRxiv", "arXiv")) %>%
     mutate(v = !!col_use)
   ggplot(pubs, aes(date_published)) +
     geom_histogram(aes(fill = 'all'), alpha = 0.7, fill = "gray70",
@@ -579,11 +586,15 @@ hist_bool <- function(pubs, col_use, binwidth = 365) {
 #' @importFrom ggplot2 scale_x_continuous
 #' @importFrom rlang quo_name
 #' @export
-hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, binwidth = 365) {
+hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, binwidth = 365,
+                           preprints = FALSE) {
   date_published <- journal <- v <- NULL
   col_use <- enquo(col_use)
+  if (!preprints) {
+    pubs <- pubs %>%
+      filter(!journal %in% c("bioRxiv", "arXiv"))
+  }
   pubs <- pubs %>%
-    filter(!journal %in% c("bioRxiv", "arXiv")) %>%
     mutate(v = !!col_use)
   p <- ggplot(pubs, aes(date_published)) +
     geom_histogram(aes(fill = 'all'), alpha = 0.7, fill = "gray90",
@@ -610,13 +621,16 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, binwidth = 
 #' @importFrom dplyr group_by summarize
 #' @importFrom stats glm
 #' @export
-test_year_bool <- function(pubs, col_use) {
+test_year_bool <- function(pubs, col_use, preprints = FALSE) {
   journal <- NULL
   col_use <- enquo(col_use)
-  df <- pubs %>%
-    filter(!journal %in% c("bioRxiv", "arXiv")) %>%
-    mutate(bool_use  = !!col_use)
-  out <- glm(bool_use ~ date_published, data = df, family = "binomial")
+  if (!preprints) {
+    pubs <- pubs %>%
+      filter(!journal %in% c("bioRxiv", "arXiv"))
+  }
+  pubs <- pubs %>%
+    mutate(bool_use = !!col_use)
+  out <- glm(bool_use ~ date_published, data = pubs, family = "binomial")
   print(summary(out))
   invisible(out)
 }
@@ -638,11 +652,14 @@ test_year_bool <- function(pubs, col_use) {
 #' @return A ggplot2 object
 #' @importFrom ggplot2 scale_color_discrete geom_freqpoly scale_fill_discrete
 #' @export
-era_freqpoly <- function(pubs, col_use, since_first = FALSE, binwidth = 365) {
+era_freqpoly <- function(pubs, col_use, since_first = FALSE, binwidth = 365,
+                         preprints = FALSE) {
   journal <- date_published <- days_since_first <- NULL
   col_use <- enquo(col_use)
-  no_preprints <- pubs %>%
-    filter(!journal %in% c("bioRxiv", "arXiv"))
+  if (!preprints) {
+    pubs <- pubs %>%
+      filter(!journal %in% c("bioRxiv", "arXiv"))
+  }
   if (since_first) {
     days_from_start <- pubs %>%
       group_by(!!col_use) %>%
@@ -650,7 +667,7 @@ era_freqpoly <- function(pubs, col_use, since_first = FALSE, binwidth = 365) {
     p <- ggplot(days_from_start, aes(days_since_first)) +
       labs(x = "Days since the first publication")
   } else {
-    p <- ggplot(no_preprints, aes(date_published)) +
+    p <- ggplot(pubs, aes(date_published)) +
       labs(x = "Date published")
   }
   p <- p +

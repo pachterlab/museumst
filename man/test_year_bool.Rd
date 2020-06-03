@@ -4,7 +4,7 @@
 \alias{test_year_bool}
 \title{Test whether something is associated with time}
 \usage{
-test_year_bool(pubs, col_use)
+test_year_bool(pubs, col_use, preprints = FALSE)
 }
 \arguments{
 \item{pubs}{A data frame with at least these columns:
@@ -17,6 +17,8 @@ if faceting by those. If facetting, then a column whose name is the value in
 `facet_by` must be present.}
 
 \item{col_use}{Which logical variable to plot. Tidyeval is supported.}
+
+\item{preprints}{Logical, whether preprints should be included.}
 }
 \value{
 A glm object is returned invisibly. The summary is printed to screen

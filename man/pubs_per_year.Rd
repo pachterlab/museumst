@@ -4,7 +4,7 @@
 \alias{pubs_per_year}
 \title{Number of publications per year}
 \usage{
-pubs_per_year(pubs, facet_by = NULL, binwidth = 365)
+pubs_per_year(pubs, facet_by = NULL, binwidth = 365, preprints = FALSE)
 }
 \arguments{
 \item{pubs}{A data frame with at least these columns:
@@ -19,6 +19,8 @@ if faceting by those. If facetting, then a column whose name is the value in
 \item{facet_by}{Name of a column for facetting.}
 
 \item{binwidth}{Width of bins for the histogram in days.}
+
+\item{preprints}{Logical, whether preprints should be included.}
 }
 \value{
 A ggplot2 object.
