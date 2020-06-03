@@ -55,8 +55,8 @@ saveRDS(institution_words, "output/inst_words.rds")
 # Get geocode of all institutions present
 sheets <- read_metadata(c("Prequel", "smFISH", "Array", "ISS",
                           "Microdissection", "No imaging",
-                          "Analysis", "Prequel analysis"))
-gcs <- geocode_inst_city(sheets, cache = TRUE, cache_location = "inst")
+                          "Analysis", "Prequel analysis"), update = TRUE)
+gcs <- geocode_first_time(sheets, cache = TRUE, cache_location = "inst")
 
 # Europe limits
 europe_poly <- matrix(c(30, 68, 30, 35, -7, 35, -7, 68, 30, 68),

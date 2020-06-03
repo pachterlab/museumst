@@ -6,7 +6,6 @@
 \usage{
 pubs_on_map(
   pubs,
-  inst_gc,
   city_gc,
   zoom = c("world", "europe", "usa"),
   facet_by = "none",
@@ -24,8 +23,6 @@ pubs_on_map(
 There must be one row per publication or per method or species for each title
 if faceting by those. If facetting, then a column whose name is the value in
 `facet_by` must be present.}
-
-\item{inst_gc}{From geocode_inst_city}
 
 \item{city_gc}{From geocode_inst_city}
 

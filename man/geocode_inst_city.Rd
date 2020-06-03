@@ -15,12 +15,7 @@ state/province, city, and institution.}
 \item{cache_location}{Where to save the cache}
 }
 \value{
-A list of two sf data frames:
-\describe{
-  \item{inst_gc}{A sf data frame with columns city, institution, and geometry.}
-  \item{city_gc}{A sf data frame with columns country, state/province, city,
-  and geometry.}
-}
+A sf data frame for longitude and latitude of cities
 }
 \description{
 Get longitude and latitude of institutions and cities. If cache is used and

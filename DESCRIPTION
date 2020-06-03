@@ -1,7 +1,7 @@
 Package: museumst
 Type: Package
 Title: Museum of Spatial Transcriptomics
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Authors@R: 
     c(person("Lambda", "Moses", email = "dlu2@caltech.edu", 
     role = c("aut", "cre"),
@@ -30,12 +30,10 @@ Imports:
     scales,
     stringr,
     stats,
-    tidyr,
-    zeallot
+    tidyr
 Suggests: 
     broom,
     gganimate,
-    ggmap,
     ggtext,
     ggtextures,
     knitr,
@@ -46,6 +44,7 @@ Suggests:
     rnaturalearth,
     sf,
     tidytext,
+    tmaptools,
     transformr,
     wordcloud
 VignetteBuilder: knitr

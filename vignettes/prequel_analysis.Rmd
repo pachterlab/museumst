@@ -19,13 +19,13 @@ Here I explore the history and geography of spatial transcriptomics data analysi
 library(museumst)
 library(purrr)
 library(dplyr)
-library(zeallot)
 library(ggplot2)
 library(sf)
 theme_set(theme_bw())
 ```
 
 # Import data
+By default, the `read_metadata` function reads the appropriate sheet from a cache within this package. This may be outdated, since the Google Sheets are constantly updated. Use the argument `update = TRUE` to download the most up to date version. The default is `FALSE` to avoid API limits during automated CRAN checks.
 ```{r}
 sheet <- read_metadata("Prequel analysis")
 ```
@@ -43,12 +43,12 @@ nrow(sheet)
 
 ```{r}
 # For maps later in this notebook
-c(inst_gc, city_gc) %<-% geocode_inst_city(sheet)
-pubs_on_map2 <- partial(pubs_on_map, inst_gc = inst_gc, city_gc = city_gc)
+city_gc <- geocode_inst_city(sheet)
+pubs_on_map2 <- partial(pubs_on_map, city_gc = city_gc)
 ```
 
 ## Overall
-
+By default, preprints are excluded from plots of number of publications over time, since the timing of preprints is incoherent to that of published papers. Including preprints will inflate the number of publications in recent months, and if we make the same plot a few months later, that inflation we see now will be gone and moved to a more recent date. You can add the `preprints = TRUE` argument to all functions plotting things over time in this package to include preprints. You can also use the `binwidth` argument to specify bin width in days. The default is 365 days.
 ```{r}
 pubs_per_year(sheet)
 ```

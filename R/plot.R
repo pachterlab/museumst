@@ -278,7 +278,6 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
 #' plotted on a world map.
 #'
 #' @inheritParams pubs_per_year
-#' @param inst_gc From geocode_inst_city
 #' @param city_gc From geocode_inst_city
 #' @param zoom Whether to plot the world map or only Europe (centered on Western
 #' Europe and some Eastern European countries are partially cropped off) or only
@@ -295,7 +294,7 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
 #' @importFrom scales breaks_width
 #' @importFrom ggrepel geom_label_repel
 #' @export
-pubs_on_map <- function(pubs, inst_gc, city_gc,
+pubs_on_map <- function(pubs, city_gc,
                         zoom = c("world", "europe", "usa"),
                         facet_by = "none",
                         ncol = 3, label_cities = TRUE,
@@ -307,10 +306,10 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
   .pkg_check("rgeos")
   if (per_year) {
     .pkg_check("gganimate")
-    vars_count <- c("country", "city", "institution", "year")
+    vars_count <- c("country", "city", "year")
     label_cities <- FALSE
   } else {
-    vars_count <- c("country", "city", "institution")
+    vars_count <- c("country", "city")
   }
   if (facet_by == "none") {
     inst_count <- pubs %>%
@@ -320,9 +319,7 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
       count(!!!syms(c(vars_count, facet_by)))
   }
   inst_count <- inst_count %>%
-    left_join(inst_gc, by = c("country", "city", "institution"))
-  city_gc <- city_gc %>%
-    semi_join(inst_count, by = c("country", "city"))
+    left_join(city_gc, by = c("country", "city"))
   country <- geometry <- NULL
   if (zoom == "world") {
     map_use <- rnaturalearth::ne_countries(scale = "small", returnclass = "sf")
@@ -337,18 +334,12 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
     inst_count <- inst_count %>%
       filter(country %in% europe_countries) %>%
       mutate(geometry = sf::st_transform(geometry, crs = crs_europe))
-    city_gc <- city_gc %>%
-      filter(country %in% europe_countries) %>%
-      mutate(geometry = sf::st_transform(geometry, crs = crs_europe))
     # project on European transformation
     map_use <- sf::st_transform(map_use, crs = crs_europe)
   } else if (zoom == "usa") {
     map_use <- usa_w_pop
     crs_usa <- 2163
     inst_count <- inst_count %>%
-      filter(country == "USA") %>%
-      mutate(geometry = sf::st_transform(geometry, crs = crs_usa))
-    city_gc <- city_gc %>%
       filter(country == "USA") %>%
       mutate(geometry = sf::st_transform(geometry, crs = crs_usa))
   }
@@ -364,12 +355,12 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
     scale_size_area(name = "Number of\npublications",
                     breaks = breaks_width(size_break_width)) +
     theme(panel.border = element_blank(), axis.title = element_blank())
-  institution2 <- city <- NULL
+  city2 <- city <- NULL
   if (facet_by == "none") {
     if (per_year) {
       p <- p +
         geom_sf(data = inst_count, aes(geometry = geometry, size = n, color = n,
-                                       group = institution2),
+                                       group = city2),
                 alpha = 0.7, show.legend = "point")
     } else {
       p <- p +
@@ -380,14 +371,14 @@ pubs_on_map <- function(pubs, inst_gc, city_gc,
       scale_color_viridis_c(name = "", breaks_width(size_break_width))
     if (zoom != "world" && label_cities) {
       p <- p +
-        geom_label_repel(data = city_gc, aes(geometry = geometry, label = city),
+        geom_label_repel(data = inst_count, aes(geometry = geometry, label = city),
                          alpha = 0.7, stat = "sf_coordinates")
     }
   } else {
     if (per_year) {
       p <- p +
         geom_sf(data = inst_count, aes(geometry = geometry, size = n,
-                                        group = institution2,
+                                        group = city2,
                                         color = !!sym(facet_by)),
                 alpha = 0.7, show.legend = "point")
     } else {
