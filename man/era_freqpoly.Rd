@@ -4,7 +4,13 @@
 \alias{era_freqpoly}
 \title{Prequel vs current binned over time}
 \usage{
-era_freqpoly(pubs, col_use, since_first = FALSE, binwidth = 365)
+era_freqpoly(
+  pubs,
+  col_use,
+  since_first = FALSE,
+  binwidth = 365,
+  preprints = FALSE
+)
 }
 \arguments{
 \item{pubs}{A data frame with at least these columns:
@@ -22,6 +28,8 @@ if faceting by those. If facetting, then a column whose name is the value in
 appeared.}
 
 \item{binwidth}{Width of bins for the histogram in days.}
+
+\item{preprints}{Logical, whether preprints should be included.}
 }
 \value{
 A ggplot2 object

@@ -69,9 +69,9 @@ geocode_inst_city <- function(sheet, cache = TRUE, cache_location = ".") {
     fn <- paste0(cache_location, "/geocode_cache.rds")
     first_time <- !dir.exists(cache_location) | !file.exists(fn)
     if (!dir.exists(cache_location)) dir.create(cache_location)
-    if (first_time) {
-      file.copy(system.file("geocode_cache.rds", package = "museumst"),
-                fn)
+    fn_inst <- system.file("geocode_cache.rds", package = "museumst")
+    if (first_time || file.mtime(fn_inst) > file.mtime(fn)) {
+      file.copy(fn_inst, fn)
       return(readRDS(fn))
     } else {
       # Get existing cache
