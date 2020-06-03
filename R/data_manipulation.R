@@ -2,17 +2,11 @@ read_metadata_fresh <- function(sheet_use) {
   date_published <- NULL
   gs4_deauth()
   url_use <- "https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154"
-  if (length(sheet_use) > 1) {
-    sheets <- map(sheet_use, read_sheet, ss = url_use)
-    sheets <- map(sheets, ~ .x %>%
-                    mutate(year = year(date_published),
-                           date_published = as_date(date_published)))
-    return(sheets)
-  } else {
-    read_sheet(url_use, sheet = sheet_use) %>%
-      mutate(year = year(date_published),
-             date_published = as_date(date_published))
-  }
+  sheets <- map(sheet_use, read_sheet, ss = url_use)
+  sheets <- map(sheets, ~ .x %>%
+                  mutate(year = year(date_published),
+                         date_published = as_date(date_published)))
+  return(sheets)
 }
 
 #' Read the metadata from Google Sheets
