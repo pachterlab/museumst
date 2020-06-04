@@ -1,3 +1,82 @@
+# Geocodes a location using OpenStreetMap Nominatim
+#
+# Geocodes a location (based on a search query) to coordinates and a bounding box. Similar to geocode from the ggmap package. It uses OpenStreetMap Nominatim. For processing large amount of queries, please read the usage policy (\url{http://wiki.openstreetmap.org/wiki/Nominatim_usage_policy}).
+#
+# I copied this function from the package \code{tmaptools} since this is the only function from
+# that package that I use here and I don't want to deal with the other dependencies
+# like \code{lwgeom}. I also stripped the functionalities for bbox and option
+# as.sf since I'm not using those here.
+#
+# @param q a character (vector) that specifies a search query. For instance \code{"India"} or \code{"CBS Weg 11, Heerlen, Netherlands"}.
+# @param projection projection in which the coordinates and bounding box are returned. Either a \code{\link[sp:CRS]{CRS}} object or a character value. If it is a character, it can either be a \code{PROJ.4} character string or a shortcut. See \code{\link{get_proj4}} for a list of shortcut values. By default latitude longitude coordinates.
+# @param return.first.only Only return the first result
+# @param server OpenStreetMap Nominatim server name. Could also be a local OSM Nominatim server.
+#
+.geocode_OSM <- function(q, projection=NULL, return.first.only=TRUE, server="http://nominatim.openstreetmap.org") {
+  n <- length(q)
+  q2 <- gsub(" ", "+", enc2utf8(q), fixed = TRUE)
+  addr <- paste0(server, "/search?q=", q2, "&format=xml&polygon=0&addressdetails=0")
+
+  project <- !missing(projection)
+
+  output2 <- lapply(1:n, function(k) {
+    tmpfile <- tempfile()
+    suppressWarnings(download.file(addr[k], destfile = tmpfile, mode= "wb", quiet = TRUE))
+
+    doc <- XML::xmlTreeParse(tmpfile, encoding="UTF-8")
+    unlink(tmpfile)
+
+    res <- XML::xmlChildren(XML::xmlRoot(doc))
+
+    if (length(res)==0) {
+      message(paste("No results found for \"", q[k], "\".", sep="")) #if (n==1)
+      return(NULL)
+    }
+
+    idx <- if (return.first.only) 1 else 1:length(res)
+
+    sn_names <- c("place_id", "osm_type", "osm_id", "place_rank", "display_name", "class", "type", "importance", "icon")
+    output <- lapply(idx, function(i) {
+      search_result <- XML::xmlAttrs(res[[i]])
+
+      search_result_id <- search_result[sn_names]
+      names(search_result_id) <- sn_names # in case of missings
+      Encoding(search_result_id) <- "UTF-8"
+
+      search_result_loc <- as.numeric(search_result[c("lat", "lon")])
+      names(search_result_loc) <- c("lat", "lon")
+
+      if (!project) {
+        coords <- search_result_loc[c("lon", "lat")]
+        names(coords) <- c("x", "y")
+      } else {
+        .crs_longlat <- sf::st_crs(4326)
+        p <- sf::st_sf(sf::st_sfc(sf::st_point(search_result_loc[2:1]), crs = .crs_longlat))
+
+        p <- sf::st_transform(p, crs=projection)
+
+        coords <- as.vector(sf::st_coordinates(p))
+        names(coords) <- c("x", "y")
+
+        search_result_loc <- as.list(coords)
+        names(search_result_loc) <- c("x", "y")
+      }
+
+      res <- c(list(query=q[k]), search_result_loc)
+      res <- as.data.frame(res, stringsAsFactors=FALSE)
+      res
+    })
+  })
+
+  output3 <- do.call(c, output2)
+
+  if (is.null(output3)) return(NULL)
+
+  df <- do.call(rbind, output3)
+  df
+}
+
+
 geocode_city <- function(sheet) {
   city <- `state/province` <- country <- city2 <- geometry <- NULL
   # Geocode cities
@@ -7,7 +86,7 @@ geocode_city <- function(sheet) {
     filter(!is.na(city)) %>%
     unite(col = "city2", city, `state/province`, country, remove = FALSE, sep = ", ") %>%
     mutate(city2 = str_remove(city2, "NA, "))
-  cities_gc <- tmaptools::geocode_OSM(cities$city2)
+  cities_gc <- .geocode_OSM(cities$city2)
   cities_gc <- cbind(cities, cities_gc)
   cities_gc <- sf::st_as_sf(cities_gc, coords = c("lon", "lat"), crs = sf::st_crs(4326)) %>%
     select(city, city2, `state/province`, country, geometry)
@@ -38,9 +117,9 @@ geocode_first_time <- function(sheet, cache = TRUE, cache_location = ".") {
 #' @importFrom dplyr distinct
 #' @importFrom tidyr unite
 #' @importFrom stringr str_remove
+#' @importFrom utils download.file
 #' @export
 geocode_inst_city <- function(sheet, cache = TRUE, cache_location = ".") {
-  .pkg_check("tmaptools")
   city <- NULL
   if (cache) {
     cache_location <- normalizePath(cache_location, mustWork = FALSE)

@@ -44,9 +44,9 @@ Suggests:
     rnaturalearth,
     sf,
     tidytext,
-    tmaptools,
     transformr,
-    wordcloud
+    wordcloud,
+    XML
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
