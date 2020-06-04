@@ -208,7 +208,7 @@ sheet %>%
 
 # Word cloud
 ## Titles
-```{r, fig.height=5, fig.width=5}
+```{r, fig.height=6, fig.width=6}
 plot_wordcloud(sheet)
 ```
 
