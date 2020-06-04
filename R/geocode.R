@@ -40,7 +40,7 @@ geocode_first_time <- function(sheet, cache = TRUE, cache_location = ".") {
 #' @importFrom stringr str_remove
 #' @export
 geocode_inst_city <- function(sheet, cache = TRUE, cache_location = ".") {
-  .pkg_check("ggmap")
+  .pkg_check("tmaptools")
   city <- NULL
   if (cache) {
     cache_location <- normalizePath(cache_location, mustWork = FALSE)
