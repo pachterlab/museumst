@@ -1,3 +1,6 @@
+# Update this manually when the copy of metadata within the package is updated
+.pkg_update_time <- "2020-06-02 20:05:00 PDT"
+
 read_metadata_fresh <- function(sheet_use) {
   date_published <- NULL
   gs4_deauth()
@@ -57,7 +60,7 @@ read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS",
       metas <- drive_get(url_use)
       updated <- metas$drive_resource[[1]]$modifiedTime
       cache_updated <- file.mtime(fn)
-      cache_updated[inds] <- file.mtime(fn_inst[inds])
+      cache_updated[inds] <- .pkg_update_time
       need_update <- cache_updated < updated
       if (any(need_update)) {
         out <- read_metadata_fresh(sheet_use[need_update])
@@ -114,7 +117,7 @@ read_major_events <- function(update = FALSE) {
     url_use <- "https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154"
     drive_deauth()
     metas <- drive_get(url_use)
-    if (file.mtime(fn_inst) < metas$drive_resource[[1]]$modifiedTime) {
+    if (.pkg_update_time < metas$drive_resource[[1]]$modifiedTime) {
       gs4_deauth()
       out <- read_sheet(url_use, sheet = "major events")
     } else {
