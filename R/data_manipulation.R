@@ -1,5 +1,5 @@
 # Update this manually when the copy of metadata within the package is updated
-.pkg_update_time <- "2020-06-02 20:05:00 PDT"
+.pkg_update_time <- "2020-07-10 16:16:19 PDT"
 
 read_metadata_fresh <- function(sheet_use) {
   date_published <- NULL
@@ -64,7 +64,7 @@ read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS",
       need_update <- cache_updated < updated
       if (any(need_update)) {
         out <- read_metadata_fresh(sheet_use[need_update])
-        fn_save <- paste0(cache_location, "/", sort(sheet_use2[need_update]), ".rds")
+        fn_save <- paste0(cache_location, "/", sheet_use2[need_update], ".rds")
         for (i in seq_along(out)) {
           saveRDS(out[[i]], fn_save[i])
         }
@@ -157,11 +157,11 @@ unnest_cat <- function(sheet, col_use, other_cols = NULL) {
   date_published <- year <- title <- journal <- country <- city <- institution <- NULL
   if (!is.null(other_cols)) {
     out <- out %>%
-      select(date_published, year, title, journal, col_new, country, city,
+      select(date_published, year, title, journal, col_new, country, `state/province`, city,
              institution, !!!syms(other_cols))
   } else {
     out <- out %>%
-      select(date_published, year, title, journal, col_new, country, city,
+      select(date_published, year, title, journal, col_new, country, `state/province`, city,
              institution)
   }
   out <- out %>%

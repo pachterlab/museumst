@@ -9,6 +9,7 @@ hist_bool_line(
   col_use,
   facet_by = NULL,
   ncol = 3,
+  n_top = Inf,
   binwidth = 365,
   preprints = FALSE
 )
@@ -28,6 +29,9 @@ if faceting by those. If facetting, then a column whose name is the value in
 \item{facet_by}{Name of a column for facetting.}
 
 \item{ncol}{Number of columns in facetted plot.}
+
+\item{n_top}{Number of categories with the most publications to plot in facets;
+the other categories are lumped into "other".}
 
 \item{binwidth}{Width of bins for the histogram in days.}
 

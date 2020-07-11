@@ -143,23 +143,38 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
 #' @param facet_by Name of a column for facetting.
 #' @param binwidth Width of bins for the histogram in days.
 #' @param preprints Logical, whether preprints should be included.
+#' @param n_top Number of categories with the most publications to plot in facets;
+#' the other categories are lumped into "other".
+#' @param sort_by How to sort the facets. first_appeared means the category that
+#' appeared earlier will be nearer to the top. count means the category with more
+#' count (number of publications) will be nearer to the top. Ignored if not
+#' facetting.
 #' @return A ggplot2 object.
 #' @importFrom dplyr filter select
-#' @importFrom forcats fct_reorder
+#' @importFrom forcats fct_reorder fct_lump_n
 #' @importFrom rlang !! sym
 #' @importFrom ggplot2 geom_bar scale_x_continuous labs theme facet_wrap
 #' @importFrom scales breaks_pretty
 #' @export
 pubs_per_year <- function(pubs, facet_by = NULL, binwidth = 365,
-                          preprints = FALSE) {
+                          preprints = FALSE, n_top = Inf,
+                          sort_by = c("first_appeared", "count")) {
   journal <- date_published <- facets <- NULL
+  sort_by <- match.arg(sort_by)
   if (!preprints) {
     pubs <- pubs %>%
       filter(!journal %in% c("bioRxiv", "arXiv"))
   }
   if (!is.null(facet_by)) {
     pubs <- pubs %>%
-      mutate(facets = fct_reorder(!!sym(facet_by), date_published, .fun = "min"))
+      mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top))
+    if (sort_by == "first_appeared") {
+      pubs <- pubs %>%
+        mutate(facets = fct_reorder(facets, date_published, .fun = "min"))
+    } else {
+      pubs <- pubs %>%
+        mutate(facets = fct_infreq(facets))
+    }
   }
   p <- ggplot(pubs, aes(date_published))
   if (!is.null(facet_by)) {
@@ -173,7 +188,7 @@ pubs_per_year <- function(pubs, facet_by = NULL, binwidth = 365,
     scale_y_continuous(expand = expansion(mult = c(0, 0.05)),
                        breaks = breaks_pretty()) +
     scale_x_date(breaks = breaks_pretty(10)) +
-    labs(y = "Number of publication", x = "Date published") +
+    labs(y = "Number of publications", x = "Date published") +
     theme(panel.grid.minor = element_blank(), legend.position = "none")
   if (!is.null(facet_by)) {
     p <- p +
@@ -285,6 +300,8 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
 #' @param ncol Number of columns in facetted plot.
 #' @param label_cities Logical, whether to label cities. In facetted plots, cities
 #' are not labeled to reduce clutter.
+#' @param n_label Number of top cities to label, so the labels won't clutter the
+#' plot.
 #' @param per_year Logical, whether to do the count for each year separately.
 #' This is for making animations with gganimate.
 #' @return A ggplot2 object
@@ -296,8 +313,8 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
 #' @export
 pubs_on_map <- function(pubs, city_gc,
                         zoom = c("world", "europe", "usa"),
-                        facet_by = "none",
-                        ncol = 3, label_cities = TRUE,
+                        facet_by = "none", n_top = Inf,
+                        ncol = 3, label_cities = TRUE, n_label = 10,
                         per_year = FALSE) {
   zoom <- match.arg(zoom)
   .pkg_check("sf")
@@ -306,10 +323,10 @@ pubs_on_map <- function(pubs, city_gc,
   .pkg_check("rgeos")
   if (per_year) {
     .pkg_check("gganimate")
-    vars_count <- c("country", "city", "year")
+    vars_count <- c("country", "state/province", "city", "year")
     label_cities <- FALSE
   } else {
-    vars_count <- c("country", "city")
+    vars_count <- c("country", "state/province", "city")
   }
   if (facet_by == "none") {
     inst_count <- pubs %>%
@@ -319,7 +336,7 @@ pubs_on_map <- function(pubs, city_gc,
       count(!!!syms(c(vars_count, facet_by)))
   }
   inst_count <- inst_count %>%
-    left_join(city_gc, by = c("country", "city"))
+    left_join(city_gc, by = c("country", "state/province", "city"))
   country <- geometry <- NULL
   if (zoom == "world") {
     map_use <- rnaturalearth::ne_countries(scale = "small", returnclass = "sf")
@@ -340,8 +357,16 @@ pubs_on_map <- function(pubs, city_gc,
     map_use <- usa_w_pop
     crs_usa <- 2163
     inst_count <- inst_count %>%
-      filter(country == "USA") %>%
+      filter(country %in% c("USA", "US", "United States", "United States of America")) %>%
       mutate(geometry = sf::st_transform(geometry, crs = crs_usa))
+    # Temporary solution for Hawaii and Alaska
+    if (any(inst_count$`state/province` %in% c("HI", "AK", "Hawaii", "Alaska"))) {
+      state_labs <- urbnmapr::get_urbn_labels(sf = TRUE)
+      inst_count$geometry[inst_count$`state/province` %in% c("HI", "Hawaii")] <-
+        state_labs$geometry[state_labs$state_abbv == "HI"]
+      inst_count$geometry[inst_count$`state/province` %in% c("AK", "Alaska")] <-
+        state_labs$geometry[state_labs$state_abbv == "AK"]
+    }
   }
   if (max(inst_count$n, na.rm = TRUE) < 4) {
     size_break_width <- 1
@@ -369,26 +394,32 @@ pubs_on_map <- function(pubs, city_gc,
     }
     p <- p +
       scale_color_viridis_c(name = "", breaks_width(size_break_width))
-    if (zoom != "world" && label_cities) {
+    if (label_cities) {
+      inst_count <- inst_count %>%
+        mutate(city_rank = row_number(desc(n)),
+               city_label = case_when(city_rank <= n_label ~ city,
+                                      TRUE ~ ""))
       p <- p +
-        geom_label_repel(data = inst_count, aes(geometry = geometry, label = city),
+        geom_label_repel(data = inst_count, aes(geometry = geometry, label = city_label),
                          alpha = 0.7, stat = "sf_coordinates")
     }
   } else {
+    inst_count <- inst_count %>%
+      mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top))
     if (per_year) {
       p <- p +
         geom_sf(data = inst_count, aes(geometry = geometry, size = n,
                                         group = city2,
-                                        color = !!sym(facet_by)),
+                                        color = facets),
                 alpha = 0.7, show.legend = "point")
     } else {
       p <- p +
         geom_sf(data = inst_count, aes(geometry = geometry, size = n,
-                    color = !!sym(facet_by)),
+                    color = facets),
                 alpha = 0.7, show.legend = "point")
     }
     p <- p +
-      facet_wrap(vars(!!sym(facet_by)), ncol = ncol) +
+      facet_wrap(vars(facets), ncol = ncol) +
       theme(legend.position = "none")
   }
   if (zoom == "europe") {
@@ -419,11 +450,14 @@ pubs_on_map <- function(pubs, city_gc,
 #' Europe and some Eastern European countries are partially cropped off) or only
 #' the US.
 #' @param plot Whether to plot choropleth or bar plot.
+#' @param label_states If plotting the US, whether to label the states.
 #' @return A ggplot2 object.
-#' @importFrom ggplot2 scale_fill_distiller geom_col
+#' @importFrom ggplot2 scale_fill_distiller geom_col geom_sf_text
+#' @importFrom stringr str_length
 #' @export
 pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
-                            plot = c("choropleth", "bar")) {
+                            plot = c("choropleth", "bar"),
+                            label_states = TRUE) {
   .pkg_check("sf")
   .pkg_check("rnaturalearth")
   .pkg_check("rnaturalearthdata")
@@ -465,8 +499,14 @@ pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
   } else {
     map_use <- usa_w_pop
     pubs_count <- pubs %>%
-      filter(country == "USA") %>%
+      filter(country %in% c("USA", "US", "United States", "United States of America")) %>%
       count(`state/province`)
+    # Convert state names to abbreviations
+    pubs_count <- pubs_count %>%
+      mutate(`state/province` = case_when(
+        `state/province` %in% map_use$state_abbv ~ `state/province`,
+        TRUE ~ map_use$state_abbv[match(`state/province`, map_use$state_name)]
+      ))
     map_use <- map_use %>%
       left_join(pubs_count,
                 by = c("state_abbv" = "state/province")) %>%
@@ -487,6 +527,12 @@ pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
       p <- p +
         coord_sf(xlim = xylims[c("xmin", "xmax")], ylim = xylims[c("ymin", "ymax")],
                  crs = 3035)
+    }
+    if (zoom == "usa" && label_states) {
+      # Label the states
+      state_labels <- urbnmapr::get_urbn_labels("states", sf = TRUE)
+      p <- p +
+        geom_sf_text(data = state_labels, aes(geometry = geometry, label = state_abbv))
     }
   } else {
     area_lab <- if (zoom == "usa") "state" else "country"
@@ -541,7 +587,7 @@ cat_heatmap <- function(pubs, row_var, col_var, ...) {
 #' @inheritParams pubs_per_year
 #' @param col_use Which logical variable to plot. Tidyeval is supported.
 #' @return A ggplot2 object
-#' @importFrom ggplot2 geom_histogram facet_grid
+#' @importFrom ggplot2 geom_histogram facet_grid scale_fill_brewer
 #' @export
 hist_bool <- function(pubs, col_use, binwidth = 365, preprints = FALSE) {
   date_published <- journal <- v <- NULL
@@ -559,6 +605,7 @@ hist_bool <- function(pubs, col_use, binwidth = 365, preprints = FALSE) {
     facet_grid(rows = vars(v)) +
     scale_y_continuous(breaks = breaks_pretty(), expand = expansion(c(0, 0.05))) +
     scale_x_date(breaks = breaks_pretty(10)) +
+    scale_fill_brewer(palette = "Set1", na.value = "gray50") +
     theme(panel.grid.minor = element_blank(), legend.position = "none") +
     labs(x = "date published")
 }
@@ -577,8 +624,8 @@ hist_bool <- function(pubs, col_use, binwidth = 365, preprints = FALSE) {
 #' @importFrom ggplot2 scale_x_continuous
 #' @importFrom rlang quo_name
 #' @export
-hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, binwidth = 365,
-                           preprints = FALSE) {
+hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, n_top = Inf,
+                           binwidth = 365, preprints = FALSE) {
   date_published <- journal <- v <- NULL
   col_use <- enquo(col_use)
   if (!preprints) {
@@ -587,13 +634,17 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, binwidth = 
   }
   pubs <- pubs %>%
     mutate(v = !!col_use)
+  if (!is.null(facet_by)) {
+    pubs <- pubs %>%
+      mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top))
+  }
   p <- ggplot(pubs, aes(date_published)) +
     geom_histogram(aes(fill = 'all'), alpha = 0.7, fill = "gray90",
                    data = select(pubs, -v), binwidth = binwidth) +
     geom_freqpoly(aes(color = v), binwidth = binwidth) +
     scale_y_continuous(breaks = breaks_pretty(), expand = expansion(c(0, 0.05))) +
     scale_x_date(breaks = breaks_pretty(10)) +
-    scale_color_discrete(name = quo_name(col_use)) +
+    scale_color_brewer(name = quo_name(col_use), palette = "Set1", na.value = "gray50") +
     theme(panel.grid.minor = element_blank(), legend.position = "top") +
     labs(y = "count", x = "date published")
   if (!is.null(facet_by)) {
@@ -641,7 +692,7 @@ test_year_bool <- function(pubs, col_use, preprints = FALSE) {
 #' @param since_first Logical. Whether to plot days after the first publication
 #' appeared.
 #' @return A ggplot2 object
-#' @importFrom ggplot2 scale_color_discrete geom_freqpoly scale_fill_discrete
+#' @importFrom ggplot2 scale_color_brewer geom_freqpoly scale_fill_discrete
 #' @export
 era_freqpoly <- function(pubs, col_use, since_first = FALSE, binwidth = 365,
                          preprints = FALSE) {
@@ -663,6 +714,7 @@ era_freqpoly <- function(pubs, col_use, since_first = FALSE, binwidth = 365,
   }
   p <- p +
     geom_freqpoly(binwidth = binwidth, aes(color = !!col_use)) +
-    scale_color_discrete(name = quo_name(col_use))
+    scale_color_brewer(name = quo_name(col_use), palette = "Set1", na.value = "gray50") +
+    labs(y = "Number of publications")
   p
 }

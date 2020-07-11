@@ -62,7 +62,7 @@ events %>%
 
 By default, preprints are excluded from plots of number of publications over time, since the timing of preprints is incoherent to that of published papers. Including preprints will inflate the number of publications in recent months, and if we make the same plot a few months later, that inflation we see now will be gone and moved to a more recent date. You can add the `preprints = TRUE` argument to all functions plotting things over time in this package to include preprints. You can also use the `binwidth` argument to specify bin width in days. The default is 365 days.
 ```{r}
-pubs_per_year(publications, binwidth = 150)
+pubs_per_year(publications, binwidth = 100, preprints = TRUE)
 ```
 
 Again, preprints are not included here since their timing is different from that of publications.
@@ -74,8 +74,8 @@ How about when broken down by method (not for data analysis sheets)?
 methods <- unnest_cat(sheet, method)
 ```
 
-```{r, fig.width=6, fig.height=4}
-pubs_per_year(methods, facet_by = "method", binwidth = 150)
+```{r, fig.width=4, fig.height=4}
+pubs_per_year(methods, facet_by = "method", binwidth = 100, preprints = TRUE)
 ```
 
 I don't know how much this actually says due to the small sample size. This is also kind of confusing since Geo-seq really is a form of LCM coupled with SMART-seq, so it should be categorized as LCM, but the authors gave it a new name. 
@@ -90,8 +90,8 @@ species <- unnest_cat(sheet, species)
 pubs_per_cat(species, species)
 ```
 
-```{r, fig.width=6, fig.height=3}
-pubs_per_cat(species, species, isotype = TRUE, img_unit = 1)
+```{r, fig.width=4, fig.height=2}
+pubs_per_cat(species, species, isotype = TRUE, img_unit = 2)
 ```
 
 I debated for a while which image to use for humans. In order to avoid racist and sexist connotations, I picked the skull as non-experts can't tell the race and sex from the skull. If you think it's bad to use a skull, then I'll use a Black, Hispanic, Middle Eastern, North African, Central Asian, or South Asian woman's portrait. I stand with the oppressed.
@@ -195,17 +195,6 @@ pubs_on_map2(species, zoom = "usa", facet_by = "species")
 pubs_on_map2(methods, zoom = "usa", facet_by = "method")
 ```
 
-# Number of datasets
-Since I did not always read the paper very carefully, take this with a grain of salt. Also, sometimes I'm not sure what counts as a dataset. The authors may test a technique on cell culture with just a few genes before moving on to real tissue, and I'm not sure if this should be included. But for microdissection, that's not an issue. Another thing I'm not sure about is biological and technical replica presented together on the paper. Should each replicate count as a dataset or should all the replica count as one dataset as they're intended to answer the same question and are analyzed together as they they were one?
-```{r}
-sheet %>% 
-  count(title, method) %>% 
-  ggplot(aes(n)) +
-  geom_bar() +
-  scale_y_continuous(expand = expansion(c(0, 0.05))) +
-  scale_x_continuous(breaks = scales::breaks_width(1))
-```
-
 # Word cloud
 ## Titles
 ```{r, fig.height=6, fig.width=6}
@@ -261,16 +250,16 @@ pubs_per_cat(langs, language, isotype = TRUE, img_unit = 2)
 
 How many publications have provided a code repo? As with any plot over time, preprints are excluded.
 ```{r}
-hist_bool(publications, !is.na(repo), binwidth = 150)
+hist_bool(publications, !is.na(repo), binwidth = 100, preprints = TRUE)
 ```
 
 How many publications have provided an accession for sequencing data?
 ```{r}
-hist_bool(publications, !is.na(accession), binwidth = 150)
+hist_bool(publications, !is.na(accession), binwidth = 100, preprints = TRUE)
 ```
 
 ```{r}
-hist_bool_line(publications, !is.na(accession), binwidth = 150)
+hist_bool_line(publications, !is.na(accession), binwidth = 100, preprints = TRUE)
 ```
 
 I don't think it's significant.

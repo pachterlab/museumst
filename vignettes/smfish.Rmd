@@ -193,17 +193,6 @@ pubs_on_map2(species, zoom = "usa", facet_by = "species", ncol = 2)
 pubs_on_map2(methods, zoom = "usa", facet_by = "method")
 ```
 
-# Number of datasets
-Since I did not always read the paper very carefully, take this with a grain of salt. Also, sometimes I'm not sure what counts as a dataset. The authors may test a technique on cell culture with just a few genes before moving on to real tissue, and I'm not sure if this should be included. But for microdissection, that's not an issue. Another thing I'm not sure about is biological and technical replica presented together on the paper. Should each replicate count as a dataset or should all the replica count as one dataset as they're intended to answer the same question and are analyzed together as they they were one?
-```{r}
-sheet %>% 
-  count(title, method) %>% 
-  ggplot(aes(n)) +
-  geom_bar() +
-  scale_y_continuous(expand = expansion(c(0, 0.05))) +
-  scale_x_continuous(breaks = scales::breaks_width(1))
-```
-
 # Word cloud
 ## Titles
 ```{r, fig.height=6, fig.width=6}
@@ -316,7 +305,7 @@ mean_genes %>%
 
 See, without those 3 outliers, there really does not seem to be an increase (if not a decrease). I wonder why people aren't opting for the larger number of genes possible. Is it because the probes are expensive or it's too challenging to process the sheer number of images, which is exacerbated by poor documentation of much of the existing code written for this task and lack of a unified pipeline? Now I wonder if growth of ST is in part because of STPipeline, which makes data preprocessing easier. Now I also wonder how Cell Ranger and Seurat contributed to spread of scRNA-seq in general.
 
-How about number of cells?
+How about number of cells? Here the total number of cells from each study per method is plotted.
 ```{r}
 sum_cells <- sheet %>% 
   group_by(date_published, title, method) %>% 
@@ -343,4 +332,4 @@ I don't think it's significant. Here I formally test if beta is not 0:
 summary(lm(n_cells ~ date_published, data = sum_cells2))
 ```
 
-See, it's not significant. So what does this mean? What should our priorities be? Shall we focus on in depth data analysis techniques without worrying too much about scalability yet since people aren't opting for larger amount of data anyway, or shall we prioritize scalability since lack of scalability of data processing and analysis tools is the reason why people aren't opting for larger amount of data? Or is that because the existing software is not very user friendly, so people consider data analysis a really daunting task? Or is it the expensive reagents and instruments and the amount of time to collect data? I don't know. I think we can try both and see what happens in a few years. Well, given how quickly this field is evolving, I suppose months. 
+See, it's not significant. So what does this mean? What should our priorities be? Shall we focus on in depth data analysis techniques without worrying too much about scalability yet since people aren't opting for larger amount of data anyway, or shall we prioritize scalability since lack of scalability of data processing and analysis tools is the reason why people aren't opting for larger amount of data? Or is that because the existing software is not very user friendly, so people consider data analysis a really daunting task? Or is it the expensive reagents and instruments and the amount of time to collect data? Or did people make up their minds and decided that it's not necessary to profile that many cells? I don't know. I think we can try both and see what happens in a few years. Well, given how quickly this field is evolving, I suppose months. 

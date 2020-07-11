@@ -64,7 +64,7 @@ pubs_per_cat(category, category)
 ```
 
 ```{r, fig.width=6, fig.height=12}
-pubs_per_year(category, facet_by = "category")
+pubs_per_year(category, facet_by = "category", n_top = 7, sort_by = "count")
 ```
 
 ```{r}
@@ -231,7 +231,7 @@ Not sure of MathWorks will get mad at me for using their logo this way, since th
 
 How many publications have provided a code repo?
 ```{r}
-hist_bool(sheet, !is.na(repo))
+hist_bool(sheet, !is.na(repo), preprints = TRUE)
 ```
 
 It seems that more recent publications are more likely to provide a repo. Is this significant? 
@@ -245,13 +245,13 @@ Yep, it's significant. How about whether the code is well-documented?
 pubs_per_year(langs, "language", binwidth = 150)
 ```
 
-```{r, fig.width=8, fig.height=6}
-hist_bool_line(langs, documented, facet_by = "language") 
+```{r}
+hist_bool_line(langs, documented, facet_by = "language", preprints = TRUE, n_top = 5) 
 ```
 
 It seems that R, Python, and C++ packages are more likely to be well-documented, and MATLAB ones are less likely. Is that MATLAB culture?
-```{r, fig.width=8, fig.height=6}
-hist_bool_line(langs, `CRAN/Bioc/pip/conda`, "language")
+```{r}
+hist_bool_line(langs, `CRAN/Bioc/pip/conda`, "language", preprints = TRUE, n_top = 5)
 ```
 
 It seems that most packages are not on those public repos, not even R packages. Why? Too lazy to write documentations?

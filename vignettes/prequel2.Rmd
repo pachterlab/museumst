@@ -45,7 +45,7 @@ nrow(sheet)
 ```{r}
 # For maps later in this notebook
 city_gc <- geocode_inst_city(sheet)
-pubs_on_map2 <- partial(pubs_on_map, city_gc = city_gc, label_cities = FALSE)
+pubs_on_map2 <- partial(pubs_on_map, city_gc = city_gc)
 ```
 
 ## Overall
@@ -171,7 +171,7 @@ pubs_per_capita(sheet, "europe")
 
 I'm kind of amazed that Sweden didn't contribute to the prequel stuff, yet it's doing so well in the newer spatial transcriptomics technologies.
 
-```{r, fig.width=8, fig.height=8}
+```{r, fig.width=5.5, fig.height=5.5}
 pubs_on_map2(species, zoom = "europe", facet_by = "species", ncol = 5)
 ```
 
@@ -261,8 +261,9 @@ Yes, it is significant. More recent databases are more likely to be still availa
 
 # Number of genes
 For the old enhancer and gene trap studies, there weren't genome annotations and number of lines was reported rather than genes. For old ISH atlases, the number of clones was reported.
-```{r, fig.width=6, fig.height=9}
-pubs_per_year(sheet, facet_by = "item_type")
+
+```{r}
+pubs_per_year(sheet, facet_by = "item_type", n_top = 3)
 ```
 
 Yeah, genes became prevalent later, and the prevalence of clones is quite transient. However, lines are not dead, since enhancer and gene traps are not dead since those are high throughput perturbations in addition to visualization.

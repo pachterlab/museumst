@@ -4,7 +4,14 @@
 \alias{pubs_per_year}
 \title{Number of publications per year}
 \usage{
-pubs_per_year(pubs, facet_by = NULL, binwidth = 365, preprints = FALSE)
+pubs_per_year(
+  pubs,
+  facet_by = NULL,
+  binwidth = 365,
+  preprints = FALSE,
+  n_top = Inf,
+  sort_by = c("first_appeared", "count")
+)
 }
 \arguments{
 \item{pubs}{A data frame with at least these columns:
@@ -21,6 +28,14 @@ if faceting by those. If facetting, then a column whose name is the value in
 \item{binwidth}{Width of bins for the histogram in days.}
 
 \item{preprints}{Logical, whether preprints should be included.}
+
+\item{n_top}{Number of categories with the most publications to plot in facets;
+the other categories are lumped into "other".}
+
+\item{sort_by}{How to sort the facets. first_appeared means the category that
+appeared earlier will be nearer to the top. count means the category with more
+count (number of publications) will be nearer to the top. Ignored if not
+facetting.}
 }
 \value{
 A ggplot2 object.

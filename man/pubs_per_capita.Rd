@@ -7,7 +7,8 @@
 pubs_per_capita(
   pubs,
   zoom = c("world", "europe", "usa"),
-  plot = c("choropleth", "bar")
+  plot = c("choropleth", "bar"),
+  label_states = TRUE
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ Europe and some Eastern European countries are partially cropped off) or only
 the US.}
 
 \item{plot}{Whether to plot choropleth or bar plot.}
+
+\item{label_states}{If plotting the US, whether to label the states.}
 }
 \value{
 A ggplot2 object.
