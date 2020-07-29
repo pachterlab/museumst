@@ -331,13 +331,14 @@ That outlier is the crazy hypothalamus MERFISH study.
 
 ```{r}
 sum_cells2 <- sum_cells %>% 
-  filter(n_cells < 5e5)
+  filter(n_cells < 1e5)
 ggplot(sum_cells2, aes(date_published, n_cells)) +
   geom_point(aes(color = method)) +
   geom_text_repel(aes(label = method, color = method), segment.alpha = 0.5) +
   geom_smooth(method = "lm") +
   labs(x = "Date published", y = "Total number of cells per study") +
-  theme(legend.position = "none")
+  theme(legend.position = "none") +
+  coord_cartesian(ylim = c(0, max(sum_cells2$n_cells)))
 ```
 
 I don't think it's significant. Here I formally test if beta is not 0:
@@ -346,3 +347,8 @@ summary(lm(n_cells ~ date_published, data = sum_cells2))
 ```
 
 See, it's not significant. So what does this mean? What should our priorities be? Shall we focus on in depth data analysis techniques without worrying too much about scalability yet since people aren't opting for larger amount of data anyway, or shall we prioritize scalability since lack of scalability of data processing and analysis tools is the reason why people aren't opting for larger amount of data? Or is that because the existing software is not very user friendly, so people consider data analysis a really daunting task? Or is it the expensive reagents and instruments and the amount of time to collect data? Or did people make up their minds and decided that it's not necessary to profile that many cells? I don't know. I think we can try both and see what happens in a few years. Well, given how quickly this field is evolving, I suppose months. 
+
+```{r}
+sessionInfo()
+```
+
