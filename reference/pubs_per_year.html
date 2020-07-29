@@ -12,7 +12,7 @@
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/minty/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
@@ -150,12 +150,12 @@ makes the plot easier to read than filling with different colors.</p>
     </div>
 
     <pre class="usage"><span class='fu'>pubs_per_year</span>(
-  <span class='no'>pubs</span>,
-  <span class='kw'>facet_by</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>binwidth</span> <span class='kw'>=</span> <span class='fl'>365</span>,
-  <span class='kw'>preprints</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>n_top</span> <span class='kw'>=</span> <span class='fl'>Inf</span>,
-  <span class='kw'>sort_by</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"first_appeared"</span>, <span class='st'>"count"</span>, <span class='st'>"recent_count"</span>)
+  <span class='kw'>pubs</span>,
+  facet_by = <span class='kw'>NULL</span>,
+  binwidth = <span class='fl'>365</span>,
+  preprints = <span class='fl'>FALSE</span>,
+  n_top = <span class='fl'>Inf</span>,
+  sort_by = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"first_appeared"</span>, <span class='st'>"count"</span>, <span class='st'>"recent_count"</span>)
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -163,7 +163,7 @@ makes the plot easier to read than filling with different colors.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>pubs</th>
-      <td><p>A data frame with at least these columns:</p><dl'>
+      <td><p>A data frame with at least these columns:</p><dl>
   <dt>journal</dt><dd><p>Name of the journal of the paper.</p></dd>
   <dt>year</dt><dd><p>Year when the paper was published.</p></dd>
 
@@ -216,7 +216,7 @@ facetting.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.9000.</p>
 </div>
 
       </footer>

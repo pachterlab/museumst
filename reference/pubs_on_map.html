@@ -12,7 +12,7 @@
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/minty/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
@@ -150,17 +150,17 @@ method or species.</p>
     </div>
 
     <pre class="usage"><span class='fu'>pubs_on_map</span>(
-  <span class='no'>pubs</span>,
-  <span class='no'>city_gc</span>,
-  <span class='kw'>zoom</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"world"</span>, <span class='st'>"europe"</span>, <span class='st'>"usa"</span>),
-  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"point"</span>, <span class='st'>"bin2d"</span>, <span class='st'>"hexbin"</span>),
-  <span class='kw'>facet_by</span> <span class='kw'>=</span> <span class='st'>"none"</span>,
-  <span class='kw'>n_top</span> <span class='kw'>=</span> <span class='fl'>Inf</span>,
-  <span class='kw'>ncol</span> <span class='kw'>=</span> <span class='fl'>3</span>,
-  <span class='kw'>label_cities</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>n_label</span> <span class='kw'>=</span> <span class='fl'>10</span>,
-  <span class='kw'>per_year</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>bins</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>70</span>, <span class='fl'>70</span>)
+  <span class='kw'>pubs</span>,
+  <span class='kw'>city_gc</span>,
+  zoom = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"world"</span>, <span class='st'>"europe"</span>, <span class='st'>"usa"</span>),
+  plot = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"point"</span>, <span class='st'>"bin2d"</span>, <span class='st'>"hexbin"</span>),
+  facet_by = <span class='st'>"none"</span>,
+  n_top = <span class='fl'>Inf</span>,
+  ncol = <span class='fl'>3</span>,
+  label_cities = <span class='fl'>TRUE</span>,
+  n_label = <span class='fl'>10</span>,
+  per_year = <span class='fl'>FALSE</span>,
+  bins = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>70</span>, <span class='fl'>70</span>)
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -168,7 +168,7 @@ method or species.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>pubs</th>
-      <td><p>A data frame with at least these columns:</p><dl'>
+      <td><p>A data frame with at least these columns:</p><dl>
   <dt>journal</dt><dd><p>Name of the journal of the paper.</p></dd>
   <dt>year</dt><dd><p>Year when the paper was published.</p></dd>
 
@@ -253,7 +253,7 @@ plotted on a world map.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.9000.</p>
 </div>
 
       </footer>
