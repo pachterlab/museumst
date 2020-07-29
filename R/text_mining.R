@@ -101,3 +101,87 @@ word_prop_scatter <- function(pubs, col_use = title, era = sheet, n_top = 20,
     geom_text_repel(aes(label = label)) +
     coord_equal()
 }
+
+#' Find the appropriate number of topics for stm
+#'
+#' This function is just like stm's searchK, but it uses tidyverse and allows a
+#' formula for prevalence. Adapted from Julia Silge's blog.
+#'
+#' @param documents Quanteda dfm object.
+#' @param K Numeric vector of numbers of topics to try.
+#' @param prevalence Formula of topic prevalence.
+#' @param seed Random seed to use.
+#' @param ... Other arguments to pass to \code{stm::stm}.
+#' @return A tibble with the metrics output by searchK, plus a column for the
+#' fitted model for each value of K tried.
+#' @export
+
+my_searchK <- function(documents, K, prevalence = ~ 1, seed = 19, ...) {
+  heldout <- stm::make.heldout(documents, seed = seed)
+  dc <- heldout$documents
+  vocab <- heldout$vocab
+  meta <- quanteda::docvars(documents)
+  fun <- function(.x, seed, prevalence, ...) {
+    stm::stm(dc, vocab = vocab, K = .x, seed = seed,
+             prevalence = prevalence, data = meta, ...)
+  }
+  many_models <- tibble(K = sample(K, length(K), replace = FALSE)) %>%
+    mutate(topic_model = furrr::future_map(K, fun, seed = seed, prevalence = prevalence, ...))
+  k_result <- many_models %>%
+    mutate(exclusivity = map(topic_model, stm::exclusivity),
+           semantic_coherence = map(topic_model, stm::semanticCoherence, dc),
+           eval_heldout = map(topic_model, stm::eval.heldout, heldout$missing),
+           residual = map(topic_model, stm::checkResiduals, dc),
+           bound =  map_dbl(topic_model, function(x) max(x$convergence$bound)),
+           lfact = map_dbl(topic_model, function(x) lfactorial(x$settings$dim$K)),
+           lbound = bound + lfact,
+           iterations = map_dbl(topic_model, function(x) length(x$convergence$bound))) %>%
+    arrange(K)
+  k_result
+}
+
+#' Plot the metrics for each K tried
+#'
+#' Adapted from Julia Silge's blog.
+#'
+#' @param k_result output of my_searchK
+#' @return A ggplot object.
+#' @export
+
+plot_k_result <- function(k_result) {
+  k_result %>%
+    transmute(K,
+              `Lower bound` = lbound,
+              Residuals = map_dbl(residual, "dispersion"),
+              `Semantic coherence` = map_dbl(semantic_coherence, mean),
+              `Held-out likelihood` = map_dbl(eval_heldout, "expected.heldout")) %>%
+    gather(Metric, Value, -K) %>%
+    ggplot(aes(K, Value, color = Metric)) +
+    geom_line(size = 1.5, alpha = 0.7, show.legend = FALSE) +
+    facet_wrap(~Metric, scales = "free_y") +
+    labs(x = "K (number of topics)",
+         y = NULL,
+         title = "Model diagnostics by number of topics")
+}
+
+#' Plot exclusivity vs. semantic coherence for different K's
+#'
+#' Adapted from Julia Silge's blog.
+#'
+#' @inheritParams plot_k_result
+#' @param Ks Numeric vector of number of topics to plot.
+#' @return A ggplot object
+#' @export
+plot_ec <- function(k_result, Ks) {
+  k_result %>%
+    select(K, exclusivity, semantic_coherence) %>%
+    filter(K %in% Ks) %>%
+    unnest(cols = c("exclusivity", "semantic_coherence")) %>%
+    mutate(K = as.factor(K)) %>%
+    ggplot(aes(semantic_coherence, exclusivity, color = K, shape = K)) +
+    geom_point(size = 2, alpha = 0.7) +
+    labs(x = "Semantic coherence",
+         y = "Exclusivity",
+         title = "Comparing exclusivity and semantic coherence",
+         subtitle = "Models with fewer topics have higher semantic coherence for more topics, but lower exclusivity")
+}
