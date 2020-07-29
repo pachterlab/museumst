@@ -34,9 +34,11 @@ Imports:
     tidyr
 Suggests: 
     broom,
+    furrr,
     gganimate,
     ggtext,
     ggtextures,
+    hexbin,
     knitr,
     magick,
     rgeos,
@@ -44,6 +46,8 @@ Suggests:
     rnaturalearthdata,
     rnaturalearth,
     sf,
+    stm,
+    stminsights,
     tidytext,
     transformr,
     wordcloud,
