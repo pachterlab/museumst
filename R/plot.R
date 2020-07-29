@@ -336,6 +336,7 @@ pubs_on_map <- function(pubs, city_gc,
   .pkg_check("rnaturalearth")
   .pkg_check("rnaturalearthdata")
   .pkg_check("rgeos")
+  if (zoom == "usa") .pkg_check("urbnmapr")
   if (plot == "hexbin") {
     .pkg_check("hexbin")
   }

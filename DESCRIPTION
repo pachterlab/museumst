@@ -50,6 +50,7 @@ Suggests:
     stminsights,
     tidytext,
     transformr,
+    urbnmapr,
     wordcloud,
     XML
 VignetteBuilder: knitr
