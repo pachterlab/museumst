@@ -1,0 +1,785 @@
+---
+title: "Untitled"
+author: "Lambda Moses"
+date: "6/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+To do for all notebooks: Explain what the code does, just as I did in the BBB notebook.
+```{r}
+library(tidyverse)
+library(lubridate)
+library(preText)
+library(quanteda)
+library(stm)
+library(text2vec)
+library(lexvarsdatr)
+library(ggrepel)
+library(sf)
+library(furrr)
+library(stminsights)
+library(uwot)
+library(tidytext)
+library(broom)
+library(gam)
+plan(multiprocess)
+theme_set(theme_bw())
+```
+
+
+```{r}
+cities_gc <- readRDS("lcm_city_gc.rds")
+df_1st <- readRDS("pubmed_lcm_1st_author_no_review.rds")
+abstracts <- readRDS("abstracts.rds")
+```
+
+```{r}
+pubs_on_map(df_1st, cities_gc, plot = "hexbin")
+```
+
+Not sure if this is a good idea, since it's plotting number of publications per unit area. I think per capita is confusing, again, because researchers move a lot and I'm not sure who are the "locals". Is per unit area more reasonable? Maybe. It helps when there's overplotting in the scatter plot.
+```{r}
+pubs_on_map(df_1st, city_gc = cities_gc)
+```
+
+```{r}
+pubs_per_cat(df_1st, country, n_top = 20)
+```
+
+```{r}
+pubs_per_cat(df_1st, city, n_top = 20)
+```
+
+I can try to get city population data, though a complication is that some city names have different spellings and sometimes there are multiple cities with the same name (e.g. trust me, there are Los Angeles's outside California). Well, I can geocode those cities with the Google API and extract Google's standards. But I don't think this is all that important, so I'm not doing it right now.
+
+Unfortunately, I can't check the institutions here since I haven't figured out a way to automatically extract the institution names and standardize them from the address given that the addresses here do not have a standardized format. OK, given more time, I probably can figure that out, but I'd rather not do it for now. But the cities do tell a lot. Los Angeles means either UCLA or USC or some hospitals like Cedars Sinai. Ithaca means Cornell. New York means Columbia, NYU, Cornell medical school, or Rockefeller. Boston means Harvard Medical School or maybe Boston College or Boston University. Bethesda means NIH. Again, all the usual suspects.
+
+```{r}
+pubs_per_capita(df_1st)
+```
+
+```{r, fig.width=6, fig.height=10}
+pubs_per_capita(df_1st, plot = "bar")
+```
+
+That's very different from other areas of spatial transcriptomics.
+
+```{r}
+pubs_on_map(df_1st, cities_gc, "europe")
+```
+
+```{r}
+pubs_per_capita(df_1st, "europe")
+```
+
+```{r}
+pubs_per_capita(df_1st, "europe", plot = "bar")
+```
+
+Denmark never showed up for the other areas in spatial transcriptomics. 
+
+```{r}
+pubs_on_map(df_1st, cities_gc, "usa")
+```
+
+```{r}
+pubs_on_map(df_1st, cities_gc, "usa", plot = "hexbin", bins = c(40, 40))
+```
+
+Orangeburg. Never heard about it. It's the Nathan Kline Institute, which again, I've never heard about. I think this shows how LCM is different from other fields of spatial transcriptomics; the other fields are more confined to the very elite institutions.
+```{r}
+pubs_per_capita(df_1st, "usa")
+```
+
+```{r}
+pubs_per_capita(df_1st, "usa", plot = "bar")
+```
+
+I think that's because of NIH's labs in Bestheda and Baltimore. Apparently NIH has a lot interest in LCM, though not as much in other fields of spatial transcriptomics compared to some other most elite institutions. Anyway, I don't think this says too much about those states, since we know that academics are kind of like modern day foragers not anchored in a city early in their careers. Since the same people move around, I don't think this data says too much about the states themselves per se since the people doing the research are quite likely to be from somewhere else. I'm not convinced that Kansas and Virginia are really better than California in this field. But I still don't think I should plot the raw numbers on the choropleth, since it creates an illusion that physically larger states have more publications than they actually do just because they're physically larger.
+
+How about over time?
+```{r}
+pubs_per_year(df_1st, binwidth = 150)
+```
+
+This is not manually curated; it's just whatever PubMed gave me from a search. Curiously, there's a first peak, and a rising and taller second peak. I wonder why. When text mining, I can try to compare the two peaks.
+
+I'll text mine the titles, keywords, or maybe abstracts as well. I can also try to extract country, state, city, institution, and department from the address field.
+
+# Text mining abstracts
+
+I think the city (a convenient proxy of institution) and journal have a lot to do with the topic of an abstract. But meanwhile, if a lot of cities and journal only have 1 or 2 abstracts, then it makes the model unnecessarily complex given the relatively small corpus and won't make it more predictive. I know, I fit this model for explanation of importance of the covariates, but at least the model should capture the important features and not too much noise, in other words, not overfit, for me to trust the explanation. 
+```{r}
+length(unique(abstracts$city2))
+```
+
+```{r}
+length(unique(abstracts$journal))
+```
+
+```{r}
+abstracts %>% 
+  count(country, city) %>% 
+  ggplot(aes(n)) +
+  stat_ecdf() +
+  labs(x = "Number of publications per city", y = "F") +
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  scale_y_continuous(breaks = scales::breaks_width(0.2))
+```
+
+By lumping everything below 3 as "Other", there're only aboutt 30% of cities left.
+
+Another question: What percent of cities have what percent of publications? Rather than an ECDF of the number of publications per city, I can plot the cumulative number/proportion of all publications vs. rank of city. 
+```{r}
+df <- abstracts %>% 
+  count(country, city) %>% 
+  arrange(desc(n)) %>% 
+  mutate(rank = row_number(desc(n)),
+         rel_rank = rank/max(rank),
+         cum_n = cumsum(n),
+         cum_prop = cum_n/sum(n))
+ggplot(df, aes(rel_rank, cum_prop)) +
+  geom_line() +
+  scale_x_continuous(breaks = scales::breaks_width(0.2), labels = scales::percent) +
+  scale_y_continuous(breaks = scales::breaks_width(0.2), labels = scales::percent) +
+  labs(x = "City percentile", y = "Percent of publications")
+```
+
+When I do lump cities with fewer than 3 publications, the remaining 30% of cities have almost 70% of publications. But is it helpful at all that a bit over 30% of publications are in the "Other" category? Well, maybe better than not using cities at all, since given that in practice, topics have a lot to do with the interests of individual labs, it makes sense to include city as a covariate. 
+```{r}
+abstracts %>% 
+  count(journal) %>% 
+  ggplot(aes(n)) +
+  stat_ecdf() +
+  labs(x = "Number of publications per journal", y = "F") +
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  scale_y_continuous(breaks = scales::breaks_width(0.2))
+```
+
+By lumping journals with fewer than 3 papers into "Other", there're about 25% of journals left.
+```{r}
+df <- abstracts %>% 
+  count(journal) %>% 
+  arrange(desc(n)) %>% 
+  mutate(rank = row_number(desc(n)),
+         rel_rank = rank/max(rank),
+         cum_n = cumsum(n),
+         cum_prop = cum_n/sum(n))
+ggplot(df, aes(rel_rank, cum_prop)) +
+  geom_line() +
+  scale_y_continuous(breaks = scales::breaks_width(0.2), labels = scales::percent) +
+  scale_x_continuous(labels = scales::percent) +
+  labs(x = "Journal percentile", y = "Percent of publications")
+```
+
+The remaining top 25% of journals have almost 65% of papers. 
+
+This curve rises more sharply than the city curve. 
+```{r}
+# The purpose of this is to address the problem that multiple cities have the same name
+abstracts <- abstracts %>% 
+  mutate(city_eff = fct_lump_min(city2, 5),
+         journal_eff = fct_lump_min(journal, 5))
+```
+
+```{r}
+ac <- corpus(abstracts, docid_field = "pmid", text_field = "abstract")
+```
+
+```{r}
+n_words <- summary(ac, n = Inf)
+```
+
+```{r}
+hist(n_words$Tokens)
+```
+
+```{r}
+hist(n_words$Types)
+```
+
+```{r}
+hist(n_words$Sentences)
+```
+
+Did the number of words in abstracts change over time?
+```{r}
+ggplot(n_words, aes(date_published, Tokens)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+Nope.
+
+# Tuning stm model
+I'm debating whether I should stem the words. Apparently here this doesn't really matter. I don't know any keyword that has multiple meanings in the context of LCM. Anyway, there're more burning questions like whether I should remove punctuation. I don't think it matters in this context, but just to check. I'll randomly pick 200 abstracts and use the `preText` package to get a sense of the effects of those preprocessing choices.
+
+```{r}
+ac_sub <- corpus_sample(ac, size = 200)
+```
+
+```{r}
+ac_fp <- factorial_preprocessing(ac_sub, parallel = FALSE, 
+                                 intermediate_directory = ".", 
+                                 return_results = FALSE,
+                                 infrequent_term_threshold = 0.005)
+```
+
+```{r}
+head(ac_fp$choices)
+```
+
+```{r}
+preText_results <- preText(
+  ac_fp,
+  dataset_name = "LCM abstracts",
+  distance_method = "cosine",
+  num_comparisons = 50)
+```
+
+```{r, fig.width=6, fig.height=8}
+preText_score_plot(preText_results)
+```
+
+The options with lower scores have less unusual results.
+```{r}
+regression_coefficient_plot(preText_results,
+                            remove_intercept = TRUE)
+```
+
+Here this means removing stopwords and punctuation makes the results less likely to be unusual, while removing infrequent terms may lead to more unusual results, while the other options might not significantly affect the results. Here preText only looked at how these preprocessing choices influence pairwise distances between abstracts. I see how this is relevant to political science, for which that package was written. How relevant is pairwise distance to LCM abstracts? 
+
+I think in the first trial, I'll only use unigrams, do stem the words, do remove stopwords and punctuation, do remove numbers, and do turn everything into lower case, for the simplest model. Then I can try what if I don't remove stopwords, what if I don't remove punctuation, and what if I do remove infrequent words and see how that would affect the topic modeling results.
+
+What are the collocations, i.e. common phrases? 
+```{r}
+ac_col <- tokens(ac, split_hyphens = TRUE, remove_symbols = TRUE) %>% 
+  tokens_remove(c(stopwords(), "sup")) %>% 
+  tokens_wordstem() %>% 
+  textstat_collocations(min_count = 20, size = 2:4) %>% 
+  filter(count_nested < count) %>% 
+  arrange(desc(count)) 
+```
+
+```{r}
+ac_col
+```
+
+OK, now I know which phrases are common. While many of the phrases here are relevant and are usually used as if they were words, some are not, so I'll use a list of phrases based on my background.
+```{r}
+phrases <- c("gene express", "laser captur microdissect", "express profil", "differenti express", "microarray analysi", "laser microdissect", "cell type", "epitheli cell", "cancer cell", "cdna microarray", "cell popul", "prostat cancer", "polymeras chain reaction", "transcript factor", "cell line", "signal pathway", "growth factor", "tumor cell", "protein express", "lymph node", "situ hybrid", "candid gene", "colorect cancer", "cell cycl", "tissu section", "extracellular matrix", "tissu microarray", "singl cell", "motor neuron", "pathway analysi", "RNA sequenc", "stromal cell", "cell prolifer", "colon cancer", "endotheli cell", "gene ontolog", "therapeut target", "cell death", "dentat gyrus", "alzheimer diseas", "squamous cell carcinoma", "spinal cord", "ovarian cancer", "progenitor cell", "immun respons", "western blot", "type 2", "hierarch cluster", "signal transduct", "growth plate", "quantit polymeras chain reaction", "breast carcinoma", "frozen tissu", "pyramid cell", "formalin fix", "paraffin embed", "arabidopsi thaliana", "real time polymeras chain reaction", "development stage", "breast tumor", "central nervous system", "time point", "plant tissu", "mass spectrometri", "revers transcriptas", "fold chang", "fals discoveri rate", "linear amplif", "cell adhes", "t cell", "b cell", "transform growth factor", "neurodegen diseas", "amino acid", "lung cancer", "gene set enrich analysi")
+phrases <- str_split(phrases, pattern = " ", simplify = FALSE)
+```
+
+```{r}
+ac_tokens <- tokens(ac, remove_punct = TRUE, 
+                    remove_symbols = TRUE, remove_url = TRUE,
+                    split_hyphens = TRUE) %>% 
+  tokens_tolower(keep_acronyms = TRUE) %>% 
+  tokens_remove(c(stopwords(), "laser", "capture", "microdissection", "use", 
+                  "using", "used", "uses", "gene", "genes", "lcm", "sup", "lmd",
+                  "express", "expressed", "expression", "cell", "cells", "tissu")) %>% 
+  tokens_wordstem() %>% 
+  tokens_compound(phrases)
+```
+
+```{r}
+ac_dfm <- dfm(ac_tokens)
+```
+
+```{r}
+ac_dfm2 <- dfm_trim(ac_dfm, min_docfreq = 0.002, docfreq_type = "prop")
+```
+
+Here spectral means using NMF for initialization. I debated for a while whether I should use the covariates. I eventually decided that I should. Otherwise it's just an intercept. At worst the effects of the covariates are not significant. But I do think some of the covariates are relevant to topic prevalence, such as journal -- the journal Plant Cell obviously is about plants and not about human cancer. OK, it seems that adding the journal covariate only hurts the held out likelihood whether I lump low frequency journals into "Other" or not, so I'll not use it. I lumped cities with fewer than 5 publications into "Other", since using smaller numbers hurts the held-out likelihood, but I still do want to see the effects of city so I don't want to lump too much. Over 80% of cities and about half of publications are now in "Other", so this only shows the effects of the top 15% or so cities.
+
+```{r}
+k_result2 <- my_searchK(ac_dfm2, K = seq(5, 60, by = 5), 
+                       prevalence = ~ stm::s(date_num, df = 3) + city_eff,
+                       gamma.prior = "L1",
+                       verbose = FALSE, seed = 1891)
+```
+
+```{r}
+plot_k_result(k_result2)
+```
+
+Looks like the number of topics should be 25 to 40 according to the residuals, but held-out likelihood and semantic coherence. suggest a smaller number. The "residuals" here means dispersion of the residuals, and ideally it should be 1. 
+
+```{r}
+plot_ec(k_result2, c(10, 25, 30, 40, 60))
+```
+
+As expected, fewer topics results into higher semantic coherence and lower exclusivity. This is really a trade off. Sort of a compromise, here I choose the model with K = 25. Since I have held out part of the data when choosing K, I'll use this K to fit the model with the full data.
+
+```{r}
+stm_res <- stm(ac_dfm2, K = 40, prevalence = ~ stm::s(date_num, df = 3) + city_eff,
+               gamma.prior = "L1", seed = 1919)
+```
+
+```{r, fig.width=6, fig.height=5}
+plot(stm_res)
+```
+
+```{r}
+labelTopics(stm_res, c(11, 19, 14, 29, 37, 34, 40))
+```
+
+Upon manual inspection, 40 topics seem to give more reasonable results.
+```{r}
+saveRDS(k_result, "k_result_lcm.rds")
+saveRDS(stm_res, "stm_res_lcm.rds")
+```
+
+Tidyverse version: Again, I'm copying and pasting code from Julia Silge's blog. I learnt a lot about text mining from her. However, I don't like her colorful barcharts, so I changed her code to make the lollipop plot here.
+```{r, fig.width=6, fig.height=8}
+td_beta <- tidy(stm_res)
+td_beta %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  mutate(topic = paste0("Topic ", topic),
+         topic = fct_relevel(topic, paste0("Topic ", 1:40)),
+         term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta)) +
+  geom_segment(aes(xend = term), yend = 0, show.legend = FALSE) +
+  geom_point(color = "blue") +
+  facet_wrap(~ topic, scales = "free_y", ncol = 5) +
+  coord_flip() +
+  scale_x_reordered() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  labs(x = NULL, y = expression(beta),
+       title = "Highest word probabilities for each topic",
+       subtitle = "Different words are associated with different topics")
+```
+
+1. Epithelium, especially in the intestine, but also in the lung
+2. miRNA, mostly in diseases other than cancer, such as atherosclerosis and kidney diseases
+3. Hippocampus and Alzheimer's disease
+4. Brain cortical layers and psychiatry, especially schizophrenia
+5. RNA-seq in plants, especically maize
+6. Metabolic syndrome and the brain, also neuroblastoma. I still wonder why these two are placed together, but increasing K does not separate them.
+7. Immune response
+8. miRNA in cancer
+9. Technical stuff like RNA quality and amplification for microarray
+10. Pathways and gene regulation, especially in cell proliferation and growth
+11. Cancer, especially breast cancer
+12. Plant reproduction
+13. Development
+14. Cancer, especially gastric cancer
+15. Proteomics
+16. Epithelium, fibrosis, especially pulmonary, and endometriosis. Could benefit from larger K.
+17. Pancreas and diabetes
+18. Plant roots
+19. Tumor invasion and metastasis
+20. Pathways and gene regulation, especially in response to stress and disease (e.g. heat shock in plants and inflammation)
+21. Signaling pathways in cancer
+22. Stem cells and development
+23. ALS, multiple sclerosis, and keloid. I still wonder why keloid is mixed with ALS. Maybe because the number of topics is too small and there's nowhere else to put the keloid abstracts.
+24. Plant seed development
+25. Brain development and neurodegeneration
+26. Infections, especially fungal infections in plants
+27. Atherosclerosis, but somehow also joint degeneration
+28. Brain pathology, especially in addiction
+29. Prostate cancer and lymphoma
+30. Myocardial infarction and hypoxia
+31. Tissue preparaiton for LCM
+32. Pathways and mechanisms
+33. Blood vessels, especially in the brain
+34. Vasculature in tumors, especially gliomas
+35. Clinical studies
+36. Oxidative stress and GST, especially in hepatocarcinogenesis
+37. Molecular mechanisms of carcinogenesis and progression
+38. Bone growth plate, especially in response to injury. Also response to radiation in general and recovery of optic nerves to injury.
+39. Neurons, neurotransmission, and neurodegeneration
+40. Molecular aspect of cancer, especially breast cancer
+
+```{r}
+plot(stm_res, type = "perspectives", topics = c(11, 40))
+```
+
+
+# Topics over time
+```{r}
+effs <- estimateEffect( ~ stm::s(date_num, df = 3), stm_res, 
+                       metadata = docvars(ac_dfm2))
+```
+
+```{r}
+effs_df <- get_effects(effs, "date_num", type = "continuous")
+effs_df <- effs_df %>% 
+  mutate(topic = fct_relevel(topic, as.character(1:40)),
+         date_published = as_date(value))
+```
+
+```{r, fig.width=6, fig.height=6}
+ggplot(effs_df, aes(date_published, proportion)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.5, fill = "gray") +
+  geom_line() +
+  facet_wrap(~ topic, ncol = 5) +
+  coord_cartesian(ylim = c(0, 0.4))
+```
+
+Remember the histogram over time. There are two peaks. The topic proportions here are from the fitted model, and what's plotted is the spline smoothed topic proportion over time. Because of the smoothing, there can be some negative values. That's why I prefer histograms to density plots that use kernel smoothing. It seems that topics 9, 14, and 37 have decreasing proportion. Explanations: 1. those topics became less popular. 2. while these topics remained as popular as ever, other topics emerged or grew more popular, and thus taking away more proportions; indeed, the proportion of some other topics seems to grow, though not statistically significant here after correcting for multiple testing. Topic 9 is about the technical aspect of LCM + microarray, especially linear amplification. It makes sense that it declined when the technique is more well-established and when people switched to RNA-seq. I still wonder why topics 14 and 37 declined. Those are about cancer, and cancer is as relevant now as it was 20 years ago. One hypothesis is that stm picked up some wordings that were once popular, but not anymore, though the underlying topics have not changed. I don't want to overinterpret the other results.
+
+Just to inspect to verify the above results
+```{r}
+abstracts <- cbind(abstracts, as.data.frame(stm_res$theta))
+```
+
+```{r}
+year_theta_long <- abstracts %>% 
+  mutate(date_bin = floor_date(date_published, unit = "year")) %>% 
+  select(date_bin, V1:V40) %>% 
+  pivot_longer(cols = V1:V40, names_to = "topic", values_to = "theta") %>% 
+  mutate(topic = str_remove(topic, "^V"),
+         topic = fct_relevel(topic, as.character(1:40)))
+year_means <- year_theta_long %>% 
+  group_by(date_bin, topic) %>% 
+  summarize(means = mean(theta)) 
+```
+
+```{r}
+year_means %>% 
+  filter(topic %in% as.character(c(9, 14, 37, 18, 24, 35))) %>% 
+  ggplot(aes(date_bin, means, color = topic)) +
+  geom_line() +
+  facet_wrap(~ topic) +
+  theme(legend.position = "none") +
+  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs", k = 3))
+```
+
+OK, so the stuff I got from `estimateEffects` looks real, rather than artefacts from smoothing. But this still doesn't answer the question why these topics have lower prevalence. Here I plotted the mean theta per year for those topics. But the mean can be dragged down if there are more papers over all in that year not because these topics declined, but because other topics grew. So I'll make another plot for how the number of papers with theta over 0.5 changed over time.
+```{r}
+year_counts <- year_theta_long %>% 
+  filter(theta > 0.5) %>% 
+  count(date_bin, topic)
+```
+
+```{r}
+year_counts %>% 
+  filter(topic %in% as.character(c(9, 14, 37, 18, 24, 35))) %>% 
+  ggplot(aes(date_bin, n, color = topic)) +
+  geom_line() +
+  facet_wrap(~ topic) +
+  theme(legend.position = "none") +
+  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs", k = 3))
+```
+
+Remember that the number of publication here increased until it peaked around 2010. Here we see that topic 4 (the technical, microarray stuff) really did decline. There's an increase in topic 27 (Alzheimer's disease), and the others are pretty flat, which might mean their decreasing proportion is because of the rise of new topics. 
+
+```{r}
+effs_summ <- tidy(effs)
+effs_summ <- effs_summ %>% 
+  mutate(p_val_adj = p.adjust(p.value))
+```
+
+```{r}
+effs_summ %>% arrange(p.value)
+```
+
+# Topics per city
+
+It seems that this drops faster than exponentially. 
+
+Unfortunately, there're too many cities and if I include all of them, the covariance matrix will be singular. So I'll begin with the effects of countries, not considering date published. I know, this is problematic, since there are international collaborations and I don't think topic of interest is spatially autocorrelated. I have lumped cities with too few publications into "other.
+
+```{r}
+effs_loc <- estimateEffect( ~ city_eff, stm_res, 
+                            metadata = abstracts)
+```
+
+```{r}
+labelTopics(stm_res, 21)
+```
+
+```{r}
+effs_loc_summ <- tidy(effs_loc)
+effs_loc_summ <- effs_loc_summ %>% 
+  mutate(p_val_adj = p.adjust(p.value))
+effs_loc_summ %>% 
+  arrange(p.value)
+```
+
+I think in some cases this actually helps identifying institutions (actually I would say labs) that have a special interest in a topic, though often this gives results that are probably spurious, like when a city appears twice for a topic, it gets significant. This also misses some cities that are lumped into "Other". 
+
+```{r}
+effs_df_loc <- get_effects(effs_loc, "city_eff", type = "pointestimate")
+effs_df_loc <- effs_df_loc %>% 
+  mutate(topic = fct_relevel(topic, as.character(1:40)),
+         mid = (upper + lower)/2)
+```
+
+```{r}
+effs_df_loc %>% 
+  filter(topic == 21) %>% 
+  mutate(value = fct_reorder(value, mid, .desc = FALSE)) %>% 
+  top_n(10, mid) %>% 
+  ggplot(aes(y = value)) +
+  geom_errorbar(aes(xmin = lower, xmax = upper))
+```
+
+```{r, fig.width=6, fig.height=6}
+heatmap(stm_res$theta)
+```
+
+```{r}
+topic_cor <- topicCorr(stm_res)
+plot(topic_cor)
+```
+
+Here the cancer topics are connected (37, 11, 29, 35, 17), the technical ones are connected to plant ones somehow (9, 31, 12, 24), the epithelium and immune responses are connected (1, 7) presumably because some abstracts in topic 1 mentions inflammation and some abstractions in topic 7 mention inflammation of the skin. There's another cluster of cancer topics (14, 19, 8). The CNS topics are connected (23, 3, 39). Both 30 and 34 are about vasculature.
+
+# Term co-occurance
+```{r}
+ac_fcm <- fcm(ac_tokens, context = "window", count = "weighted", weights = 1/(1:5))
+```
+
+```{r}
+glove <- GlobalVectors$new(rank = 50, x_max = 10)
+```
+
+```{r}
+ac_gv <- glove$fit_transform(ac_fcm, n_iter = 50)
+```
+
+```{r}
+ac_context <- glove$components
+ac_vectors <- ac_gv + t(ac_context)
+```
+
+```{r}
+dim(ac_vectors)
+```
+
+Just to inspect the nearest neighbors of some keywords to see if this embedding makes sense
+```{r}
+kws <- c("microarray", "plant", "cancer", "neuron")
+nns <- map_dfr(kws, lvdr_quick_cosine, tfm = ac_vectors, include_targ = TRUE)
+```
+
+```{r}
+nns
+```
+
+Yes, it does make sense.
+
+There're many words here, so I'll only plot the most frequent ones.
+```{r}
+wf <- textstat_frequency(ac_dfm)
+words_plot <- wf$feature[wf$frequency > 30]
+```
+
+```{r}
+sim_mat <- sim2(ac_vectors[rownames(ac_vectors) %in% words_plot,])
+```
+
+```{r}
+mds_res <- cmdscale(1-sim_mat, k = 5, eig = TRUE) 
+mds_mat <- mds_res$points %>% 
+  data.frame() %>% 
+  mutate(label = rownames(sim_mat))
+```
+
+```{r}
+mds_mat <- mds_mat %>% 
+  left_join(wf, by = c("label" = "feature"))
+```
+
+```{r}
+mds_plt <- mds_mat %>% 
+  filter(rank <= 150)
+```
+
+```{r}
+ggplot(mds_mat, aes(X1, X2)) +
+  geom_point(aes(color = docfreq)) +
+  scale_color_distiller(palette = "Blues", direction = 1)
+```
+
+```{r}
+mds_plt %>% 
+  ggplot(aes(X1, X2)) +
+  geom_point() +
+  geom_text_repel(aes(label = label), segment.alpha = 0.3)
+```
+
+It seems that X1 separates the biological (left) from the technical (right). That's interesting, though also expected. It seems that X2 separates the descriptions (top) from mechanisms and functions (bottom). OK, I did this because it feels cool. But how does this help with my paper? I suppose it might be more helpful when I compare the prequel and current era abstracts and color the points on this plot. As for LCM, I'm not entirely sure how this thing helps. Maybe the cool part is to see which words are semantically similar according to this corpus.
+
+```{r}
+mds_plt %>% 
+  ggplot(aes(X3, X4)) +
+  geom_point() +
+  geom_text_repel(aes(label = label), segment.alpha = 0.3)
+```
+
+It seems that X3 is about quality (left) vs. quantity (right). X4: experimental methods are on the top and biological functions are at the bottom.
+
+```{r}
+feat <- names(topfeatures(ac_fcm, 80))
+fcm2 <- fcm_select(ac_fcm, pattern = feat)
+set.seed(19)
+textplot_network(fcm2, min_freq = 0.9, vertex_labelsize = log((rowSums(fcm2) + 1)/(min(rowSums(fcm2)) + 1)))
+```
+
+```{r}
+ac_umap <- as.data.frame(umap(ac_vectors[rownames(ac_vectors) %in% mds_plt$label,]))
+ac_umap$label <- rownames(ac_vectors[rownames(ac_vectors) %in% mds_plt$label,])
+```
+
+```{r}
+ggplot(ac_umap, aes(V1, V2)) +
+  geom_point() +
+  geom_text_repel(aes(label = label), segment.alpha = 0.3)
+```
+
+# Word prevalence
+
+Then see how word/phrase usage changed over time. How to do that? I'm using the method in the slingshot vignette to find genes whose expression changed through time. Problem: documents are not like cells. Because of different topics, some terms may not be mentioned at all in some documents. Well then why not split the documents by topics first and then model the number of times words are used within each document? However, what I'm interested in is not how many times words are used within each document, but how, consider this entire LCM corpus, word use changes over time, as a measure of changes in diction and interests. For instance, say there can be a lot of interest in cancer since a large proportion of the corpus is about cancer, though each individual document doesn't necessarily use the word "cancer" a lot. So I'll bin by year (which seems to be a sensible time scale here) and use the proportion of words in the year. Again, I'm copying some of Julia's code. Hmm, they joke a lot about copying and pasting code from Stack Overflow, but actually I don't use Stack Overflow that much.
+```{r}
+ac_dfm2_tidy <- tidy(ac_dfm2)
+# Add the metadata
+ac_dfm2_tidy <- ac_dfm2_tidy %>% 
+  left_join(abstracts[, c("date_published", "pmid")], by = c("document" = "pmid"))
+```
+
+```{r}
+words_by_time <- ac_dfm2_tidy %>%
+  mutate(time_floor = floor_date(date_published, unit = "year")) %>%
+  filter(time_floor > ymd("2000-01-01")) %>% 
+  count(time_floor, term) %>%
+  group_by(time_floor) %>%
+  mutate(time_total = sum(n)) %>%
+  group_by(term) %>%
+  mutate(word_total = sum(n)) %>%
+  ungroup() %>%
+  rename(count = n) %>%
+  filter(word_total > 30)
+```
+
+```{r}
+words_by_time <- words_by_time %>% 
+  rename(word = term)
+```
+
+```{r}
+words_by_time <- words_by_time %>% 
+  mutate(prop = count/time_total)
+```
+
+First sanity check, just use Julia's logistic regression method before using slingshot's `gam` method.
+```{r}
+nested_data <- words_by_time %>%
+  nest(data = c(time_floor, count, time_total, word_total, prop))
+```
+
+```{r}
+nested_models <- nested_data %>%
+  mutate(models = map(data, ~ glm(cbind(count, time_total) ~ time_floor, ., 
+                                  family = "binomial")))
+```
+
+```{r}
+slopes <- nested_models %>%
+  mutate(models = map(models, tidy)) %>%
+  unnest(cols = "models") %>%
+  filter(term == "time_floor") %>%
+  mutate(p_val_adj = p.adjust(p.value))
+```
+
+```{r}
+slopes <- slopes %>% 
+  select(-data)
+```
+
+```{r}
+top_slopes <- slopes %>% 
+  filter(p_val_adj < 0.05) %>% 
+  arrange(p_val_adj)
+```
+
+Nothing surprising. 
+```{r}
+words_by_time %>%
+  inner_join(top_slopes, by = "word") %>%
+  ggplot(aes(time_floor, prop)) +
+  geom_line() +
+  labs(x = "Year", y = "Word frequency") +
+  facet_wrap(~ word, ncol = 5)
+```
+
+This shows the decline of microarray and the technical stuff and rise of RNA-seq since 2010, which isn't too far from the advent of RNA-seq in 2008. But how about the word "transcriptome"? I think it might be a change in diction, since microarrays do in fact profile the transcriptome. 
+
+Now I try slingshot's GAM method.
+```{r}
+gam_models <- nested_data %>% 
+  mutate(models = map(data, ~ suppressWarnings(gam(prop ~ s(time_floor, 3), data = .))))
+```
+
+```{r}
+gam_models <- gam_models %>% 
+  select(-data) %>% 
+  mutate(models = map(models, tidy)) %>%
+  unnest(cols = "models") %>%
+  filter(term == "s(time_floor, 3)") %>%
+  mutate(p_val_adj = p.adjust(p.value))
+```
+
+```{r}
+top_gam <- gam_models %>% 
+  filter(p_val_adj < 0.05) %>% 
+  arrange(p_val_adj)
+```
+
+```{r, fig.width=5, fig.height=4}
+words_by_time %>%
+  inner_join(top_gam, by = "word") %>%
+  ggplot(aes(time_floor, prop)) +
+  geom_line() +
+  labs(x = "Year", y = "Word frequency") +
+  facet_wrap(~ word, ncol = 6)
+```
+
+Yes, the results make sense and is consistentt with the logistic regression results. For whatever reason, those are not detected by Julia's logistic regression method. Well, GAM is more flexible. I'll plot a heatmap to see what kind of patterns are there. But meanwhile, since there're too few papers in 2000, I would take some of the results with a grain of salt. Also, what happened to "tumor"? Cancer is still very relevant. I guess it might be due to the rise of other topics like LCM in plants and diseases other than cancer.
+
+```{r}
+words_hm <- unique(c(top_gam$word, top_slopes$word))
+word_mat_df <- words_by_time %>% 
+  filter(word %in% words_hm) %>% 
+  mutate(year = year(time_floor)) %>% 
+  select(year, word, prop) %>% 
+  pivot_wider(id_cols = word, names_from = year, values_from = prop)
+```
+
+```{r}
+word_mat <- as.matrix(word_mat_df[, -1])
+rownames(word_mat) <- word_mat_df$word
+```
+
+```{r}
+word_mat <- t(scale(t(word_mat)))
+```
+
+```{r}
+heatmap(word_mat, Colv = NA, scale = "none")
+```
+
+Which topics are those words associated with?
+```{r}
+td_beta %>% 
+  filter(term == "key") %>% 
+  arrange(desc(beta))
+```
+
+```{r}
+labelTopics(stm_res, 21)
+```
+
+```{r}
+findThoughts(stm_res, texts = abstracts$abstract, topics = 21, n = 5)
+```
+

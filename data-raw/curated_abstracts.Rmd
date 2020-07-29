@@ -1,0 +1,300 @@
+---
+title: "Getting abstracts for curated literature"
+author: "Lambda Moses"
+date: "7/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+I regret not collecting the pmid when curating the papers. Here is the code used to get the pmids and add them to the sheets; it's too tedious to do that by hand.
+```{r}
+library(easyPubMed)
+library(XML)
+library(ggmap)
+library(rbiorxiv)
+library(lubridate)
+```
+
+```{r}
+v <- c("title", "URL", "journal", "sheet", "country", "state/province", "city", "institution")
+df <- rbind(data_sheets[, v], analysis_sheets[, v]) %>% 
+  filter(!is.na(title), !is.na(URL), !is.na(city)) %>% 
+  distinct()
+```
+
+```{r}
+preprints <- c("bioRxiv", "arXiv")
+for_pubmed <- df %>% 
+  filter(!journal %in% preprints)
+```
+
+```{r}
+for_pubmed <- for_pubmed %>% 
+  mutate(id_query = case_when(
+    str_detect(URL, "^https://doi.org/") ~ str_remove(URL, "^https://doi.org/"),
+    str_detect(URL, "pubmed.ncbi") ~ str_extract(URL, "\\d+"),
+    TRUE ~ NA_character_))
+```
+
+```{r}
+my_pmids_res <- map(for_pubmed$id_query, slowly(get_pubmed_ids, rate_delay(0.2)), 
+                    api_key = Sys.getenv("PUBMED_API_KEY"))
+my_pmids2 <- map(my_pmids_res, list("IdList", "Id"))
+```
+
+```{r}
+lengths(my_pmids2)
+```
+
+```{r}
+inds <- lengths(my_pmids2) < 1
+followup <- for_pubmed[inds, ]
+```
+
+```{r}
+followup_pmid_res <- map(followup$title, slowly(get_pubmed_ids_by_fulltitle, rate_delay(0.2)),
+                     api_key = Sys.getenv("PUBMED_API_KEY"))
+followup_pmid2 <- map(followup_pmid_res, list("IdList", "Id"))
+```
+
+```{r}
+lengths(followup_pmid2)
+```
+
+```{r}
+inds2 <- lengths(followup_pmid2) < 1
+followup2 <- followup[inds2,]
+```
+
+```{r}
+followup2$title
+```
+
+```{r}
+followup2$id_query <- c("9215645", "9831640", "9254908", "11044609", "11287186",
+                        "11520663", "20134060", "29400650", NA, "20529936",
+                        NA)
+```
+
+```{r}
+inds3 <- !is.na(followup2$id_query)
+q_use <- followup2$id_query[inds3]
+followup_pmid_res2 <- map(q_use, slowly(get_pubmed_ids, rate_delay(0.2)), 
+                    api_key = Sys.getenv("PUBMED_API_KEY"))
+followup_pmid3 <- map(followup_pmid_res2, list("IdList", "Id"))
+```
+
+```{r}
+lengths(followup_pmid3)
+```
+
+```{r}
+cols_qs <- c(v, "id_query")
+qs <- rbind(for_pubmed[!inds, cols_qs], followup[!inds2, cols_qs], 
+            followup2[inds3, cols_qs]) %>% 
+  distinct() %>% 
+  mutate(res = c(my_pmids_res[!inds], followup_pmid_res[!inds2], followup_pmid_res2))
+```
+
+```{r}
+manual <- followup2[!inds3,]
+```
+
+```{r}
+qs <- qs %>% 
+  mutate(my_xmls = map(res, fetch_pubmed_data))
+```
+
+```{r}
+qs <- qs %>% 
+  mutate(xmls_list = map(my_xmls, articles_to_list))
+```
+
+```{r}
+which(lengths(qs$xmls_list) > 1)
+```
+
+```{r}
+abstracts <- map_dfr(qs$xmls_list, ~ map_dfr(.x, article_to_df, getAuthors = FALSE))
+abstracts2 <- abstracts %>% 
+  filter(pmid %in% qs$id_query | doi %in% qs$id_query)
+```
+
+```{r}
+wrong_res <- qs %>% 
+  anti_join(abstracts2, by = c("id_query" = "doi")) %>% 
+  anti_join(abstracts2, by = c("id_query" = "pmid"))
+```
+
+```{r}
+wrong_res$title
+```
+
+```{r}
+wrong_res$id_query <- c("9845528", "10504583", "10603084", "12848831", "12887592",
+                        "15043218", NA, NA, "23591446", NA, "1283314", "9626495",
+                        "11231151", "11850183", "12367636", "26999799", "30735129",
+                        "12763235")
+```
+
+```{r}
+manual <- rbind(manual, wrong_res[is.na(wrong_res$id_query), names(manual)])
+wrong_res <- wrong_res %>% 
+  filter(!is.na(id_query))
+```
+
+```{r}
+wrong_res <- wrong_res %>% 
+  mutate(res = map(id_query, get_pubmed_ids),
+         my_xmls = map(res, fetch_pubmed_data),
+         xmls_list = map(my_xmls, articles_to_list))
+```
+
+```{r}
+lengths(wrong_res$xmls_list)
+```
+
+```{r}
+qs <- qs %>% 
+  anti_join(wrong_res, by = "title")
+qs <- rbind(qs, wrong_res)
+```
+
+```{r}
+abstracts3 <- map_dfr(qs$xmls_list, ~ map_dfr(.x, article_to_df, max_chars = 1e6,
+                                              getAuthors = FALSE))
+```
+
+```{r}
+qs <- qs %>% 
+  mutate(pmid = map_chr(res, list("IdList", "Id")))
+```
+
+```{r}
+abstracts3 <- abstracts3 %>% 
+  inner_join(qs[, c("pmid", "sheet", "country", "state/province", "city", "institution")], 
+             by = "pmid")
+abstracts3 <- abstracts3 %>% 
+  select(pmid:journal, sheet:institution) %>% 
+  distinct()
+```
+
+I want to add the pmids back to the Google Sheets so next time I do this analysis, after I update the sheets, it will be easier. The problem is that the titles I manually copied and pasted are somehow different from the titles pulled from the PubMed API. It seems that the spaces have different UTF encoding and the N-dashes are different. I also need to merge this to the main sheet for geocoding and matching abstracts to sheets of interest.
+
+```{r}
+# Adding pmid back to sheets
+gs4_deauth()
+sheets <- read_metadata_fresh(c("Prequel", "Microdissection", "smFISH", "Array", 
+                                "ISS", "No imaging", "Analysis", "Prequel analysis"))
+```
+
+I'll save these as local Excel sheets first and then manually copy and paste the pmids into the online sheets, so I don't lose the blue highlighting of papers that impressed me.
+```{r}
+sheets <- map(sheets, ~ .x %>% 
+                left_join(qs[, c("title", "URL", "pmid")], by = c("title", "URL")))
+sheets <- map(sheets, distinct)
+```
+
+```{r}
+names(sheets) <- c("Prequel", "Microdissection", "smFISH", "Array", 
+                   "ISS", "No imaging", "Analysis", "Prequel analysis")
+```
+
+```{r}
+library(writexl)
+```
+
+```{r}
+write_xlsx(sheets, path = "sheets.xlsx")
+```
+
+I'll get the abstracts of those papers that can't be found on PubMed, bioRxiv, or arXiv manually. There aren't that many of them.
+
+```{r}
+for_biorxiv <- rbind(data_sheets[, v], 
+                     analysis_sheets[, v]) %>% 
+  distinct() %>% 
+  filter(journal == "bioRxiv") %>% 
+  mutate(doi = str_remove(URL, "^https://doi.org/"))
+```
+
+```{r}
+abstracts4 <- for_biorxiv %>% 
+  mutate(abstract = map_chr(doi, ~ slowly(biorxiv_content, rate_delay(1))(doi = .x)[[1]]$abstract))
+```
+
+That's easy enough. Pubmed API sucks.
+
+Now arXiv. 
+```{r}
+for_arxiv <- rbind(data_sheets[, v], 
+                     analysis_sheets[, v]) %>% 
+  distinct() %>% 
+  filter(journal == "arXiv")
+```
+
+```{r}
+for_arxiv
+```
+
+Since there's only one entry, I'll do it manually.
+```{r}
+for_arxiv$abstract <- "Spatial studies of transcriptome provide biologists with gene expression maps of heterogeneous and complex tissues. However, most experimental protocols for spatial transcriptomics suffer from the need to select beforehand a small fraction of genes to be quantified over the entire transcriptome. Standard single-cell RNA sequencing (scRNA-seq) is more prevalent, easier to implement and can in principle capture any gene but cannot recover the spatial location of the cells. In this manuscript, we focus on the problem of imputation of missing genes in spatial transcriptomic data based on (unpaired) standard scRNA-seq data from the same biological tissue. Building upon domain adaptation work, we propose gimVI, a deep generative model for the integration of spatial transcriptomic data and scRNA-seq data that can be used to impute missing genes. After describing our generative model and an inference procedure for it, we compare gimVI to alternative methods from computational biology or domain adaptation on real datasets and outperform Seurat Anchors, Liger and CORAL to impute held-out genes."
+```
+
+Then finally the ones that aren't on PubMed, bioRxiv, or arXiv, or ones for which the PubMed query failed (manually searching it on the PubMed website would still works, which means that API stinks).
+```{r}
+manual$title
+```
+
+```{r}
+manual$abstract <- c("In silico three-dimensional (3D) reconstruction of tissues/organs based on single-cell profiles is required to comprehensively understand how individual cells are organized in actual tissues/organs. Although several tissue reconstruction methods have been developed, they are still insufficient to map cells on the original tissues in terms of both scale and quality. In this study, we aim to develop a novel informatics approach which can reconstruct whole and various tissues/organs in silico. As the first step of this project, we conducted single-cell transcriptome analysis of 38 individual cells obtained from two mouse blastocysts (E3.5d) and tried to reconstruct blastocyst structures in 3D. In reconstruction step, each cell position is estimated by 3D principal component analysis and expression profiles of cell adhesion genes as well as other marker genes. In addition, we also proposed a reconstruction method without using marker gene information. The resulting reconstructed blastocyst structures implied an indirect relationship between the genes of Myh9 and Oct4.",
+                     "In situ staining of a target mRNA at several time points during the development of a D. melanogaster embryo gives one a detailed spatio-temporal view of the expression pattern of a given gene. We have developed algorithms and software for analyzing a database of such images with the goal of being able to identify coordinately expressed genes and further our understanding of cis-regulatory control during embryogenesis. Our approach combines measures of similarity at both the global and local levels, based on Gaussian Mixture Model (GMM) decompositions. At the global level, the observed distribution of pixel values is quantized using an adaptive GMM decomposition and then quantized images are compared using mutual information. At the local level, we decompose quantized images into 2-dimensional Gaussian kernels or 'blobs' and then develop a blob-set matching method to search for the best matching traits in different pattern-images. A hybrid scoring method is proposed to combine both global and local matching results. We further develop a voting scheme to search for genes with similar spatial staining patterns over the time course of embryo development. To evaluate the effectiveness of our approach, we compare it with several global image matching schemes and a controlled vocabulary method. We then apply our method to 4400 images of 136 genes to detect potentially co-regulated genes that have similar spatio-temporal patterns, using expert-annotation to evaluate our results.",
+                     "The spatio-temporal patterning of gene expression in early embryos is an important source of information for understanding the functions of genes involved in development. Most analyses to date rely on biologists' visual inspection of microscope images, which for large-scale datasets becomes impractical and subjective. In this paper, we introduce a new method for clustering 2D images of gene expression patterns in Drosophila melanogaster (fruit fly) embryos. These patterns, typically generated from in situ hybridization of mRNA probes, reveal when, where and how abundantly a target gene is expressed. Our method involves two steps. First, we use an eigen-embryo model to reduce noise and generate feature vectors that form a better basis for capturing the salient aspects of quantized embryo images. Second, we cluster these feature vectors by an efficient minimum-spanning-tree partition algorithm. We investigate this approach on fly embryo datasets that span the entire course of embryogenesis. The experimental results show that our clustering algorithm produces superior pattern clusters. We also find previously unobserved clusters of genes that share biologically interesting patterns of gene-expression",
+                     "In this paper, we present an approach for classification and indexing of embryonic gene expression pattern images using shape descriptors for retrieval of data in the biological domain. For this purpose, the image is first subjected to a registration process that involves edge fitting and size-standardization. It is followed by segmentation in order to delineate the expression pattern from the cellular background. The moment invariants for the segmented pattern are computed. Image dissimilarity between images is computed based on these moment invariants for each image pair. Area and Centroids of the segmented expression shapes are used to neutralize the invariant behavior of moment invariants during image retrieval. Details of the proposed approach along with analysis of a pilot dataset are presented in this paper.",
+                     "We review quantitative methods and software developed to analyze genome-scale, brain-wide spatially-mapped gene-expression data. We expose new methods based on the underlying high-dimensional geometry of voxel space and gene space, and on simulations of the distribution of co-expression networks of a given size. We apply them to the Allen Atlas of the adult mouse brain, and to the coexpression network of a set of genes related to nicotine addiction retrieved from the NicSNP database. The computational methods are implemented in BrainGeneExpressionAnalysis (BGEA), a Matlab toolbox available for download."
+)
+```
+
+```{r}
+manual$id_query <- NULL
+abstracts4$doi <- NULL
+```
+
+```{r}
+abstracts4 <- rbind(abstracts4, for_arxiv, manual)
+abstracts4 <- abstracts4 %>% 
+  left_join(rbind(data_sheets[, c("title", "URL", "date_published")], 
+                  analysis_sheets[, c("title", "URL", "date_published")]),
+            by = c("title", "URL")) %>% 
+  mutate(date_num = as.numeric(date_published))
+```
+
+```{r}
+abstracts3 <- abstracts3 %>% 
+  unite(col = "date_published", year, month, day, sep = "-") %>% 
+  mutate(date_published = ymd(date_published),
+         date_num = as.numeric(date_published)) %>% 
+  select(-doi, -jabbrv)
+```
+
+```{r}
+abstracts4$pmid <- NA_character_
+abstracts4$URL <- NULL
+```
+
+```{r}
+curated_abstracts <- rbind(abstracts3, abstracts4)
+```
+
+```{r}
+curated_abstracts <- curated_abstracts %>% 
+  distinct()
+```
+
+```{r}
+saveRDS(curated_abstracts, "curated_abstracts.rds")
+```

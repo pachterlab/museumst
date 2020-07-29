@@ -1,0 +1,106 @@
+---
+title: "Getting and updating curated abstract collection"
+author: "Lambda Moses"
+date: "7/13/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Again, since there aren't many papers from arXiv and it isn't straightforward to get the abstract from the title of doi, I'll do the arXiv ones manually.
+```{r}
+library(tidyverse)
+library(easyPubMed)
+library(rbiorxiv)
+library(lubridate)
+theme_set(theme_bw())
+```
+
+```{r}
+nms <- c("Prequel", "Microdissection", "smFISH", "Array", "ISS", "No imaging", 
+         "Analysis", "Prequel analysis")
+all_sheets <- read_metadata(sheet_use = nms, update = TRUE)
+```
+
+```{r}
+abstracts <- readRDS("curated_abstracts.rds")
+```
+
+```{r}
+abstracts <- abstracts %>% 
+  filter(pmid != "32619996" | is.na(pmid))
+```
+
+```{r}
+pmids <- unique(all_sheets$pmid)
+pmids_old <- unique(abstracts$pmid)
+pmids <- pmids[!is.na(pmids)]
+pmids_old <- pmids_old[!is.na(pmids_old)]
+```
+
+```{r}
+pmids_new <- setdiff(pmids, pmids_old)
+pmid_res <- map(pmids_new, slowly(get_pubmed_ids, rate_delay(0.2)), 
+                api_key = Sys.getenv("PUBMED_API_KEY"))
+my_xmls <- map(pmid_res, fetch_pubmed_data)
+xmls_list <- map(my_xmls, articles_to_list)
+abstracts_new <- map_dfr(xmls_list, article_to_df, getAuthors = FALSE, max_chars = 1e6)
+```
+
+Also get new abstracts from bioRxiv
+```{r}
+for_biorxiv <- all_sheets %>% 
+  filter(journal == "bioRxiv") %>% 
+  anti_join(abstracts, by = "title") %>% 
+  mutate(doi = str_remove(URL, "^https://doi.org/"))
+for_biorxiv
+```
+
+```{r}
+for_biorxiv <- for_biorxiv %>% 
+  mutate(abstract = map_chr(doi, ~ slowly(biorxiv_content, rate_delay(1))(doi = .x)[[1]]$abstract))
+```
+
+```{r}
+setdiff(names(abstracts), names(abstracts_new))
+```
+
+```{r}
+for_biorxiv <- for_biorxiv %>% 
+  mutate(date_num = as.numeric(date_published)) %>% 
+  unite(col = "city2", city, country, sep = ", ", remove = FALSE)
+```
+
+```{r}
+abstracts_new <- abstracts_new %>% 
+  unite(col = "date_published", year, month, day, sep = "-") %>% 
+  mutate(date_published = ymd(date_published),
+         date_num = as.numeric(date_published)) %>% 
+  select(-doi, -jabbrv)
+all_sheets$pmid <- as.character(all_sheets$pmid)
+abstracts_new <- abstracts_new %>% 
+  left_join(all_sheets[, c("pmid", "country", "state/province", "city", "institution", "sheet")],
+            by = "pmid")
+abstracts_new <- abstracts_new %>% 
+  unite(col = "city2", city, country, sep = ", ", remove = FALSE)
+```
+
+```{r}
+abstracts <- rbind(abstracts, abstracts_new[, names(abstracts)], for_biorxiv[, names(abstracts)])
+```
+
+```{r}
+abstracts <- abstracts %>% 
+  distinct()
+```
+
+```{r}
+abstracts[duplicated(abstracts$title),]
+```
+
+```{r}
+saveRDS(abstracts, "curated_abstracts.rds")
+```
+

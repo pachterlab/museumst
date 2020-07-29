@@ -1,0 +1,555 @@
+---
+title: "Text mining abstracts of curated literature"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{text_mining2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r}
+library(tidyverse)
+library(quanteda)
+library(stm)
+library(text2vec)
+library(lexvarsdatr)
+library(ggrepel)
+library(preText)
+library(caret)
+library(furrr)
+library(stminsights)
+library(uwot)
+library(tidytext)
+library(gam)
+theme_set(theme_bw())
+plan(multiprocess)
+```
+
+```{r}
+abstracts <- readRDS("curated_abstracts.rds")
+```
+
+```{r}
+abstracts %>% 
+  filter(str_length(abstract) < 100)
+```
+
+```{r}
+anyDuplicated(abstracts$pmid)
+```
+
+Sometimes I put the same paper in multiple sheets since it's relevant to them all. So what to do here? I will use date published and journal as covariates for sure. I'm not sure about location. Shall I use "sheet" as a covariate? It makes sense to do so, since "sheet" does have a lot to do with topic in ways I already know. But quanteda doesn't allow duplicate ID's for the documents. Oh, I have an idea. I'll one hot encode the sheets, but in my flavor.
+
+```{r}
+abs_meta <- abstracts %>% 
+  select(-sheet) %>% 
+  distinct()
+```
+
+```{r}
+one_hot_fun <- function(x, sheet_use) {
+  as.integer(map_lgl(x, ~ sheet_use %in% .x))
+}
+```
+
+```{r}
+abs1hot <- abstracts %>% 
+  select(pmid, title, sheet) %>% 
+  group_nest(pmid, title, .key = "sheet") %>% 
+  mutate(sheet = map(sheet, "sheet"))
+```
+
+```{r}
+sn <- unique(abstracts$sheet)
+```
+
+```{r}
+cols1hot <- map(sn, ~ one_hot_fun(abs1hot$sheet, .x))
+names(cols1hot) <- str_replace_all(sn, "\\s", "_")
+cols1hot <- as.data.frame(cols1hot)
+```
+
+```{r}
+abs1hot <- cbind(abs1hot, cols1hot) %>% 
+  select(-sheet)
+anyDuplicated(abs1hot$title)
+```
+
+```{r}
+abs_meta <- abs_meta %>% 
+  left_join(abs1hot, by = c("pmid", "title"))
+```
+
+```{r}
+abs_meta <- abs_meta %>% 
+  unite(col = "city2", city, country, sep = ", ", remove = FALSE) 
+```
+
+```{r}
+abs_meta <- abs_meta %>% 
+  mutate_if(is.integer, factor, levels = c("0", "1"))
+```
+
+```{r}
+abs_meta %>% 
+  mutate(abs_len = str_length(abstract)) %>% 
+  arrange(abs_len) %>% 
+  head(20)
+```
+
+```{r}
+abs_meta <- abs_meta %>% 
+  filter(str_length(abstract) > 100)
+```
+
+```{r}
+abstracts %>% 
+  count(country, city) %>% 
+  ggplot(aes(n)) +
+  stat_ecdf() +
+  labs(x = "Number of publications per city", y = "F") +
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  scale_y_continuous(breaks = scales::breaks_width(0.2))
+```
+
+```{r}
+df <- abstracts %>% 
+  count(country, city) %>% 
+  arrange(desc(n)) %>% 
+  mutate(rank = row_number(desc(n)),
+         rel_rank = rank/max(rank),
+         cum_n = cumsum(n),
+         cum_prop = cum_n/sum(n))
+ggplot(df, aes(rel_rank, cum_prop)) +
+  geom_line() +
+  scale_x_continuous(breaks = scales::breaks_width(0.2), labels = scales::percent) +
+  scale_y_continuous(breaks = scales::breaks_width(0.2), labels = scales::percent) +
+  labs(x = "City percentile", y = "Percent of publications")
+```
+
+```{r}
+abs_meta <- abs_meta %>% 
+  mutate(city_eff = fct_lump_min(city2, 3))
+```
+
+Since the papers not on PubMed obviously don't have pmid's, and there're quite a few of them, I'll use the titles, which are not duplicated, as the document ID's.
+
+```{r}
+ac <- corpus(abs_meta, docid_field = "title", text_field = "abstract")
+```
+
+Again, I'll use preText to help me to decide the preprocessing steps
+```{r}
+ac_sub <- corpus_sample(ac, size = 100)
+```
+
+```{r}
+ac_fp <- factorial_preprocessing(ac_sub, parallel = FALSE, 
+                                 intermediate_directory = ".", 
+                                 return_results = FALSE,
+                                 infrequent_term_threshold = 0.002)
+```
+
+```{r}
+head(ac_fp$choices)
+```
+```{r}
+preText_results <- preText(
+    ac_fp,
+    dataset_name = "curated abstracts",
+    distance_method = "cosine",
+    num_comparisons = 50)
+```
+
+```{r, fig.width=6, fig.height=8}
+preText_score_plot(preText_results)
+```
+
+```{r}
+regression_coefficient_plot(preText_results,
+                            remove_intercept = TRUE)
+```
+
+Cool, it looks like removing stopwords and punctuation would make the results more typical, and other choices don't really affect how typical the results are.
+
+What are the common phrases?
+
+```{r}
+ac_col <- tokens(ac, split_hyphens = TRUE, remove_symbols = TRUE) %>% 
+  tokens_remove(c(stopwords(), "sup")) %>% 
+  tokens_wordstem() %>% 
+  textstat_collocations(min_count = 20, size = 2:4) %>% 
+  filter(count_nested < count) %>% 
+  arrange(desc(count)) 
+```
+
+```{r}
+ac_col
+```
+
+That makes sense.
+
+```{r}
+phrases <- str_split(ac_col$collocation, pattern = " ", simplify = FALSE)
+```
+
+```{r}
+ac_tokens <- tokens(ac, remove_punct = TRUE, 
+                    remove_symbols = TRUE, remove_url = TRUE,
+                    split_hyphens = TRUE) %>% 
+  tokens_tolower(keep_acronyms = TRUE) %>% 
+  tokens_remove(stopwords()) %>% 
+  tokens_wordstem() %>% 
+  tokens_compound(phrases)
+```
+
+```{r}
+ac_dfm <- dfm(ac_tokens)
+ac_dfm2 <- dfm_trim(ac_dfm, min_docfreq = 0.002, docfreq_type = "prop")
+```
+
+```{r}
+k_result2 <- my_searchK(ac_dfm2, K = c(seq(3, 20, by = 2), 20, 25, 30), 
+                       prevalence = ~ s(date_num, df = 3) + 
+                         #journal + city_eff + 
+                         Prequel + Prequel_analysis + Microdissection +
+                         smFISH + Analysis + Array + ISS +
+                         No_imaging,
+                       gamma.prior = "L1",
+                       verbose = FALSE, seed = 1891)
+```
+
+```{r}
+plot_k_result(k_result2)
+```
+
+I guess I'll try 11 to 13 topics. Still wondering why heldout likelihood is decreasing. Overfitting? I don't think so; this still happened even when I only used an intercept for prevalence.
+
+```{r}
+plot_ec(k_result2, c(5, 13, 15, 20))
+```
+
+```{r}
+stm_res <- stm(ac_dfm2, K = 13, prevalence = ~ stm::s(date_num, df = 3) + 
+                 Prequel + Prequel_analysis + Microdissection +
+                 smFISH + Analysis + Array + ISS + No_imaging,
+               gamma.prior = "L1", seed = 1919)
+```
+
+```{r}
+labelTopics(stm_res, topics = 1:13)
+```
+
+```{r}
+plot(stm_res)
+```
+
+```{r, fig.width=6, fig.height=6}
+td_beta <- tidy(stm_res)
+td_beta %>%
+  group_by(topic) %>%
+  top_n(20, beta) %>%
+  ungroup() %>%
+  mutate(topic = paste0("Topic ", topic),
+         topic = fct_relevel(topic, paste0("Topic ", 1:11)),
+         term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta)) +
+  geom_segment(aes(xend = term), yend = 0, show.legend = FALSE) +
+  geom_point(color = "blue") +
+  facet_wrap(~ topic, scales = "free_y", ncol = 5) +
+  coord_flip() +
+  scale_x_reordered() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  labs(x = NULL, y = expression(beta),
+       title = "Highest word probabilities for each topic",
+       subtitle = "Different words are associated with different topics")
+```
+
+```{r}
+plot(stm_res, type = "perspectives", topics = c(10, 12))
+```
+
+```{r}
+effs <- estimateEffect( ~ s(date_num, df = 3), stm_res, 
+                       metadata = docvars(ac_dfm2))
+```
+
+Anyway, since I manually curated these, I don't think topic modeling adds much to what I already know. But I think GloVe embeddings might show something I don't already know. But this is interesting: How often papers from prequel and current era share topics?
+
+```{r}
+effs_df <- get_effects(effs, "date_num", type = "continuous")
+effs_df <- effs_df %>% 
+  mutate(topic = fct_relevel(topic, as.character(1:13)),
+         date_published = as_date(value))
+```
+
+```{r}
+ggplot(effs_df, aes(date_published, proportion)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.5, fill = "gray") +
+  geom_line() +
+  facet_wrap(~ topic, ncol = 5) #+
+  #coord_cartesian(ylim = c(0, 0.4))
+```
+
+```{r}
+effs_summ <- tidy(effs) %>% 
+  mutate(p_val_adj = p.adjust(p.value))
+```
+
+```{r}
+effs_summ %>% 
+  arrange(p.value)
+```
+
+Topic 3 is about gene trap, and I already know that it was much more prevalent in the 1990s. Topic 5 is about Ciona intestinalis, which I also know peaked in the 2000s. Topic 1 is about Drosophila WMISH image annotation, which I also know has peaked in the 2000s. Topic 12 is about developmental ISH atlases, which I also already know has peaked in the 2000s. I didn't learn anything new.
+
+```{r}
+effs_era <- estimateEffect(~ Prequel + Prequel_analysis + Microdissection +
+                 smFISH + Analysis + Array + ISS + No_imaging,
+                 stm_res, metadata = docvars(ac_dfm2))
+```
+
+```{r}
+effs_era_summ <- tidy(effs_era)
+effs_era_summ <- effs_era_summ %>% 
+  mutate(p_val_adj = p.adjust(p.value))
+effs_era_summ %>% 
+  arrange(p.value)
+```
+
+It seems that it sort of recapitulates the sheets, but not always.
+
+```{r}
+heatmap(stm_res$theta)
+```
+
+```{r}
+ac_fcm <- fcm(ac_tokens, context = "window", count = "weighted", weights = 1/(1:5))
+```
+
+```{r}
+glove <- GlobalVectors$new(rank = 50, x_max = 10)
+ac_gv <- glove$fit_transform(ac_fcm, n_iter = 50)
+```
+
+```{r}
+ac_context <- glove$components
+ac_vectors <- ac_gv + t(ac_context)
+```
+
+```{r}
+dim(ac_vectors)
+```
+
+Just to inspect the nearest neighbors of some keywords to see if this embedding makes sense
+```{r}
+kws <- c("brain", "spatial", "develop", "drosophila", "mirna")
+nns <- map_dfr(kws, lvdr_quick_cosine, tfm = ac_vectors, include_targ = TRUE)
+```
+
+```{r}
+nns
+```
+
+It does seem to make sense, expect drosophila + chicken... Well, since I do know what's in this collection, given this background, it does make sense, since a lot of papers on drosophila and chicken are about WMISH developmental atlases. 
+```{r}
+wf <- textstat_frequency(ac_dfm)
+words_plot <- wf$feature[wf$frequency > 30]
+```
+
+```{r}
+sim_mat <- sim2(ac_vectors[rownames(ac_vectors) %in% words_plot,])
+```
+
+```{r}
+mds_res <- cmdscale(1-sim_mat, k = 5, eig = TRUE) 
+mds_mat <- mds_res$points %>% 
+  data.frame() %>% 
+  mutate(label = rownames(sim_mat))
+```
+
+```{r}
+mds_mat <- mds_mat %>% 
+  left_join(wf, by = c("label" = "feature"))
+```
+
+```{r}
+mds_plt <- mds_mat %>% 
+  filter(rank <= 150)
+```
+
+```{r}
+ggplot(mds_mat, aes(X1, X2)) +
+  geom_point(aes(color = docfreq)) +
+  scale_color_distiller(palette = "Blues", direction = 1)
+```
+
+```{r}
+mds_plt %>% 
+  ggplot(aes(X1, X2)) +
+  geom_point() +
+  geom_text_repel(aes(label = label), segment.alpha = 0.3)
+```
+
+X1 separates terms about gene expression patterns (left) from those about methods, though the methods there include everything but enhancer and gene traps (right). X2 separates descriptions of biological systems and techniques (top) from description and interpretation of data (bottom). But it also seems that the top of X2 tend to be more common in older papers while the bottom tend to be common in newer papers. 
+
+```{r}
+mds_plt %>% 
+  ggplot(aes(X3, X4)) +
+  geom_point() +
+  geom_text_repel(aes(label = label), segment.alpha = 0.3)
+```
+
+X3 separates results (left) from methods (right). X4 separates biological systems (top) from interpretations of biological systems (bottom)
+
+```{r}
+ac_umap <- as.data.frame(umap(ac_vectors[rownames(ac_vectors) %in% words_plot,]))
+ac_umap$label <- rownames(ac_vectors[rownames(ac_vectors) %in% words_plot,])
+ac_umap <- ac_umap %>% 
+  mutate(label = case_when(label %in% mds_plt$label ~ label,
+                           TRUE ~ ""))
+```
+
+```{r}
+ggplot(ac_umap, aes(V1, V2)) +
+  geom_point() +
+  geom_text_repel(aes(label = label), segment.alpha = 0.3)
+```
+
+```{r}
+feat <- names(topfeatures(ac_fcm, 80))
+fcm2 <- fcm_select(ac_fcm, pattern = feat)
+set.seed(19)
+textplot_network(fcm2, min_freq = 0.9, vertex_labelsize = log((rowSums(fcm2) + 1)/(min(rowSums(fcm2)) + 1)))
+```
+
+```{r}
+ac_dfm2_tidy <- tidy(ac_dfm2)
+# Add the metadata
+ac_dfm2_tidy <- ac_dfm2_tidy %>% 
+  left_join(abstracts[, c("date_published", "title", "sheet")], by = c("document" = "title"))
+```
+
+```{r}
+words_by_time <- ac_dfm2_tidy %>%
+  filter(date_published >= lubridate::ymd("1995-01-01")) %>% 
+  mutate(time_floor = floor_date(date_published, unit = "year")) %>%
+  count(time_floor, term) %>%
+  group_by(time_floor) %>%
+  mutate(time_total = sum(n)) %>%
+  group_by(term) %>%
+  mutate(word_total = sum(n)) %>%
+  ungroup() %>%
+  rename(count = n) %>%
+  filter(word_total > 30, !is.na(time_floor))
+```
+
+```{r}
+words_by_time <- words_by_time %>% 
+  rename(word = term)
+```
+
+```{r}
+words_by_time <- words_by_time %>% 
+  mutate(prop = count/time_total)
+```
+
+First sanity check, just use Julia's logistic regression method before using slingshot's `gam` method.
+```{r}
+nested_data <- words_by_time %>%
+  nest(data = c(time_floor, count, time_total, word_total, prop))
+```
+
+```{r}
+nested_models <- nested_data %>%
+  mutate(models = map(data, ~ glm(cbind(count, time_total) ~ time_floor, ., 
+                                  family = "binomial")))
+```
+
+```{r}
+slopes <- nested_models %>%
+  mutate(models = map(models, tidy)) %>%
+  unnest(cols = "models") %>%
+  filter(term == "time_floor") %>%
+  mutate(p_val_adj = p.adjust(p.value))
+```
+
+```{r}
+slopes <- slopes %>% 
+  select(-data)
+```
+
+```{r}
+top_slopes <- slopes %>% 
+  filter(p_val_adj < 0.05) %>% 
+  arrange(p_val_adj)
+```
+
+Nothing surprising. 
+```{r}
+words_by_time %>%
+  inner_join(top_slopes, by = "word") %>%
+  ggplot(aes(time_floor, prop)) +
+  geom_line() +
+  labs(x = "Year", y = "Word frequency") +
+  facet_wrap(~ word)
+```
+
+Now I try slingshot's GAM method.
+```{r}
+gam_models <- nested_data %>% 
+  mutate(models = map(data, ~ suppressWarnings(gam(prop ~ s(time_floor, 3), data = .))))
+```
+
+```{r}
+gam_models <- gam_models %>% 
+  select(-data) %>% 
+  mutate(models = map(models, tidy)) %>%
+  unnest(cols = "models") %>%
+  filter(term == "s(time_floor, 3)") %>%
+  mutate(p_val_adj = p.adjust(p.value))
+```
+
+```{r}
+top_gam <- gam_models %>% 
+  filter(p_val_adj < 0.05) %>% 
+  arrange(p_val_adj)
+```
+
+```{r}
+words_by_time %>%
+  inner_join(top_gam, by = "word") %>%
+  ggplot(aes(time_floor, prop)) +
+  geom_line() +
+  labs(x = "Year", y = "Word frequency") +
+  facet_wrap(~ word)
+```
+
+```{r}
+words_hm <- unique(c(top_gam$word, top_slopes$word))
+word_mat_df <- words_by_time %>% 
+  filter(word %in% words_hm) %>% 
+  mutate(year = year(time_floor)) %>% 
+  select(year, word, prop) %>% 
+  pivot_wider(id_cols = word, names_from = year, values_from = prop)
+```
+
+```{r}
+word_mat <- as.matrix(word_mat_df[, -1])
+rownames(word_mat) <- word_mat_df$word
+```
+
+```{r}
+word_mat <- t(scale(t(word_mat)))
+```
+
+```{r, fig.width=5, fig.height=5}
+heatmap(word_mat, Colv = NA, scale = "none")
+```
