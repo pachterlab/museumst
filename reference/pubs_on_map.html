@@ -74,7 +74,7 @@ method or species." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">museumst</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9002</span>
       </span>
     </div>
 
@@ -151,13 +151,16 @@ method or species.</p>
 
     <pre class="usage"><span class='fu'>pubs_on_map</span>(
   <span class='no'>pubs</span>,
-  <span class='no'>inst_gc</span>,
   <span class='no'>city_gc</span>,
   <span class='kw'>zoom</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"world"</span>, <span class='st'>"europe"</span>, <span class='st'>"usa"</span>),
+  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"point"</span>, <span class='st'>"bin2d"</span>, <span class='st'>"hexbin"</span>),
   <span class='kw'>facet_by</span> <span class='kw'>=</span> <span class='st'>"none"</span>,
+  <span class='kw'>n_top</span> <span class='kw'>=</span> <span class='fl'>Inf</span>,
   <span class='kw'>ncol</span> <span class='kw'>=</span> <span class='fl'>3</span>,
   <span class='kw'>label_cities</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>per_year</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+  <span class='kw'>n_label</span> <span class='kw'>=</span> <span class='fl'>10</span>,
+  <span class='kw'>per_year</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>bins</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>70</span>, <span class='fl'>70</span>)
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -165,17 +168,13 @@ method or species.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>pubs</th>
-      <td><p>A data frame with at least these columns:</p><dl>
+      <td><p>A data frame with at least these columns:</p><dl'>
   <dt>journal</dt><dd><p>Name of the journal of the paper.</p></dd>
   <dt>year</dt><dd><p>Year when the paper was published.</p></dd>
 
 </dl><p>There must be one row per publication or per method or species for each title
 if faceting by those. If facetting, then a column whose name is the value in
 `facet_by` must be present.</p></td>
-    </tr>
-    <tr>
-      <th>inst_gc</th>
-      <td><p>From geocode_inst_city</p></td>
     </tr>
     <tr>
       <th>city_gc</th>
@@ -188,8 +187,18 @@ Europe and some Eastern European countries are partially cropped off) or only
 the US.</p></td>
     </tr>
     <tr>
+      <th>plot</th>
+      <td><p>Whether to plot points, rectangular bins (bin2d), or hexagonal
+bins (hexbin). The binned options are useful when there's overplotting.</p></td>
+    </tr>
+    <tr>
       <th>facet_by</th>
       <td><p>Name of a column for facetting.</p></td>
+    </tr>
+    <tr>
+      <th>n_top</th>
+      <td><p>Number of categories with the most publications to plot in facets;
+the other categories are lumped into "other".</p></td>
     </tr>
     <tr>
       <th>ncol</th>
@@ -201,9 +210,19 @@ the US.</p></td>
 are not labeled to reduce clutter.</p></td>
     </tr>
     <tr>
+      <th>n_label</th>
+      <td><p>Number of top cities to label, so the labels won't clutter the
+plot.</p></td>
+    </tr>
+    <tr>
       <th>per_year</th>
       <td><p>Logical, whether to do the count for each year separately.
 This is for making animations with gganimate.</p></td>
+    </tr>
+    <tr>
+      <th>bins</th>
+      <td><p>Numeric vector of length 2, the number of bins for bin2d or hex
+in the x and y directions. Ignored if plotting points.</p></td>
     </tr>
     </table>
 
@@ -234,7 +253,7 @@ plotted on a world map.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

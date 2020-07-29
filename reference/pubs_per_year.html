@@ -74,7 +74,7 @@ makes the plot easier to read than filling with different colors." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">museumst</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9002</span>
       </span>
     </div>
 
@@ -149,14 +149,21 @@ as the dates are incoherent with those for published papers. I find facetting
 makes the plot easier to read than filling with different colors.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>pubs_per_year</span>(<span class='no'>pubs</span>, <span class='kw'>facet_by</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>binwidth</span> <span class='kw'>=</span> <span class='fl'>365</span>)</pre>
+    <pre class="usage"><span class='fu'>pubs_per_year</span>(
+  <span class='no'>pubs</span>,
+  <span class='kw'>facet_by</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>binwidth</span> <span class='kw'>=</span> <span class='fl'>365</span>,
+  <span class='kw'>preprints</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>n_top</span> <span class='kw'>=</span> <span class='fl'>Inf</span>,
+  <span class='kw'>sort_by</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"first_appeared"</span>, <span class='st'>"count"</span>, <span class='st'>"recent_count"</span>)
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>pubs</th>
-      <td><p>A data frame with at least these columns:</p><dl>
+      <td><p>A data frame with at least these columns:</p><dl'>
   <dt>journal</dt><dd><p>Name of the journal of the paper.</p></dd>
   <dt>year</dt><dd><p>Year when the paper was published.</p></dd>
 
@@ -171,6 +178,22 @@ if faceting by those. If facetting, then a column whose name is the value in
     <tr>
       <th>binwidth</th>
       <td><p>Width of bins for the histogram in days.</p></td>
+    </tr>
+    <tr>
+      <th>preprints</th>
+      <td><p>Logical, whether preprints should be included.</p></td>
+    </tr>
+    <tr>
+      <th>n_top</th>
+      <td><p>Number of categories with the most publications to plot in facets;
+the other categories are lumped into "other".</p></td>
+    </tr>
+    <tr>
+      <th>sort_by</th>
+      <td><p>How to sort the facets. first_appeared means the category that
+appeared earlier will be nearer to the top. count means the category with more
+count (number of publications) will be nearer to the top. Ignored if not
+facetting.</p></td>
     </tr>
     </table>
 
@@ -193,7 +216,7 @@ if faceting by those. If facetting, then a column whose name is the value in
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

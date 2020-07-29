@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">museumst</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9002</span>
       </span>
     </div>
 
@@ -99,59 +99,9 @@
 <a href="#museumst-museum-of-spatial-transcriptomics" class="anchor"></a>museumst: Museum of Spatial Transcriptomics</h1></div>
 <!-- badges: start -->
 
-<p>This package contains functions to make plots in analysis of manually curated metadata about publications throughout the history of spatial transcriptomics. The vignettes are the analysis notebooks.</p>
-<p>These plots are made for all sheets unless specified:</p>
-<ul>
-<li>Time line of major events. While all sheets will have it, it’s made in the sheet specific section.</li>
-<li>Number of publications
-<ul>
-<li>Per year (excluding preprints)</li>
-<li>Per journal</li>
-<li>Per species</li>
-<li>Per method</li>
-<li>Make isotype plot for top 5 species, just a fun and memorable visualization</li>
-<li>Per institution</li>
-<li>Per country</li>
-<li>Per city, plotted on a world map. In the sheet specific section, if there are many cities in one country represented in that sheet, then another map just for that country.</li>
-<li>Per species per city, since I noted that some institutions focus on a certain species</li>
-<li>Per method per city, similar reason to why per species per city.</li>
-<li>Which method has data for the most species</li>
-</ul>
-</li>
-<li>Number of datasets (for those sheets with dataset information)
-<ul>
-<li>Per publication</li>
-<li>Per species</li>
-<li>Number of genes and cells/bins per dataset, separated by method; this will be in the sheet specific section as different sheets need to be treated differently here</li>
-</ul>
-</li>
-<li>Word cloud
-<ul>
-<li>All titles</li>
-<li>Titles for top species (sheet specific)</li>
-<li>Titles for top methods (sheet specific)</li>
-<li>Titles over time will be in the sheet specific section as different sheets have different time scales.</li>
-<li>Department names</li>
-<li>For dataset sheets, downstream analyses (not standardized, don’t take it too seriously as it might depend on my mood when I wrote it)</li>
-<li>For data analysis sheets, core principles and summaries</li>
-<li>Tissues for each species</li>
-</ul>
-</li>
-<li>For data analysis sheets, code availability status</li>
-<li>For non-prequel sheets, programming languages used</li>
-</ul>
-<p>Instead of using a child document for the shared part, I still decided to copy the notebook so I can fine tune the plots for visual appeal and write comments. I can also feel free to use <code>gganimate</code>. Shall I turn this spreadsheet and these notebooks into a website for people to explore? That sounds like a good idea, though the only way I know how to do it are <code>shiny</code> and <code>blogdown</code>.</p>
-<p>To do:</p>
-<ul>
-<li>Cache the entire sheet as well, and won’t query Google Sheet itself unless user chooses to update</li>
-<li>More defensive programming</li>
-<li>Move dependencies for isotype plot, timeline, and maps to Suggests</li>
-<li>Polish user interface</li>
-<li>Build shiny app for exploring this metadata</li>
-<li>Put the vignettes on a RStudio Cloud project for those who do code to play around with. The entire package repo will be there so the user can also change the code and make other plots.</li>
-<li>Get this package to CRAN</li>
-<li>The code to produce final figures for the review papers about this metadata will be in a separate repo, but this package will make it a lot easier to make those figures.</li>
-</ul>
+<p>Welcome to the Museum of Spatial Transcriptomics! This package contains functions and notebooks used to analyze the metadata of a curated database of literature in spatial transcriptomics. The analyses and the function documentations can be read on the <code>pkgdown</code> website of this package. To make the analysis transparent, we put this repository on RStudio Cloud; you can change parameters and even change the code. The analysis notebooks are in the <code>vignettes</code> directory. The LCM text mining notebooks that take longer to run are in the <code>data-raw</code> directory.</p>
+<p>The analyses are generally broken down by type of spatial technology, in addition to “prequel” technologies (i.e. in situ hybridization atlases) and data analysis publications.</p>
+<p>The analyses can be explored on RStudio Cloud: <a href="https://rstudio.cloud/project/1325402" class="uri">https://rstudio.cloud/project/1325402</a> The database can be accessed here: <a href="https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit?usp=sharing" class="uri">https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit?usp=sharing</a></p>
 </div>
   </div>
 
@@ -188,7 +138,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

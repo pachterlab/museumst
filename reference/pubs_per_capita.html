@@ -73,7 +73,7 @@ states within the US." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">museumst</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9002</span>
       </span>
     </div>
 
@@ -150,7 +150,8 @@ states within the US.</p>
     <pre class="usage"><span class='fu'>pubs_per_capita</span>(
   <span class='no'>pubs</span>,
   <span class='kw'>zoom</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"world"</span>, <span class='st'>"europe"</span>, <span class='st'>"usa"</span>),
-  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"choropleth"</span>, <span class='st'>"bar"</span>)
+  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"choropleth"</span>, <span class='st'>"bar"</span>),
+  <span class='kw'>label_states</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -170,6 +171,10 @@ the US.</p></td>
     <tr>
       <th>plot</th>
       <td><p>Whether to plot choropleth or bar plot.</p></td>
+    </tr>
+    <tr>
+      <th>label_states</th>
+      <td><p>If plotting the US, whether to label the states.</p></td>
     </tr>
     </table>
 
@@ -192,7 +197,7 @@ the US.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

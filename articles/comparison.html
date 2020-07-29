@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">museumst</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9002</span>
       </span>
     </div>
 
@@ -90,13 +90,13 @@
 
       
 
-      </header><div class="row">
+      </header><script src="comparison_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Comparisons between sheets</h1>
                         <h4 class="author">Lambda Moses</h4>
             
-            <h4 class="date">2020-06-02</h4>
+            <h4 class="date">2020-07-29</h4>
       
       
       <div class="hidden name"><code>comparison.Rmd</code></div>
@@ -105,11 +105,12 @@
 
     
     
-<p>Here I compare different sheets and do the analysis for all sheets in the original trilogy together.</p>
+<p>Here I compare different sheets and do the analysis for all sheets in the original trilogy together. Here select plots from the notebooks for the individual sheets are plotted together for easier comparison.</p>
 <div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">museumst</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">gganimate</span>)</pre></body></html></div>
+<pre><code>## Warning: package 'gganimate' was built under R version 4.0.2</code></pre>
 <pre><code>## Loading required package: ggplot2</code></pre>
-<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">purrr</span>)
+<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">purrr</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">dplyr</span>)</pre></body></html></div>
 <pre><code>## 
 ## Attaching package: 'dplyr'</code></pre>
@@ -119,166 +120,221 @@
 <pre><code>## The following objects are masked from 'package:base':
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">tidytext</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">tidyr</span>)
+<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">tidytext</span>)</pre></body></html></div>
+<pre><code>## Warning: package 'tidytext' was built under R version 4.0.2</code></pre>
+<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">tidyr</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">ggplot2</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">forcats</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">zeallot</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">scales</span>)</pre></body></html></div>
 <pre><code>## 
 ## Attaching package: 'scales'</code></pre>
 <pre><code>## The following object is masked from 'package:purrr':
 ## 
 ##     discard</code></pre>
-<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">ggrepel</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">broom</span>)
+<div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">ggrepel</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">sf</span>)</pre></body></html></div>
-<pre><code>## Linking to GEOS 3.7.2, GDAL 2.4.2, PROJ 5.2.0</code></pre>
-<div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_set</a></span>(<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>())</pre></body></html></div>
+<pre><code>## Warning: package 'sf' was built under R version 4.0.2</code></pre>
+<pre><code>## Linking to GEOS 3.8.1, GDAL 3.1.1, PROJ 6.3.1</code></pre>
+<div class="sourceCode" id="cb16"><html><body><pre class="r"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_set</a></span>(<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>())</pre></body></html></div>
 <div id="data" class="section level1">
 <h1 class="hasAnchor">
 <a href="#data" class="anchor"></a>Data</h1>
 <p>How does the trend in number of papers in the original trilogy compare to that in the prequel?</p>
-<div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="no">nms</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Prequel"</span>, <span class="st">"Microdissection"</span>, <span class="st">"smFISH"</span>, <span class="st">"Array"</span>, <span class="st">"ISS"</span>, <span class="st">"No imaging"</span>)
+<p>By default, the <code>read_metadata</code> function reads the appropriate sheet from a cache within this package. This may be outdated, since the Google Sheets are constantly updated. Use the argument <code>update = TRUE</code> to download the most up to date version. The default is <code>FALSE</code> to avoid API limits during automated CRAN checks.</p>
+<div class="sourceCode" id="cb17"><html><body><pre class="r"><span class="no">nms</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Prequel"</span>, <span class="st">"Microdissection"</span>, <span class="st">"smFISH"</span>, <span class="st">"Array"</span>, <span class="st">"ISS"</span>, <span class="st">"No imaging"</span>)
 <span class="no">data_sheets</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/read_metadata.html">read_metadata</a></span>(<span class="no">nms</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb14"><html><body><pre class="r"><span class="no">data_sheets</span> <span class="kw">&lt;-</span> <span class="no">data_sheets</span> <span class="kw">%&gt;%</span>
+<div class="sourceCode" id="cb18"><html><body><pre class="r"><span class="no">data_sheets</span> <span class="kw">&lt;-</span> <span class="no">data_sheets</span> <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>(<span class="kw">era</span> <span class="kw">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when</a></span>(<span class="no">sheet</span> <span class="kw">==</span> <span class="st">"Prequel"</span> ~ <span class="st">"prequel"</span>,
                          <span class="fl">TRUE</span> ~ <span class="st">"current"</span>))</pre></body></html></div>
 <div id="number-of-publications-over-time" class="section level2">
 <h2 class="hasAnchor">
 <a href="#number-of-publications-over-time" class="anchor"></a>Number of publications over time</h2>
 <p>See the number of publications; for original trilogy sheets, each dataset has its own row so often one publication has multiple rows.</p>
-<div class="sourceCode" id="cb15"><html><body><pre class="r"><span class="no">publications</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/get_pubs_df.html">get_pubs_df</a></span>(<span class="no">data_sheets</span>, <span class="st">"era"</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb16"><html><body><pre class="r"><span class="co"># For maps later in this notebook</span>
-<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">inst_gc</span>, <span class="no">city_gc</span>) <span class="kw">%&lt;-%</span> <span class="fu"><a href="../reference/geocode_inst_city.html">geocode_inst_city</a></span>(<span class="no">publications</span>)
-<span class="no">pubs_on_map2</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/partial.html">partial</a></span>(<span class="no">pubs_on_map</span>, <span class="kw">inst_gc</span> <span class="kw">=</span> <span class="no">inst_gc</span>, <span class="kw">city_gc</span> <span class="kw">=</span> <span class="no">city_gc</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb17"><html><body><pre class="r"><span class="fu"><a href="../reference/era_freqpoly.html">era_freqpoly</a></span>(<span class="no">publications</span>, <span class="no">era</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
+<div class="sourceCode" id="cb19"><html><body><pre class="r"><span class="no">publications</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/get_pubs_df.html">get_pubs_df</a></span>(<span class="no">data_sheets</span>, <span class="st">"era"</span>)</pre></body></html></div>
+<p>Number of publications in each sheet</p>
+<div class="sourceCode" id="cb20"><html><body><pre class="r"><span class="no">data_sheets</span> <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(<span class="no">title</span>, <span class="no">sheet</span>) <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html">distinct</a></span>() <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html">count</a></span>(<span class="no">sheet</span>)</pre></body></html></div>
+<pre><code>## # A tibble: 6 x 2
+##   sheet               n
+##   &lt;chr&gt;           &lt;int&gt;
+## 1 Array              26
+## 2 ISS                12
+## 3 Microdissection    44
+## 4 No imaging          5
+## 5 Prequel           193
+## 6 smFISH             30</code></pre>
+<div class="sourceCode" id="cb22"><html><body><pre class="r"><span class="co"># For maps later in this notebook</span>
+<span class="no">city_gc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/geocode_inst_city.html">geocode_inst_city</a></span>(<span class="no">publications</span>)
+<span class="no">pubs_on_map2</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/partial.html">partial</a></span>(<span class="no">pubs_on_map</span>, <span class="kw">city_gc</span> <span class="kw">=</span> <span class="no">city_gc</span>)</pre></body></html></div>
+<p>By default, preprints are excluded from plots of number of publications over time, since the timing of preprints is incoherent to that of published papers. Including preprints will inflate the number of publications in recent months, and if we make the same plot a few months later, that inflation we see now will be gone and moved to a more recent date. You can add the <code>preprints = TRUE</code> argument to all functions plotting things over time in this package to include preprints. You can also use the <code>binwidth</code> argument to specify bin width in days. The default is 365 days.</p>
+<div class="sourceCode" id="cb23"><html><body><pre class="r"><span class="fu"><a href="../reference/era_freqpoly.html">era_freqpoly</a></span>(<span class="no">publications</span>, <span class="no">era</span>, <span class="kw">preprints</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
 <p>Here we see that what’s currently known as spatial transcriptomics is growing more than prequel spatial transcriptomics back in the 1990s and 2000s. Or maybe my prequel collection is incomplete, so I’m not so sure how big that peak is. What’s more remarkable is the number of publications in 2020. Now it’s near the end of May. We’re almost half way through the year. Considering that most publications are from Western countries, for which December is the holiday season, I expect this number to double by the end of 2020.</p>
 <p>Let me plot these lines not with the absolute year, but how many years since the first publication in the category to see how quickly these things grew. This will definitely change once I make the LCM collection more complete. Since using LCM + transcriptomics started at least as early as 2001 (the oldest paper I can find that did this is from 2001), I would expect the FALSE curve to rise earlier than the TRUE curve.</p>
-<div class="sourceCode" id="cb18"><html><body><pre class="r"><span class="fu"><a href="../reference/era_freqpoly.html">era_freqpoly</a></span>(<span class="no">publications</span>, <span class="no">era</span>, <span class="kw">since_first</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
+<div class="sourceCode" id="cb24"><html><body><pre class="r"><span class="fu"><a href="../reference/era_freqpoly.html">era_freqpoly</a></span>(<span class="no">publications</span>, <span class="no">era</span>, <span class="kw">since_first</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">preprints</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
 <p>So far they seem pretty parallel (which most likely won’t be the case when I make the LCM collection more complete), though I certainly don’t think the current era has peaked yet. Based on this, I think the current era will be much greater than the prequel era.</p>
 <p>Here I’m making an animation on a map for prequel and original trilogy separately for number of publications per institution. These take a while to run to render all those frames, so not run for CRAN checks.</p>
-<div class="sourceCode" id="cb19"><html><body><pre class="r"><span class="no">world_prequel</span> <span class="kw">&lt;-</span> <span class="no">publications</span> <span class="kw">%&gt;%</span>
+<div class="sourceCode" id="cb25"><html><body><pre class="r"><span class="no">world_prequel</span> <span class="kw">&lt;-</span> <span class="no">publications</span> <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="no">era</span> <span class="kw">==</span> <span class="st">"prequel"</span>) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="../reference/pubs_on_map.html">pubs_on_map</a></span>(<span class="no">inst_gc</span>, <span class="no">city_gc</span>, <span class="kw">per_year</span> <span class="kw">=</span> <span class="fl">TRUE</span>)
 <span class="fu"><a href="https://gganimate.com/reference/animate.html">animate</a></span>(<span class="no">world_prequel</span>, <span class="kw">nframes</span> <span class="kw">=</span> <span class="fl">200</span>)
 <span class="fu"><a href="https://gganimate.com/reference/anim_save.html">anim_save</a></span>(<span class="st">"output/world_prequel.gif"</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb20"><html><body><pre class="r"><span class="no">europe_prequel</span> <span class="kw">&lt;-</span> <span class="no">publications</span> <span class="kw">%&gt;%</span>
+<div class="sourceCode" id="cb26"><html><body><pre class="r"><span class="no">europe_prequel</span> <span class="kw">&lt;-</span> <span class="no">publications</span> <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="no">era</span> <span class="kw">==</span> <span class="st">"prequel"</span>) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="../reference/pubs_on_map.html">pubs_on_map</a></span>(<span class="no">inst_gc</span>, <span class="no">city_gc</span>, <span class="kw">zoom</span> <span class="kw">=</span> <span class="st">"europe"</span>, <span class="kw">per_year</span> <span class="kw">=</span> <span class="fl">TRUE</span>)
 <span class="fu"><a href="https://gganimate.com/reference/animate.html">animate</a></span>(<span class="no">europe_prequel</span>, <span class="kw">nframes</span> <span class="kw">=</span> <span class="fl">200</span>)
 <span class="fu"><a href="https://gganimate.com/reference/anim_save.html">anim_save</a></span>(<span class="st">"output/europe.gif"</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb21"><html><body><pre class="r"><span class="no">usa_prequel</span> <span class="kw">&lt;-</span> <span class="no">publications</span> <span class="kw">%&gt;%</span>
+<div class="sourceCode" id="cb27"><html><body><pre class="r"><span class="no">usa_prequel</span> <span class="kw">&lt;-</span> <span class="no">publications</span> <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="no">era</span> <span class="kw">==</span> <span class="st">"prequel"</span>) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="../reference/pubs_on_map.html">pubs_on_map</a></span>(<span class="no">inst_gc</span>, <span class="no">city_gc</span>, <span class="kw">zoom</span> <span class="kw">=</span> <span class="st">"usa"</span>, <span class="kw">per_year</span> <span class="kw">=</span> <span class="fl">TRUE</span>)
 <span class="fu"><a href="https://gganimate.com/reference/animate.html">animate</a></span>(<span class="no">usa_prequel</span>, <span class="kw">nframes</span> <span class="kw">=</span> <span class="fl">200</span>)
 <span class="fu"><a href="https://gganimate.com/reference/anim_save.html">anim_save</a></span>(<span class="st">"output/usa.gif"</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb22"><html><body><pre class="r"><span class="no">world_current</span> <span class="kw">&lt;-</span> <span class="no">publications</span> <span class="kw">%&gt;%</span>
+<div class="sourceCode" id="cb28"><html><body><pre class="r"><span class="no">world_current</span> <span class="kw">&lt;-</span> <span class="no">publications</span> <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="no">era</span> <span class="kw">==</span> <span class="st">"current"</span>) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="../reference/pubs_on_map.html">pubs_on_map</a></span>(<span class="no">inst_gc</span>, <span class="no">city_gc</span>, <span class="kw">per_year</span> <span class="kw">=</span> <span class="fl">TRUE</span>)
 <span class="fu"><a href="https://gganimate.com/reference/animate.html">animate</a></span>(<span class="no">world_current</span>, <span class="kw">nframes</span> <span class="kw">=</span> <span class="fl">150</span>)
 <span class="fu"><a href="https://gganimate.com/reference/anim_save.html">anim_save</a></span>(<span class="st">"output/world_current.gif"</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb23"><html><body><pre class="r"><span class="no">europe_current</span> <span class="kw">&lt;-</span> <span class="no">publications</span> <span class="kw">%&gt;%</span>
+<div class="sourceCode" id="cb29"><html><body><pre class="r"><span class="no">europe_current</span> <span class="kw">&lt;-</span> <span class="no">publications</span> <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="no">era</span> <span class="kw">==</span> <span class="st">"current"</span>) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="../reference/pubs_on_map.html">pubs_on_map</a></span>(<span class="no">inst_gc</span>, <span class="no">city_gc</span>, <span class="kw">per_year</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">zoom</span> <span class="kw">=</span> <span class="st">"europe"</span>)
 <span class="fu"><a href="https://gganimate.com/reference/animate.html">animate</a></span>(<span class="no">europe_current</span>, <span class="kw">nframes</span> <span class="kw">=</span> <span class="fl">80</span>)
 <span class="fu"><a href="https://gganimate.com/reference/anim_save.html">anim_save</a></span>(<span class="st">"output/europe_current.gif"</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb24"><html><body><pre class="r"><span class="no">usa_current</span> <span class="kw">&lt;-</span> <span class="no">publications</span> <span class="kw">%&gt;%</span>
+<div class="sourceCode" id="cb30"><html><body><pre class="r"><span class="no">usa_current</span> <span class="kw">&lt;-</span> <span class="no">publications</span> <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="no">era</span> <span class="kw">==</span> <span class="st">"current"</span>) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="../reference/pubs_on_map.html">pubs_on_map</a></span>(<span class="no">inst_gc</span>, <span class="no">city_gc</span>, <span class="kw">per_year</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">zoom</span> <span class="kw">=</span> <span class="st">"usa"</span>)
 <span class="fu"><a href="https://gganimate.com/reference/animate.html">animate</a></span>(<span class="no">usa_current</span>)
 <span class="fu"><a href="https://gganimate.com/reference/anim_save.html">anim_save</a></span>(<span class="st">"output/usa_current.gif"</span>)</pre></body></html></div>
 </div>
-<div id="for-all-original-trilogy-data" class="section level2">
+<div id="for-all-original-trilogy-or-current-era-data" class="section level2">
 <h2 class="hasAnchor">
-<a href="#for-all-original-trilogy-data" class="anchor"></a>For all original trilogy data</h2>
-<div class="sourceCode" id="cb25"><html><body><pre class="r"><span class="no">current</span> <span class="kw">&lt;-</span> <span class="no">data_sheets</span> <span class="kw">%&gt;%</span>
+<a href="#for-all-original-trilogy-or-current-era-data" class="anchor"></a>For all original trilogy or current era data</h2>
+<div class="sourceCode" id="cb31"><html><body><pre class="r"><span class="no">current</span> <span class="kw">&lt;-</span> <span class="no">data_sheets</span> <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="no">era</span> <span class="kw">==</span> <span class="st">"current"</span>) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(<span class="no">date_published</span>:<span class="no">journal</span>, <span class="no">country</span>:<span class="no">year</span>, <span class="no">sheet</span>) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html">distinct</a></span>()</pre></body></html></div>
-<div class="sourceCode" id="cb26"><html><body><pre class="r"><span class="no">current2</span> <span class="kw">&lt;-</span> <span class="no">publications</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="no">era</span> <span class="kw">==</span> <span class="st">"current"</span>)</pre></body></html></div>
-<p>How many per sheet? Again, I definitely don’t think the LCM collection (within Microdissection) is anywhere close to complete, so microdissection is definitely the most popular one so far. Maybe after I make the LCM collection more complete, I should plot the LCM collection separately.</p>
-<div class="sourceCode" id="cb27"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">current</span>, <span class="no">sheet</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-16-1.png" width="700"></p>
-<p>Sheet over time</p>
-<div class="sourceCode" id="cb28"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_year.html">pubs_per_year</a></span>(<span class="no">current</span>, <span class="st">"sheet"</span>, <span class="kw">binwidth</span> <span class="kw">=</span> <span class="fl">120</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-17-1.png" width="576"></p>
+<div class="sourceCode" id="cb32"><html><body><pre class="r"><span class="no">current2</span> <span class="kw">&lt;-</span> <span class="no">publications</span> <span class="kw">%&gt;%</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="no">era</span> <span class="kw">==</span> <span class="st">"current"</span>)</pre></body></html></div>
+<p>How many per sheet? Again, I definitely don’t think the LCM collection (within Microdissection) is anywhere close to complete, so microdissection is definitely the most popular one so far. LCM abstracts from PubMed search are analyzed separately.</p>
+<div class="sourceCode" id="cb33"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">current</span>, <span class="no">sheet</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-17-1.png" width="700"></p>
+<p>How about when broken down by the specific methods, like Visium and MERFISH?</p>
+<div class="sourceCode" id="cb34"><html><body><pre class="r"><span class="no">methods_current</span> <span class="kw">&lt;-</span> <span class="no">data_sheets</span> <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(<span class="no">title</span>, <span class="no">date_published</span>, <span class="no">method</span>, <span class="no">sheet</span>, <span class="no">era</span>) <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="no">era</span> <span class="kw">==</span> <span class="st">"current"</span>, !<span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span>(<span class="no">method</span>)) <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html">distinct</a></span>()</pre></body></html></div>
+<div class="sourceCode" id="cb35"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">methods_current</span>, <span class="no">method</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-19-1.png" width="576"></p>
+<p>I’m not sure what to do with LCM, since I did a separate analysis on LCM literature from PubMed search. Here we see Visium has really taken off though it just got commercialized late last year.</p>
+<p>Sheet over time. Those on RStudio Cloud: Please try different binwidths!</p>
+<div class="sourceCode" id="cb36"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_year.html">pubs_per_year</a></span>(<span class="no">current</span>, <span class="st">"sheet"</span>, <span class="kw">binwidth</span> <span class="kw">=</span> <span class="fl">150</span>, <span class="kw">sort_by</span> <span class="kw">=</span> <span class="st">"recent"</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-20-1.png" width="480"></p>
+<p>Also break this down further: this is to reproduce this plot in the other notebooks, faceted by methods.</p>
+<div class="sourceCode" id="cb37"><html><body><pre class="r"><span class="no">binwidths</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/reexports.html">tribble</a></span>(~ <span class="no">sheet</span>, ~ <span class="no">binwidth</span>,
+                      <span class="st">"Prequel"</span>, <span class="fl">365</span>,
+                      <span class="st">"Microdissection"</span>, <span class="fl">365</span>,
+                      <span class="st">"smFISH"</span>, <span class="fl">365</span>,
+                      <span class="st">"Array"</span>, <span class="fl">100</span>,
+                      <span class="st">"ISS"</span>, <span class="fl">200</span>)
+<span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html">pmap</a></span>(<span class="no">binwidths</span>, ~ <span class="no">data_sheets</span> <span class="kw">%&gt;%</span>
+       <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="no">sheet</span> <span class="kw">==</span> <span class="no">..1</span>) <span class="kw">%&gt;%</span>
+       <span class="fu"><a href="../reference/unnest_cat.html">unnest_cat</a></span>(<span class="kw">col_use</span> <span class="kw">=</span> <span class="no">method</span>) <span class="kw">%&gt;%</span>
+       <span class="fu"><a href="../reference/pubs_per_year.html">pubs_per_year</a></span>(<span class="kw">facet_by</span> <span class="kw">=</span> <span class="st">"method"</span>, <span class="kw">binwidth</span> <span class="kw">=</span> <span class="no">..2</span>) +
+       <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span>(<span class="no">..1</span>))</pre></body></html></div>
+<pre><code>## [[1]]</code></pre>
+<p><img src="comparison_files/figure-html/unnamed-chunk-21-1.png" width="576"></p>
+<pre><code>## 
+## [[2]]</code></pre>
+<p><img src="comparison_files/figure-html/unnamed-chunk-21-2.png" width="576"></p>
+<pre><code>## 
+## [[3]]</code></pre>
+<p><img src="comparison_files/figure-html/unnamed-chunk-21-3.png" width="576"></p>
+<pre><code>## 
+## [[4]]</code></pre>
+<p><img src="comparison_files/figure-html/unnamed-chunk-21-4.png" width="576"></p>
+<pre><code>## 
+## [[5]]</code></pre>
+<p><img src="comparison_files/figure-html/unnamed-chunk-21-5.png" width="576"></p>
+<p>Also plot the most common methods</p>
+<div class="sourceCode" id="cb43"><html><body><pre class="r"><span class="no">methods_current</span> <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="no">method</span> <span class="kw">!=</span> <span class="st">"LCM"</span>) <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="../reference/pubs_per_year.html">pubs_per_year</a></span>(<span class="kw">facet_by</span> <span class="kw">=</span> <span class="st">"method"</span>, <span class="kw">binwidth</span> <span class="kw">=</span> <span class="fl">150</span>, <span class="kw">preprints</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">n_top</span> <span class="kw">=</span> <span class="fl">4</span>,
+                <span class="kw">sort_by</span> <span class="kw">=</span> <span class="st">"recent"</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-22-1.png" width="384"></p>
 <p>Species in all the current sheets. For prequels, it has already been plotted in the prequel notebook.</p>
-<div class="sourceCode" id="cb29"><html><body><pre class="r"><span class="no">species</span> <span class="kw">&lt;-</span> <span class="no">data_sheets</span> <span class="kw">%&gt;%</span>
+<div class="sourceCode" id="cb44"><html><body><pre class="r"><span class="no">species</span> <span class="kw">&lt;-</span> <span class="no">data_sheets</span> <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="no">era</span> <span class="kw">==</span> <span class="st">"current"</span>, !<span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span>(<span class="no">species</span>)) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="../reference/unnest_cat.html">unnest_cat</a></span>(<span class="no">species</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb30"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">species</span>, <span class="no">species</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-19-1.png" width="700"></p>
+<div class="sourceCode" id="cb45"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">species</span>, <span class="no">species</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-24-1.png" width="700"></p>
 <p>I thought that there would be more mouse papers than human ones, but there’re slightly more human ones.</p>
 <p>Another fun isotype plot:</p>
-<div class="sourceCode" id="cb31"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">species</span>, <span class="no">species</span>, <span class="kw">n_top</span> <span class="kw">=</span> <span class="fl">5</span>, <span class="kw">isotype</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">img_unit</span> <span class="kw">=</span> <span class="fl">5</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-20-1.png" width="700"></p>
-<div class="sourceCode" id="cb32"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">current2</span>, <span class="no">country</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-21-1.png" width="700"></p>
-<div class="sourceCode" id="cb33"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">current2</span>, <span class="no">city</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-22-1.png" width="576"></p>
-<div class="sourceCode" id="cb34"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">current2</span>, <span class="no">institution</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-23-1.png" width="576"></p>
-<div class="sourceCode" id="cb35"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">current2</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-24-1.png" width="700"></p>
-<div class="sourceCode" id="cb36"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">current2</span>, <span class="kw">plot</span> <span class="kw">=</span> <span class="st">"bar"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb46"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">species</span>, <span class="no">species</span>, <span class="kw">n_top</span> <span class="kw">=</span> <span class="fl">5</span>, <span class="kw">isotype</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">img_unit</span> <span class="kw">=</span> <span class="fl">5</span>)</pre></body></html></div>
 <p><img src="comparison_files/figure-html/unnamed-chunk-25-1.png" width="700"></p>
-<div class="sourceCode" id="cb37"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">current</span>, <span class="st">"europe"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb47"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">current2</span>, <span class="no">country</span>)</pre></body></html></div>
 <p><img src="comparison_files/figure-html/unnamed-chunk-26-1.png" width="700"></p>
-<div class="sourceCode" id="cb38"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">current</span>, <span class="st">"usa"</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-27-1.png" width="700"></p>
-<div class="sourceCode" id="cb39"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">current</span>, <span class="st">"usa"</span>, <span class="st">"bar"</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-28-1.png" width="700"></p>
-<div class="sourceCode" id="cb40"><html><body><pre class="r"><span class="fu">pubs_on_map2</span>(<span class="no">current</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb48"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">current2</span>, <span class="no">city</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-27-1.png" width="576"></p>
+<div class="sourceCode" id="cb49"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">current2</span>, <span class="no">institution</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-28-1.png" width="576"></p>
+<div class="sourceCode" id="cb50"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">current2</span>)</pre></body></html></div>
 <p><img src="comparison_files/figure-html/unnamed-chunk-29-1.png" width="700"></p>
-<p>Bug: Need to distinguish between Cambridge, UK and Cambridge, MA in bar plots, though this is not a problem on maps.</p>
-<div class="sourceCode" id="cb41"><html><body><pre class="r"><span class="fu">pubs_on_map2</span>(<span class="no">current</span>, <span class="kw">zoom</span> <span class="kw">=</span> <span class="st">"europe"</span>)</pre></body></html></div>
+<p>Unlike LCM, this is more concentrated in the West. We do have some LCM papers from countries like Egypt, India, and Turkey. Even prequel papers are more spread out.</p>
+<div class="sourceCode" id="cb51"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">current2</span>, <span class="kw">plot</span> <span class="kw">=</span> <span class="st">"bar"</span>)</pre></body></html></div>
 <p><img src="comparison_files/figure-html/unnamed-chunk-30-1.png" width="700"></p>
-<div class="sourceCode" id="cb42"><html><body><pre class="r"><span class="fu">pubs_on_map2</span>(<span class="no">current</span>, <span class="kw">zoom</span> <span class="kw">=</span> <span class="st">"usa"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb52"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">current</span>, <span class="st">"europe"</span>)</pre></body></html></div>
 <p><img src="comparison_files/figure-html/unnamed-chunk-31-1.png" width="700"></p>
+<div class="sourceCode" id="cb53"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">current</span>, <span class="st">"usa"</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-32-1.png" width="700"></p>
+<div class="sourceCode" id="cb54"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">current</span>, <span class="st">"usa"</span>, <span class="st">"bar"</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-33-1.png" width="700"></p>
+<div class="sourceCode" id="cb55"><html><body><pre class="r"><span class="fu">pubs_on_map2</span>(<span class="no">current</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-34-1.png" width="700"></p>
+<p>Bug: Need to distinguish between Cambridge, UK and Cambridge, MA in bar plots, though this is not a problem on maps.</p>
+<div class="sourceCode" id="cb56"><html><body><pre class="r"><span class="fu">pubs_on_map2</span>(<span class="no">current</span>, <span class="kw">zoom</span> <span class="kw">=</span> <span class="st">"europe"</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-35-1.png" width="700"></p>
+<div class="sourceCode" id="cb57"><html><body><pre class="r"><span class="fu">pubs_on_map2</span>(<span class="no">current</span>, <span class="kw">zoom</span> <span class="kw">=</span> <span class="st">"usa"</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-36-1.png" width="700"></p>
 <div id="text-mining-titles" class="section level3">
 <h3 class="hasAnchor">
 <a href="#text-mining-titles" class="anchor"></a>Text mining titles</h3>
-<div class="sourceCode" id="cb43"><html><body><pre class="r"><span class="no">data_sheets</span> <span class="kw">%&gt;%</span>
+<div class="sourceCode" id="cb58"><html><body><pre class="r"><span class="no">data_sheets</span> <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="no">era</span> <span class="kw">==</span> <span class="st">"current"</span>) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="../reference/plot_wordcloud.html">plot_wordcloud</a></span>(<span class="kw">min.freq</span> <span class="kw">=</span> <span class="fl">1</span>)</pre></body></html></div>
 <pre><code>## Warning in wordcloud::wordcloud(words = df$word, freq = df$freq, scale =
-## scale, : tissue could not be fit on page. It will not be plotted.</code></pre>
+## scale, : expression could not be fit on page. It will not be plotted.</code></pre>
 <pre><code>## Warning in wordcloud::wordcloud(words = df$word, freq = df$freq, scale =
 ## scale, : single could not be fit on page. It will not be plotted.</code></pre>
-<pre><code>## Warning in wordcloud::wordcloud(words = df$word, freq = df$freq, scale =
-## scale, : profiling could not be fit on page. It will not be plotted.</code></pre>
-<p><img src="comparison_files/figure-html/unnamed-chunk-32-1.png" width="480"></p>
+<p><img src="comparison_files/figure-html/unnamed-chunk-37-1.png" width="480"></p>
 <p>Unlike in Prequel, “database” is not at all prominent here. Which words have the most different frequencies between prequel and current era data papers? Here I use proportion of words to normalize the different sizes of the corpus. The most extreme case is when a word is used a lot in one era and not used at all in the other.</p>
-<div class="sourceCode" id="cb47"><html><body><pre class="r"><span class="no">publications</span> <span class="kw">%&gt;%</span>
+<div class="sourceCode" id="cb61"><html><body><pre class="r"><span class="no">publications</span> <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html">count</a></span>(<span class="no">era</span>)</pre></body></html></div>
 <pre><code>## # A tibble: 2 x 2
 ##   era         n
 ##   &lt;chr&gt;   &lt;int&gt;
-## 1 current   103
+## 1 current   115
 ## 2 prequel   192</code></pre>
-<div class="sourceCode" id="cb49"><html><body><pre class="r"><span class="fu"><a href="../reference/word_prop_scatter.html">word_prop_scatter</a></span>(<span class="no">publications</span>, <span class="no">title</span>, <span class="kw">era</span> <span class="kw">=</span> <span class="no">era</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-34-1.png" width="700"></p>
+<div class="sourceCode" id="cb63"><html><body><pre class="r"><span class="fu"><a href="../reference/word_prop_scatter.html">word_prop_scatter</a></span>(<span class="no">publications</span>, <span class="no">title</span>, <span class="kw">era</span> <span class="kw">=</span> <span class="no">era</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-39-1.png" width="700"></p>
 <p>Cool. It seems that the more frequent words diverge more from y = x. Here we see in the current era, there’s more emphasis on single cell, transcriptomics, and the word “spatial”, while in the prequel era, there was more emphasis on database, patterns, and the very notion of “gene expression”. Is it that the prequel era grew in the same period when the human and mouse genomes were sequenced and culminated around the same time when the human reference genome was published; back then gene expression was considered really cool, though now this notion is so common place that we no longer make a big deal out of it? Is this why the “spatial” and “single cell” are emphasized, because it’s been so hard that we make a big deal out of it when it’s done? Well, I don’t think many people emphasize H&amp;E in a title, though even if it’s central to a paper, because it’s so easy and cheap. They would rather say “pathology” or “diagnostics” since the cool part is not H&amp;E, but the insights of the pathologist who analyzed the images. Will there be a day when “spatial” is so common place that people no longer make a big deal out of it, and mention it just like saying “I texted my friend”, which is pretty trivial now, though texting was once a big deal?</p>
-<div class="sourceCode" id="cb50"><html><body><pre class="r"><span class="no">data_sheets</span> <span class="kw">%&gt;%</span>
+<div class="sourceCode" id="cb64"><html><body><pre class="r"><span class="no">data_sheets</span> <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="no">era</span> <span class="kw">==</span> <span class="st">"current"</span>) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="../reference/plot_wordcloud.html">plot_wordcloud</a></span>(<span class="no">tissue</span>, <span class="kw">min.freq</span> <span class="kw">=</span> <span class="fl">1</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-35-1.png" width="576"></p>
+<p><img src="comparison_files/figure-html/unnamed-chunk-40-1.png" width="576"></p>
 <p>Also compare tissues in the current era to those in prequel:</p>
-<div class="sourceCode" id="cb51"><html><body><pre class="r"><span class="no">tissues</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/unnest_cat.html">unnest_cat</a></span>(<span class="no">data_sheets</span>, <span class="no">tissue</span>, <span class="kw">other_cols</span> <span class="kw">=</span> <span class="st">"era"</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb52"><html><body><pre class="r"><span class="fu"><a href="../reference/word_prop_scatter.html">word_prop_scatter</a></span>(<span class="no">tissues</span>, <span class="no">tissue</span>, <span class="no">era</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-37-1.png" width="700"></p>
+<div class="sourceCode" id="cb65"><html><body><pre class="r"><span class="no">tissues</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/unnest_cat.html">unnest_cat</a></span>(<span class="no">data_sheets</span>, <span class="no">tissue</span>, <span class="kw">other_cols</span> <span class="kw">=</span> <span class="st">"era"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb66"><html><body><pre class="r"><span class="fu"><a href="../reference/word_prop_scatter.html">word_prop_scatter</a></span>(<span class="no">tissues</span>, <span class="no">tissue</span>, <span class="no">era</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-42-1.png" width="700"></p>
 <p>It seems that there’s more Drosophila in the prequel era. But also mouse tissues other than the brain, such as the retina and genitourinary tracts (the “tract” and “system” are probably from the GUDMAP atlas). The “bulb” comes from mouse olfactory bulb, which is the go to organ to test array capture based techniques. Cell cultures also showed up here. But also note “cancer”, since spatial transcriptomics in tumors is not possible with prequel era technology (except LCM, which I include in current era though the oldest LCM transcriptomics study I found is from 2001) because tumors don’t have a stereotypical structure. Actually I already knew this as I was curating the papers, long before making this plot, but this plot confirms my suspicions.</p>
 <p>For current era data papers, which programming languages (if any stated in the paper) are the most popular?</p>
-<div class="sourceCode" id="cb53"><html><body><pre class="r"><span class="co"># prequel sheet doesn't have programming language information anyway though it has that columnn</span>
+<div class="sourceCode" id="cb67"><html><body><pre class="r"><span class="co"># prequel sheet doesn't have programming language information anyway though it has that columnn</span>
 <span class="no">langs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/unnest_cat.html">unnest_cat</a></span>(<span class="no">data_sheets</span>, <span class="no">language</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb54"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">langs</span>, <span class="no">language</span>, <span class="kw">n_top</span> <span class="kw">=</span> <span class="fl">5</span>, <span class="kw">isotype</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">img_unit</span> <span class="kw">=</span> <span class="fl">5</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-39-1.png" width="700"></p>
+<div class="sourceCode" id="cb68"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">langs</span>, <span class="no">language</span>, <span class="kw">n_top</span> <span class="kw">=</span> <span class="fl">5</span>, <span class="kw">isotype</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">img_unit</span> <span class="kw">=</span> <span class="fl">5</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-44-1.png" width="700"></p>
 <p>Just imagining MathWorks getting mad at me for making a pattern out of their logo. Finally, how about department names?</p>
-<div class="sourceCode" id="cb55"><html><body><pre class="r"><span class="fu"><a href="../reference/word_prop_scatter.html">word_prop_scatter</a></span>(<span class="no">publications</span>, <span class="no">department</span>, <span class="no">era</span>, <span class="kw">other_stop_words</span> <span class="kw">=</span> <span class="no">inst_words</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-40-1.png" width="700"></p>
+<div class="sourceCode" id="cb69"><html><body><pre class="r"><span class="fu"><a href="../reference/word_prop_scatter.html">word_prop_scatter</a></span>(<span class="no">publications</span>, <span class="no">department</span>, <span class="no">era</span>, <span class="kw">other_stop_words</span> <span class="kw">=</span> <span class="no">inst_words</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-45-1.png" width="700"></p>
 <p>I already know that prequel era and current era institutions are different, and that there’s more emphasis on developmental biology in the prequel era. Here “zoology” makes sense, since there’re more “weird” species in the prequel era, like Ciona intestinalis. The “medical” also makes sense, since many current era datasets (more specifically, ST) are from clinical biopsies or autopsies, such as for cancer, gingivis, and ALS.</p>
 </div>
 </div>
@@ -286,37 +342,60 @@
 <div id="analysis" class="section level1">
 <h1 class="hasAnchor">
 <a href="#analysis" class="anchor"></a>Analysis</h1>
-<div class="sourceCode" id="cb56"><html><body><pre class="r"><span class="no">nms</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Analysis"</span>, <span class="st">"Prequel analysis"</span>)
+<div class="sourceCode" id="cb70"><html><body><pre class="r"><span class="no">nms</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Analysis"</span>, <span class="st">"Prequel analysis"</span>)
 <span class="no">analysis_sheets</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/read_metadata.html">read_metadata</a></span>(<span class="no">nms</span>)</pre></body></html></div>
 <p>Just to see how number of publications changed through time here</p>
-<div class="sourceCode" id="cb57"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_year.html">pubs_per_year</a></span>(<span class="no">analysis_sheets</span>, <span class="st">"sheet"</span>, <span class="kw">binwidth</span> <span class="kw">=</span> <span class="fl">180</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-42-1.png" width="700"></p>
-<div class="sourceCode" id="cb58"><html><body><pre class="r"><span class="fu"><a href="../reference/era_freqpoly.html">era_freqpoly</a></span>(<span class="no">analysis_sheets</span>, <span class="no">sheet</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-43-1.png" width="700"></p>
-<div class="sourceCode" id="cb59"><html><body><pre class="r"><span class="fu"><a href="../reference/era_freqpoly.html">era_freqpoly</a></span>(<span class="no">analysis_sheets</span>, <span class="no">sheet</span>, <span class="kw">since_first</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-44-1.png" width="700"></p>
+<div class="sourceCode" id="cb71"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_year.html">pubs_per_year</a></span>(<span class="no">analysis_sheets</span>, <span class="st">"sheet"</span>, <span class="kw">binwidth</span> <span class="kw">=</span> <span class="fl">180</span>, <span class="kw">preprints</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-47-1.png" width="700"></p>
+<div class="sourceCode" id="cb72"><html><body><pre class="r"><span class="fu"><a href="../reference/era_freqpoly.html">era_freqpoly</a></span>(<span class="no">analysis_sheets</span>, <span class="no">sheet</span>, <span class="kw">preprints</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-48-1.png" width="700"></p>
+<div class="sourceCode" id="cb73"><html><body><pre class="r"><span class="fu"><a href="../reference/era_freqpoly.html">era_freqpoly</a></span>(<span class="no">analysis_sheets</span>, <span class="no">sheet</span>, <span class="kw">since_first</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">preprints</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-49-1.png" width="700"></p>
 <p>Again, in the current era, data analysis papers grow more than in the prequel era (if my collection is complete, which I’m not sure). I don’t think we have reached the peak yet.</p>
 <p>Here, again, I’ll compare word frequency between current era analysis and prequel analysis</p>
-<div class="sourceCode" id="cb60"><html><body><pre class="r"><span class="fu"><a href="../reference/word_prop_scatter.html">word_prop_scatter</a></span>(<span class="no">analysis_sheets</span>, <span class="kw">era</span> <span class="kw">=</span> <span class="no">sheet</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-45-1.png" width="700"></p>
+<div class="sourceCode" id="cb74"><html><body><pre class="r"><span class="fu"><a href="../reference/word_prop_scatter.html">word_prop_scatter</a></span>(<span class="no">analysis_sheets</span>, <span class="kw">era</span> <span class="kw">=</span> <span class="no">sheet</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-50-1.png" width="700"></p>
 <p>Just like for the datasets, there’s more emphasis on pattern and gene expression in prequel analysis, and more emphasis on single cell and the very word “spatial” in the current era. For gene expression in prequel analysis, note that most papers from that era in this collection are about automatic classification and annotation of gene expression patterns, so it makes sense to mention “gene expression”.</p>
 <p>How about summaries of the methods?</p>
-<div class="sourceCode" id="cb61"><html><body><pre class="r"><span class="fu"><a href="../reference/word_prop_scatter.html">word_prop_scatter</a></span>(<span class="no">analysis_sheets</span>, <span class="no">summary</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-46-1.png" width="700"></p>
+<div class="sourceCode" id="cb75"><html><body><pre class="r"><span class="fu"><a href="../reference/word_prop_scatter.html">word_prop_scatter</a></span>(<span class="no">analysis_sheets</span>, <span class="no">summary</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-51-1.png" width="700"></p>
 <p>Take this with a grain of salt since what I wrote in the summaries in part depends on my mood. Like when I was tired, I would be more concise, and when I was happy, I would be more verbose. Here we see in the current era, with single cell resolution, “cell” is more emphasized, while the BDGP atlas and ABA are not single cell resolution so the word “voxel” is used instead.</p>
 <p>Again, since both prequel analysis and current era analysis sheets have only about 60 titles, I think the dataset is too small for helpful modeling of how word frequencies change through time.</p>
 <p>Finally, department names.</p>
-<div class="sourceCode" id="cb62"><html><body><pre class="r"><span class="fu"><a href="../reference/word_prop_scatter.html">word_prop_scatter</a></span>(<span class="no">analysis_sheets</span>, <span class="no">department</span>, <span class="kw">other_stop_words</span> <span class="kw">=</span> <span class="no">inst_words</span>, <span class="kw">n_top</span> <span class="kw">=</span> <span class="fl">15</span>)</pre></body></html></div>
-<p><img src="comparison_files/figure-html/unnamed-chunk-47-1.png" width="700"></p>
+<div class="sourceCode" id="cb76"><html><body><pre class="r"><span class="fu"><a href="../reference/word_prop_scatter.html">word_prop_scatter</a></span>(<span class="no">analysis_sheets</span>, <span class="no">department</span>, <span class="kw">other_stop_words</span> <span class="kw">=</span> <span class="no">inst_words</span>, <span class="kw">n_top</span> <span class="kw">=</span> <span class="fl">15</span>)</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-52-1.png" width="700"></p>
 <p>We see that a lot of the prequel analysis is from computer science departments. I wonder whether this reflects a sociological change, since biologists trained as recently as the 2000s often don’t have much computational background and it seems that in the 2010s, especially after about 2015, biology has been becoming more and more computational, so more of the data analysis methods were developed within biology departments. I don’t know if this trend is real of whether it’s simply the timeline of my personal journy from experimental biology to computational biology. Back in the first half of 2015, I did H&amp;E and Masson’s trichrome staining. In September 2015, I changed lab, intending to learn bioinformatics, learnt R, and then started analyzing phenotype data from mouse cohorts before getting into GWAS in late 2016. So probably I only see biology becoming more and more computational because the sort of biology I’ve been dealing with became more and more computational. Or maybe it is real, since back in 2017, Eleazar Eskin told me about his idea of doing a master’s program for postdoc biologists who want to catch up with the computational stuff, and then in 2018, the first time I TA’ed, it was the sort of intro to molecular biology class that I have taken back in my sophomore year in college (2014), and to my surprise, my section only had 2 students and the professor was dismayed that these days some “biologists” are actually mathematicians who don’t even know how to do PCR. I was surprised that this class wasn’t full and mandatory for biology majors, as was the case when I was a sophomore.</p>
 <p>These are some visual explorations. Burning question: are the differences statistically significant? I think these plots are already compelling enough for now. I may need to look more into text mining literature to see what kind of tests are the best.</p>
-<div class="sourceCode" id="cb63"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span>()</pre></body></html></div>
+<p>Also, how about plotting how number of publications about spatial data and number of publications about data analysis together?</p>
+<div class="sourceCode" id="cb77"><html><body><pre class="r"><span class="no">all_current</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span>(<span class="no">current</span>,
+                     <span class="no">analysis_sheets</span>[<span class="no">analysis_sheets</span>$<span class="no">sheet</span> <span class="kw">==</span> <span class="st">"Analysis"</span>,
+                                     <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span>(<span class="no">current</span>)])</pre></body></html></div>
+<div class="sourceCode" id="cb78"><html><body><pre class="r"><span class="no">all_current</span> <span class="kw">&lt;-</span> <span class="no">all_current</span> <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>(<span class="kw">type</span> <span class="kw">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when</a></span>(<span class="no">sheet</span> <span class="kw">==</span> <span class="st">"Analysis"</span> ~ <span class="st">"analysis"</span>,
+                          <span class="fl">TRUE</span> ~ <span class="st">"data"</span>)) <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(-<span class="no">sheet</span>) <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html">distinct</a></span>()</pre></body></html></div>
+<div class="sourceCode" id="cb79"><html><body><pre class="r"><span class="fu"><a href="../reference/era_freqpoly.html">era_freqpoly</a></span>(<span class="no">all_current</span>, <span class="no">type</span>, <span class="kw">preprints</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">binwidth</span> <span class="kw">=</span> <span class="fl">120</span>) +
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_date.html">scale_x_date</a></span>(<span class="kw">breaks</span> <span class="kw">=</span> <span class="kw pkg">scales</span><span class="kw ns">::</span><span class="fu"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">breaks_pretty</a></span>(<span class="fl">10</span>))</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-55-1.png" width="700"></p>
+<p>For those who viewing this vignette on RStudio Cloud, PLEASE do play around with different values of <code>binwidth</code>, since different values can give different interpretations. But I do think while before 2019, analysis did lack behind data, analysis has really taken off since 2019. However, this plot does not tell the whole story. It only says how many papers were posted online, but not the quality. Data analysis can still be behind if we don’t have quality methods. But there’s a fine line between “everything is so bad” and “this field is challenging” when judging that “behind”. Another problem with this is that while some types of analysis methods have taken off, some other types have not. But I do think data integration and cell type inference for non-single cell resolution data have taken off. Spatially variable genes, finding characteristic gene patterns? Not really. Preprocessing? Maybe, but still not good enough for smFISH and ISS based data, though for arrayed based data, there’s ST Pipeline and Space Ranger.</p>
+<p>How about prequel data vs. analysis?</p>
+<div class="sourceCode" id="cb80"><html><body><pre class="r"><span class="no">all_prequel</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span>(<span class="no">data_sheets</span>[<span class="no">data_sheets</span>$<span class="no">sheet</span> <span class="kw">==</span> <span class="st">"Prequel"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span>(<span class="no">current</span>)],
+                     <span class="no">analysis_sheets</span>[<span class="no">analysis_sheets</span>$<span class="no">sheet</span> <span class="kw">==</span> <span class="st">"Prequel analysis"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span>(<span class="no">current</span>)])</pre></body></html></div>
+<div class="sourceCode" id="cb81"><html><body><pre class="r"><span class="no">all_prequel</span> <span class="kw">&lt;-</span> <span class="no">all_prequel</span> <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>(<span class="kw">type</span> <span class="kw">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when</a></span>(<span class="no">sheet</span> <span class="kw">==</span> <span class="st">"Prequel analysis"</span> ~ <span class="st">"analysis"</span>,
+                          <span class="fl">TRUE</span> ~ <span class="st">"data"</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb82"><html><body><pre class="r"><span class="fu"><a href="../reference/era_freqpoly.html">era_freqpoly</a></span>(<span class="no">all_prequel</span>, <span class="no">type</span>, <span class="kw">preprints</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">binwidth</span> <span class="kw">=</span> <span class="fl">365</span>) +
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_date.html">scale_x_date</a></span>(<span class="kw">breaks</span> <span class="kw">=</span> <span class="kw pkg">scales</span><span class="kw ns">::</span><span class="fu"><a href="https://scales.r-lib.org//reference/breaks_pretty.html">breaks_pretty</a></span>(<span class="fl">15</span>))</pre></body></html></div>
+<p><img src="comparison_files/figure-html/unnamed-chunk-58-1.png" width="700"></p>
+<p>So the analysis was indeed behind.</p>
+<div class="sourceCode" id="cb83"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span>()</pre></body></html></div>
 <pre><code>## R version 4.0.0 (2020-04-24)
 ## Platform: x86_64-apple-darwin17.0 (64-bit)
-## Running under: macOS Catalina 10.15.4
+## Running under: macOS Catalina 10.15.5
 ## 
 ## Matrix products: default
-## BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+## BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib
 ## LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
 ## 
 ## locale:
@@ -326,40 +405,37 @@
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] sf_0.9-3            broom_0.5.6         ggrepel_0.8.2      
-##  [4] scales_1.1.1        zeallot_0.1.0       forcats_0.5.0      
-##  [7] tidyr_1.1.0         tidytext_0.2.4      dplyr_1.0.0        
-## [10] purrr_0.3.4         gganimate_1.0.5     ggplot2_3.3.1      
-## [13] museumst_0.0.0.9000
+##  [1] sf_0.9-5            ggrepel_0.8.2       scales_1.1.1       
+##  [4] forcats_0.5.0       tidyr_1.1.0         tidytext_0.2.5     
+##  [7] dplyr_1.0.0         purrr_0.3.4         gganimate_1.0.6    
+## [10] ggplot2_3.3.2       museumst_0.0.0.9002
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] httr_1.4.1              rnaturalearth_0.1.0     viridisLite_0.3.0      
-##  [4] assertthat_0.2.1        ggtextures_0.0.1        sp_1.4-2               
-##  [7] googlesheets4_0.2.0     cellranger_1.1.0        yaml_2.2.1             
-## [10] progress_1.2.2          pillar_1.4.4            backports_1.1.7        
+##  [1] rnaturalearth_0.1.0     viridisLite_0.3.0       assertthat_0.2.1       
+##  [4] ggtextures_0.0.1        sp_1.4-2                googlesheets4_0.2.0    
+##  [7] cellranger_1.1.0        yaml_2.2.1              progress_1.2.2         
+## [10] urbnmapr_0.0.0.9002     pillar_1.4.6            backports_1.1.8        
 ## [13] lattice_0.20-41         glue_1.4.1              digest_0.6.25          
-## [16] RColorBrewer_1.1-2      colorspace_1.4-1        htmltools_0.4.0        
-## [19] Matrix_1.2-18           plyr_1.8.6              pkgconfig_2.0.3        
-## [22] magick_2.3              tweenr_1.0.1            jpeg_0.1-8.1           
-## [25] ggmap_3.0.0             tibble_3.0.1            googledrive_1.0.1      
-## [28] generics_0.0.2          farver_2.0.3            ellipsis_0.3.1         
-## [31] withr_2.2.0             cli_2.0.2               magrittr_1.5           
-## [34] crayon_1.3.4            memoise_1.1.0           evaluate_0.14          
-## [37] tokenizers_0.2.1        janeaustenr_0.1.5       fansi_0.4.1            
-## [40] fs_1.4.1                nlme_3.1-147            SnowballC_0.7.0        
-## [43] MASS_7.3-51.5           class_7.3-16            tools_4.0.0            
-## [46] prettyunits_1.1.1       hms_0.5.3               RgoogleMaps_1.4.5.3    
-## [49] gargle_0.5.0            lifecycle_0.2.0         stringr_1.4.0          
-## [52] munsell_0.5.0           compiler_4.0.0          pkgdown_1.5.1.9000     
-## [55] e1071_1.7-3             rlang_0.4.6             classInt_0.4-3         
-## [58] units_0.6-6             grid_4.0.0              rjson_0.2.20           
-## [61] bitops_1.0-6            labeling_0.3            rmarkdown_2.2          
-## [64] gtable_0.3.0            DBI_1.1.0               R6_2.4.1               
-## [67] lubridate_1.7.8         knitr_1.28              utf8_1.1.4             
-## [70] rgeos_0.5-3             rprojroot_1.3-2         KernSmooth_2.23-16     
-## [73] desc_1.2.0              stringi_1.4.6           Rcpp_1.0.4.6           
-## [76] vctrs_0.3.0             png_0.1-7               wordcloud_2.6          
-## [79] rnaturalearthdata_0.1.0 tidyselect_1.1.0        xfun_0.14</code></pre>
+## [16] RColorBrewer_1.1-2      colorspace_1.4-1        htmltools_0.5.0.9000   
+## [19] Matrix_1.2-18           pkgconfig_2.0.3         magick_2.4.0           
+## [22] tweenr_1.0.1            tibble_3.0.3            googledrive_1.0.1      
+## [25] generics_0.0.2          farver_2.0.3            ellipsis_0.3.1         
+## [28] withr_2.2.0             cli_2.0.2               magrittr_1.5           
+## [31] crayon_1.3.4            memoise_1.1.0           evaluate_0.14          
+## [34] tokenizers_0.2.1        janeaustenr_0.1.5       fs_1.4.2               
+## [37] fansi_0.4.1             SnowballC_0.7.0         MASS_7.3-51.6          
+## [40] class_7.3-17            tools_4.0.0             prettyunits_1.1.1      
+## [43] hms_0.5.3               gargle_0.5.0            lifecycle_0.2.0        
+## [46] stringr_1.4.0           munsell_0.5.0           compiler_4.0.0         
+## [49] pkgdown_1.5.1           e1071_1.7-3             rlang_0.4.7            
+## [52] classInt_0.4-3          units_0.6-7             grid_4.0.0             
+## [55] rstudioapi_0.11         labeling_0.3            rmarkdown_2.3          
+## [58] gtable_0.3.0            DBI_1.1.0               R6_2.4.1               
+## [61] lubridate_1.7.9         knitr_1.29              rgeos_0.5-3            
+## [64] utf8_1.1.4              rprojroot_1.3-2         KernSmooth_2.23-17     
+## [67] desc_1.2.0              stringi_1.4.6           Rcpp_1.0.5             
+## [70] vctrs_0.3.2             wordcloud_2.6           tidyselect_1.1.0       
+## [73] xfun_0.16               rnaturalearthdata_0.1.0</code></pre>
 </div>
   </div>
 
@@ -378,7 +454,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>

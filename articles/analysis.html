@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">museumst</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9002</span>
       </span>
     </div>
 
@@ -90,13 +90,13 @@
 
       
 
-      </header><div class="row">
+      </header><script src="analysis_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Analysis</h1>
                         <h4 class="author">Lambda Moses</h4>
             
-            <h4 class="date">2020-06-02</h4>
+            <h4 class="date">2020-07-29</h4>
       
       
       <div class="hidden name"><code>analysis.Rmd</code></div>
@@ -117,87 +117,91 @@
 <pre><code>## The following objects are masked from 'package:base':
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">zeallot</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">ggplot2</span>)
+<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">ggplot2</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">sf</span>)</pre></body></html></div>
-<pre><code>## Linking to GEOS 3.7.2, GDAL 2.4.2, PROJ 5.2.0</code></pre>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_set</a></span>(<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>())</pre></body></html></div>
+<pre><code>## Warning: package 'sf' was built under R version 4.0.2</code></pre>
+<pre><code>## Linking to GEOS 3.8.1, GDAL 3.1.1, PROJ 6.3.1</code></pre>
+<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_set</a></span>(<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>())</pre></body></html></div>
 <div id="import-data" class="section level1">
 <h1 class="hasAnchor">
 <a href="#import-data" class="anchor"></a>Import data</h1>
-<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="no">sheet</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/read_metadata.html">read_metadata</a></span>(<span class="st">"Analysis"</span>)</pre></body></html></div>
+<p>By default, the <code>read_metadata</code> function reads the appropriate sheet from a cache within this package. This may be outdated, since the Google Sheets are constantly updated. Use the argument <code>update = TRUE</code> to download the most up to date version. The default is <code>FALSE</code> to avoid API limits during automated CRAN checks.</p>
+<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="no">sheet</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/read_metadata.html">read_metadata</a></span>(<span class="st">"Analysis"</span>)</pre></body></html></div>
 </div>
 <div id="number-of-publications" class="section level1">
 <h1 class="hasAnchor">
 <a href="#number-of-publications" class="anchor"></a>Number of publications</h1>
 <p>How many publications per year?</p>
-<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html">anyDuplicated</a></span>(<span class="no">sheet</span>$<span class="no">title</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html">anyDuplicated</a></span>(<span class="no">sheet</span>$<span class="no">title</span>)</pre></body></html></div>
 <pre><code>## [1] 0</code></pre>
 <p>How many publications are there in total in this sheet?</p>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span>(<span class="no">sheet</span>)</pre></body></html></div>
-<pre><code>## [1] 62</code></pre>
-<div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="co"># For maps later in this notebook</span>
-<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">inst_gc</span>, <span class="no">city_gc</span>) <span class="kw">%&lt;-%</span> <span class="fu"><a href="../reference/geocode_inst_city.html">geocode_inst_city</a></span>(<span class="no">sheet</span>)
-<span class="no">pubs_on_map2</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/partial.html">partial</a></span>(<span class="no">pubs_on_map</span>, <span class="kw">inst_gc</span> <span class="kw">=</span> <span class="no">inst_gc</span>, <span class="kw">city_gc</span> <span class="kw">=</span> <span class="no">city_gc</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span>(<span class="no">sheet</span>)</pre></body></html></div>
+<pre><code>## [1] 71</code></pre>
+<div class="sourceCode" id="cb14"><html><body><pre class="r"><span class="co"># For maps later in this notebook</span>
+<span class="no">city_gc</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/geocode_inst_city.html">geocode_inst_city</a></span>(<span class="no">sheet</span>)
+<span class="no">pubs_on_map2</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/partial.html">partial</a></span>(<span class="no">pubs_on_map</span>, <span class="kw">city_gc</span> <span class="kw">=</span> <span class="no">city_gc</span>)</pre></body></html></div>
 <div id="overall" class="section level2">
 <h2 class="hasAnchor">
 <a href="#overall" class="anchor"></a>Overall</h2>
-<div class="sourceCode" id="cb14"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_year.html">pubs_per_year</a></span>(<span class="no">sheet</span>)</pre></body></html></div>
+<p>By default, preprints are excluded from plots of number of publications over time, since the timing of preprints is incoherent to that of published papers. Including preprints will inflate the number of publications in recent months, and if we make the same plot a few months later, that inflation we see now will be gone and moved to a more recent date. You can add the <code>preprints = TRUE</code> argument to all functions plotting things over time in this package to include preprints. You can also use the <code>binwidth</code> argument to specify bin width in days. The default is 365 days.</p>
+<div class="sourceCode" id="cb15"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_year.html">pubs_per_year</a></span>(<span class="no">sheet</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
 </div>
 <div id="by-category" class="section level2">
 <h2 class="hasAnchor">
 <a href="#by-category" class="anchor"></a>By category</h2>
 <p>By the category of problem to address</p>
-<div class="sourceCode" id="cb15"><html><body><pre class="r"><span class="no">category</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/unnest_cat.html">unnest_cat</a></span>(<span class="no">sheet</span>, <span class="no">category</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb16"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">category</span>, <span class="no">category</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb16"><html><body><pre class="r"><span class="no">category</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/unnest_cat.html">unnest_cat</a></span>(<span class="no">sheet</span>, <span class="no">category</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb17"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">category</span>, <span class="no">category</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
-<div class="sourceCode" id="cb17"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_year.html">pubs_per_year</a></span>(<span class="no">category</span>, <span class="kw">facet_by</span> <span class="kw">=</span> <span class="st">"category"</span>)</pre></body></html></div>
-<p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" width="576"></p>
-<div class="sourceCode" id="cb18"><html><body><pre class="r"><span class="no">principle</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/unnest_cat.html">unnest_cat</a></span>(<span class="no">sheet</span>, <span class="no">core_principle</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb19"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">principle</span>, <span class="no">core_principle</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb18"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_year.html">pubs_per_year</a></span>(<span class="no">category</span>, <span class="kw">facet_by</span> <span class="kw">=</span> <span class="st">"category"</span>, <span class="kw">n_top</span> <span class="kw">=</span> <span class="fl">5</span>, <span class="kw">sort_by</span> <span class="kw">=</span> <span class="st">"recent_count"</span>)</pre></body></html></div>
+<p><img src="analysis_files/figure-html/unnamed-chunk-9-1.png" width="384"></p>
+<div class="sourceCode" id="cb19"><html><body><pre class="r"><span class="no">principle</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/unnest_cat.html">unnest_cat</a></span>(<span class="no">sheet</span>, <span class="no">core_principle</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb20"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">principle</span>, <span class="no">core_principle</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
 </div>
 <div id="by-species" class="section level2">
 <h2 class="hasAnchor">
 <a href="#by-species" class="anchor"></a>By species</h2>
 <p>These are the species the computational methods were demonstrated on</p>
-<div class="sourceCode" id="cb20"><html><body><pre class="r"><span class="no">species</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/unnest_cat.html">unnest_cat</a></span>(<span class="no">sheet</span>, <span class="no">species</span>)</pre></body></html></div>
-<div class="sourceCode" id="cb21"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">species</span>, <span class="no">species</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb21"><html><body><pre class="r"><span class="no">species</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/unnest_cat.html">unnest_cat</a></span>(<span class="no">sheet</span>, <span class="no">species</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb22"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">species</span>, <span class="no">species</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
-<div class="sourceCode" id="cb22"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">species</span>, <span class="no">species</span>, <span class="kw">n_top</span> <span class="kw">=</span> <span class="fl">5</span>, <span class="kw">isotype</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">img_unit</span> <span class="kw">=</span> <span class="fl">2</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb23"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">species</span>, <span class="no">species</span>, <span class="kw">n_top</span> <span class="kw">=</span> <span class="fl">5</span>, <span class="kw">isotype</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">img_unit</span> <span class="kw">=</span> <span class="fl">2</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
 <p>I debated for a while which image to use for humans. In order to avoid racist and sexist connotations, I picked the skull as non-experts can’t tell the race and sex from the skull. If you think it’s bad to use a skull, then I’ll use a Black, Hispanic, Middle Eastern, North African, Central Asian, or South Asian woman’s portrait. I stand with the oppressed.</p>
 </div>
 <div id="by-journal" class="section level2">
 <h2 class="hasAnchor">
 <a href="#by-journal" class="anchor"></a>By journal</h2>
-<div class="sourceCode" id="cb23"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span>(<span class="no">sheet</span>$<span class="no">journal</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb24"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span>(<span class="no">sheet</span>$<span class="no">journal</span>))</pre></body></html></div>
 <pre><code>## 
-##                              arXiv             Breast Cancer Research 
+##                              arXiv                       BMC Genomics 
 ##                                  1                                  1 
-##                 Developmental Cell                      F1000Research 
+##             Breast Cancer Research                 Developmental Cell 
 ##                                  1                                  1 
-## Genomics and Computational Biology                            Methods 
+##                      F1000Research Genomics and Computational Biology 
 ##                                  1                                  1 
-##          Molecular Systems Biology               Natue Communications 
+##                            Methods          Molecular Systems Biology 
+##                                  1                                  1 
+##               Natue Communications      Nature Biomedical Engineering 
 ##                                  1                                  1 
 ##              Nature Communications                           PLoS One 
 ##                                  1                                  1 
-##                     Bioinformatics                       Cell Systems 
+##                       Cell Systems                             Nature 
 ##                                  2                                  2 
-##                             Nature              Nucleic Acid Research 
+##              Nucleic Acid Research         PLoS Computational Biology 
 ##                                  2                                  2 
-##         PLoS Computational Biology                            Science 
-##                                  2                                  2 
-##                 BMC Bioinformatics                       Cell Reports 
+##                     Bioinformatics                 BMC Bioinformatics 
+##                                  3                                  3 
+##                       Cell Reports                            Science 
 ##                                  3                                  3 
 ##                 Scientific Reports                               Cell 
 ##                                  3                                  4 
 ##               Nature Biotechnology                     Nature Methods 
-##                                  4                                  6 
+##                                  4                                  8 
 ##                            bioRxiv 
-##                                 17</code></pre>
+##                                 20</code></pre>
 </div>
 <div id="location" class="section level2">
 <h2 class="hasAnchor">
@@ -206,42 +210,42 @@
 <h3 class="hasAnchor">
 <a href="#general" class="anchor"></a>General</h3>
 <p>Just some barplots for number of publications per institution, city, and country.</p>
-<div class="sourceCode" id="cb25"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">sheet</span>, <span class="no">country</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb26"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">sheet</span>, <span class="no">country</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-16-1.png" width="700"></p>
 <p>How about per capita? Actually this probably does not say much since many researchers in the West are immigrants. Then it raises the burning political question of who counts as the “population”.</p>
-<div class="sourceCode" id="cb26"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">sheet</span>, <span class="kw">plot</span> <span class="kw">=</span> <span class="st">"bar"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb27"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">sheet</span>, <span class="kw">plot</span> <span class="kw">=</span> <span class="st">"bar"</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-17-1.png" width="700"></p>
-<p>How about country over time? There might not be enough publications to show a trend.</p>
-<div class="sourceCode" id="cb27"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_year.html">pubs_per_year</a></span>(<span class="no">sheet</span>, <span class="kw">facet_by</span> <span class="kw">=</span> <span class="st">"country"</span>)</pre></body></html></div>
+<p>How about country over time?</p>
+<div class="sourceCode" id="cb28"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_year.html">pubs_per_year</a></span>(<span class="no">sheet</span>, <span class="kw">facet_by</span> <span class="kw">=</span> <span class="st">"country"</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-18-1.png" width="576"> Now look at cities.</p>
-<div class="sourceCode" id="cb28"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">sheet</span>, <span class="no">city</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb29"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">sheet</span>, <span class="no">city</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-19-1.png" width="700"></p>
 <p>Institutions</p>
-<div class="sourceCode" id="cb29"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">sheet</span>, <span class="no">institution</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb30"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">sheet</span>, <span class="no">institution</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-20-1.png" width="700"></p>
 </div>
 <div id="worldwide" class="section level3">
 <h3 class="hasAnchor">
 <a href="#worldwide" class="anchor"></a>Worldwide</h3>
-<div class="sourceCode" id="cb30"><html><body><pre class="r"><span class="fu">pubs_on_map2</span>(<span class="no">sheet</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb31"><html><body><pre class="r"><span class="fu">pubs_on_map2</span>(<span class="no">sheet</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-21-1.png" width="700"></p>
 <p>Let me also plot the per capita thing on a map, as a choropleth</p>
-<div class="sourceCode" id="cb31"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">sheet</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb32"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">sheet</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-22-1.png" width="700"></p>
 <p>Break down by species</p>
-<div class="sourceCode" id="cb32"><html><body><pre class="r"><span class="fu">pubs_on_map2</span>(<span class="no">species</span>, <span class="kw">facet_by</span> <span class="kw">=</span> <span class="st">"species"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb33"><html><body><pre class="r"><span class="fu">pubs_on_map2</span>(<span class="no">species</span>, <span class="kw">facet_by</span> <span class="kw">=</span> <span class="st">"species"</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-23-1.png" width="768"></p>
 </div>
 <div id="europe" class="section level3">
 <h3 class="hasAnchor">
 <a href="#europe" class="anchor"></a>Europe</h3>
 <p>Plot a map just for Europe. A problem here is that if I simply filter the <code>world</code> sf object, I’ll get some islands away from what we usually think is Europe. Kind of feel bad for Russians since Russia is so large that it makes the map look bad and I don’t have a paper from Russia in this spreadsheet.</p>
-<div class="sourceCode" id="cb33"><html><body><pre class="r"><span class="fu">pubs_on_map2</span>(<span class="no">sheet</span>, <span class="kw">zoom</span> <span class="kw">=</span> <span class="st">"europe"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb34"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_on_map.html">pubs_on_map</a></span>(<span class="no">sheet</span>, <span class="no">city_gc</span>, <span class="kw">zoom</span> <span class="kw">=</span> <span class="st">"europe"</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-24-1.png" width="700"></p>
-<div class="sourceCode" id="cb34"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">sheet</span>, <span class="st">"europe"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb35"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">sheet</span>, <span class="st">"europe"</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-25-1.png" width="700"></p>
 <p>I didn’t realize that Switzerland and Netherlands were pretty great. Again, this is a small sample size, so I take this with a grain of salt.</p>
-<div class="sourceCode" id="cb35"><html><body><pre class="r"><span class="fu">pubs_on_map2</span>(<span class="no">species</span>, <span class="kw">zoom</span> <span class="kw">=</span> <span class="st">"europe"</span>, <span class="kw">facet_by</span> <span class="kw">=</span> <span class="st">"species"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb36"><html><body><pre class="r"><span class="fu">pubs_on_map2</span>(<span class="no">species</span>, <span class="kw">zoom</span> <span class="kw">=</span> <span class="st">"europe"</span>, <span class="kw">facet_by</span> <span class="kw">=</span> <span class="st">"species"</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-26-1.png" width="700"></p>
 <p>Maybe I just made this plot for fun. Not sure what to say about it.</p>
 </div>
@@ -249,11 +253,11 @@
 <h3 class="hasAnchor">
 <a href="#usa" class="anchor"></a>USA</h3>
 <p>Also a plot just for America. I did not encounter a publication in this spreadsheet that is from Hawaii or Alaska, but I’ll include Hawaii and Alaska in the map anyway in case I get one in the future.</p>
-<div class="sourceCode" id="cb36"><html><body><pre class="r"><span class="fu">pubs_on_map2</span>(<span class="no">sheet</span>, <span class="kw">zoom</span> <span class="kw">=</span> <span class="st">"usa"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb37"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_on_map.html">pubs_on_map</a></span>(<span class="no">sheet</span>, <span class="kw">zoom</span> <span class="kw">=</span> <span class="st">"usa"</span>, <span class="kw">city_gc</span> <span class="kw">=</span> <span class="no">city_gc</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-27-1.png" width="700"></p>
-<div class="sourceCode" id="cb37"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">sheet</span>, <span class="st">"usa"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb38"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_capita.html">pubs_per_capita</a></span>(<span class="no">sheet</span>, <span class="st">"usa"</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-28-1.png" width="700"></p>
-<div class="sourceCode" id="cb38"><html><body><pre class="r"><span class="fu">pubs_on_map2</span>(<span class="no">species</span>, <span class="kw">zoom</span> <span class="kw">=</span> <span class="st">"usa"</span>, <span class="kw">facet_by</span> <span class="kw">=</span> <span class="st">"species"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb39"><html><body><pre class="r"><span class="fu">pubs_on_map2</span>(<span class="no">species</span>, <span class="kw">zoom</span> <span class="kw">=</span> <span class="st">"usa"</span>, <span class="kw">facet_by</span> <span class="kw">=</span> <span class="st">"species"</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-29-1.png" width="768"></p>
 </div>
 </div>
@@ -264,37 +268,37 @@
 <div id="titles" class="section level2">
 <h2 class="hasAnchor">
 <a href="#titles" class="anchor"></a>Titles</h2>
-<div class="sourceCode" id="cb39"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_wordcloud.html">plot_wordcloud</a></span>(<span class="no">sheet</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb40"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_wordcloud.html">plot_wordcloud</a></span>(<span class="no">sheet</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-30-1.png" width="672"></p>
 </div>
 <div id="summaries" class="section level2">
 <h2 class="hasAnchor">
 <a href="#summaries" class="anchor"></a>Summaries</h2>
-<div class="sourceCode" id="cb40"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_wordcloud.html">plot_wordcloud</a></span>(<span class="no">sheet</span>, <span class="no">summary</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb41"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_wordcloud.html">plot_wordcloud</a></span>(<span class="no">sheet</span>, <span class="no">summary</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-31-1.png" width="672"></p>
-<div class="sourceCode" id="cb41"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_wordcloud.html">plot_wordcloud</a></span>(<span class="no">sheet</span>, <span class="no">core_principle</span>, <span class="kw">scale</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">5</span>, <span class="fl">0.1</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb42"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_wordcloud.html">plot_wordcloud</a></span>(<span class="no">sheet</span>, <span class="no">core_principle</span>, <span class="kw">scale</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">5</span>, <span class="fl">0.1</span>))</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-32-1.png" width="672"></p>
 </div>
 <div id="tissues" class="section level2">
 <h2 class="hasAnchor">
 <a href="#tissues" class="anchor"></a>Tissues</h2>
-<div class="sourceCode" id="cb42"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_wordcloud.html">plot_wordcloud</a></span>(<span class="no">sheet</span>, <span class="no">tissue</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb43"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_wordcloud.html">plot_wordcloud</a></span>(<span class="no">sheet</span>, <span class="no">tissue</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-33-1.png" width="384"></p>
 </div>
 <div id="over-time" class="section level2">
 <h2 class="hasAnchor">
 <a href="#over-time" class="anchor"></a>Over time</h2>
-<div class="sourceCode" id="cb43"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/range.html">range</a></span>(<span class="no">sheet</span>$<span class="no">date_published</span>)</pre></body></html></div>
-<pre><code>## [1] "2009-04-29" "2020-05-31"</code></pre>
-<div class="sourceCode" id="cb45"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_wordcloud.html">plot_wordcloud</a></span>(<span class="no">sheet</span>, <span class="kw">year_min</span> <span class="kw">=</span> <span class="fl">2009</span>, <span class="kw">year_max</span> <span class="kw">=</span> <span class="fl">2015</span>, <span class="kw">scale</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">5</span>, <span class="fl">0.1</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb44"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/range.html">range</a></span>(<span class="no">sheet</span>$<span class="no">date_published</span>)</pre></body></html></div>
+<pre><code>## [1] "2009-04-29" "2020-07-16"</code></pre>
+<div class="sourceCode" id="cb46"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_wordcloud.html">plot_wordcloud</a></span>(<span class="no">sheet</span>, <span class="kw">year_min</span> <span class="kw">=</span> <span class="fl">2009</span>, <span class="kw">year_max</span> <span class="kw">=</span> <span class="fl">2015</span>, <span class="kw">scale</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">5</span>, <span class="fl">0.1</span>))</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-35-1.png" width="576"></p>
-<div class="sourceCode" id="cb46"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_wordcloud.html">plot_wordcloud</a></span>(<span class="no">sheet</span>, <span class="kw">year_min</span> <span class="kw">=</span> <span class="fl">2015</span>, <span class="kw">year_max</span> <span class="kw">=</span> <span class="fl">2021</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb47"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_wordcloud.html">plot_wordcloud</a></span>(<span class="no">sheet</span>, <span class="kw">year_min</span> <span class="kw">=</span> <span class="fl">2015</span>, <span class="kw">year_max</span> <span class="kw">=</span> <span class="fl">2021</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-36-1.png" width="672"></p>
 </div>
 <div id="department-names" class="section level2">
 <h2 class="hasAnchor">
 <a href="#department-names" class="anchor"></a>Department names</h2>
-<div class="sourceCode" id="cb47"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_wordcloud.html">plot_wordcloud</a></span>(<span class="no">sheet</span>, <span class="kw">col_use</span> <span class="kw">=</span> <span class="st">"department"</span>, <span class="kw">other_stop_words</span> <span class="kw">=</span> <span class="no">inst_words</span>,
+<div class="sourceCode" id="cb48"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_wordcloud.html">plot_wordcloud</a></span>(<span class="no">sheet</span>, <span class="kw">col_use</span> <span class="kw">=</span> <span class="st">"department"</span>, <span class="kw">other_stop_words</span> <span class="kw">=</span> <span class="no">inst_words</span>,
               <span class="kw">scale</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">5</span>, <span class="fl">0.1</span>))</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-37-1.png" width="672"></p>
 </div>
@@ -302,9 +306,9 @@
 <div id="programming-languages" class="section level1">
 <h1 class="hasAnchor">
 <a href="#programming-languages" class="anchor"></a>Programming languages</h1>
-<div class="sourceCode" id="cb48"><html><body><pre class="r"><span class="no">langs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/unnest_cat.html">unnest_cat</a></span>(<span class="no">sheet</span>, <span class="no">language</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"documented"</span>, <span class="st">"packaged"</span>, <span class="st">"CRAN/Bioc/pip/conda"</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb49"><html><body><pre class="r"><span class="no">langs</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/unnest_cat.html">unnest_cat</a></span>(<span class="no">sheet</span>, <span class="no">language</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"documented"</span>, <span class="st">"packaged"</span>, <span class="st">"CRAN/Bioc/pip/conda"</span>))</pre></body></html></div>
 <p>Here each icon stands for 2 publications.</p>
-<div class="sourceCode" id="cb49"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">langs</span>, <span class="no">language</span>, <span class="kw">n_top</span> <span class="kw">=</span> <span class="fl">5</span>, <span class="kw">isotype</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">img_unit</span> <span class="kw">=</span> <span class="fl">2</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb50"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_cat.html">pubs_per_cat</a></span>(<span class="no">langs</span>, <span class="no">language</span>, <span class="kw">n_top</span> <span class="kw">=</span> <span class="fl">5</span>, <span class="kw">isotype</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">img_unit</span> <span class="kw">=</span> <span class="fl">2</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-39-1.png" width="700"></p>
 <p>Not sure of MathWorks will get mad at me for using their logo this way, since they don’t want people to put their logo into a pattern and I’m not entirely sure if this counts as pattern.</p>
 </div>
@@ -312,43 +316,43 @@
 <h1 class="hasAnchor">
 <a href="#data-and-code-availability" class="anchor"></a>Data and code availability</h1>
 <p>How many publications have provided a code repo?</p>
-<div class="sourceCode" id="cb50"><html><body><pre class="r"><span class="fu"><a href="../reference/hist_bool.html">hist_bool</a></span>(<span class="no">sheet</span>, !<span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span>(<span class="no">repo</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb51"><html><body><pre class="r"><span class="fu"><a href="../reference/hist_bool.html">hist_bool</a></span>(<span class="no">sheet</span>, !<span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span>(<span class="no">repo</span>), <span class="kw">preprints</span> <span class="kw">=</span> <span class="fl">TRUE</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-40-1.png" width="700"></p>
 <p>It seems that more recent publications are more likely to provide a repo. Is this significant?</p>
-<div class="sourceCode" id="cb51"><html><body><pre class="r"><span class="fu"><a href="../reference/test_year_bool.html">test_year_bool</a></span>(<span class="no">sheet</span>, !<span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span>(<span class="no">repo</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb52"><html><body><pre class="r"><span class="fu"><a href="../reference/test_year_bool.html">test_year_bool</a></span>(<span class="no">sheet</span>, !<span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span>(<span class="no">repo</span>))</pre></body></html></div>
 <pre><code>## 
 ## Call:
 ## glm(formula = bool_use ~ date_published, family = "binomial", 
-##     data = df)
+##     data = pubs)
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -2.3003   0.3786   0.4338   0.5782   1.1454  
+## -2.3715   0.3374   0.3859   0.5181   1.1586  
 ## 
 ## Coefficients:
-##                  Estimate Std. Error z value Pr(&gt;|z|)  
-## (Intercept)    -2.009e+01  8.665e+00  -2.318   0.0204 *
-## date_published  1.234e-03  5.011e-04   2.463   0.0138 *
+##                  Estimate Std. Error z value Pr(&gt;|z|)   
+## (Intercept)    -21.806905   8.646968  -2.522  0.01167 * 
+## date_published   0.001337   0.000499   2.680  0.00736 **
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 44.584  on 43  degrees of freedom
-## Residual deviance: 36.470  on 42  degrees of freedom
-## AIC: 40.47
+##     Null deviance: 47.139  on 49  degrees of freedom
+## Residual deviance: 37.254  on 48  degrees of freedom
+## AIC: 41.254
 ## 
-## Number of Fisher Scoring iterations: 4</code></pre>
+## Number of Fisher Scoring iterations: 5</code></pre>
 <p>Yep, it’s significant. How about whether the code is well-documented?</p>
-<div class="sourceCode" id="cb53"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_year.html">pubs_per_year</a></span>(<span class="no">langs</span>, <span class="st">"language"</span>, <span class="kw">binwidth</span> <span class="kw">=</span> <span class="fl">150</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb54"><html><body><pre class="r"><span class="fu"><a href="../reference/pubs_per_year.html">pubs_per_year</a></span>(<span class="no">langs</span>, <span class="st">"language"</span>, <span class="kw">binwidth</span> <span class="kw">=</span> <span class="fl">150</span>)</pre></body></html></div>
 <p><img src="analysis_files/figure-html/unnamed-chunk-42-1.png" width="576"></p>
-<div class="sourceCode" id="cb54"><html><body><pre class="r"><span class="fu"><a href="../reference/hist_bool_line.html">hist_bool_line</a></span>(<span class="no">langs</span>, <span class="no">documented</span>, <span class="kw">facet_by</span> <span class="kw">=</span> <span class="st">"language"</span>)</pre></body></html></div>
-<p><img src="analysis_files/figure-html/unnamed-chunk-43-1.png" width="768"></p>
+<div class="sourceCode" id="cb55"><html><body><pre class="r"><span class="fu"><a href="../reference/hist_bool_line.html">hist_bool_line</a></span>(<span class="no">langs</span>, <span class="no">documented</span>, <span class="kw">facet_by</span> <span class="kw">=</span> <span class="st">"language"</span>, <span class="kw">preprints</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">n_top</span> <span class="kw">=</span> <span class="fl">5</span>)</pre></body></html></div>
+<p><img src="analysis_files/figure-html/unnamed-chunk-43-1.png" width="700"></p>
 <p>It seems that R, Python, and C++ packages are more likely to be well-documented, and MATLAB ones are less likely. Is that MATLAB culture?</p>
-<div class="sourceCode" id="cb55"><html><body><pre class="r"><span class="fu"><a href="../reference/hist_bool_line.html">hist_bool_line</a></span>(<span class="no">langs</span>, <span class="no">`CRAN/Bioc/pip/conda`</span>, <span class="st">"language"</span>)</pre></body></html></div>
-<p><img src="analysis_files/figure-html/unnamed-chunk-44-1.png" width="768"></p>
+<div class="sourceCode" id="cb56"><html><body><pre class="r"><span class="fu"><a href="../reference/hist_bool_line.html">hist_bool_line</a></span>(<span class="no">langs</span>, <span class="no">`CRAN/Bioc/pip/conda`</span>, <span class="st">"language"</span>, <span class="kw">preprints</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">n_top</span> <span class="kw">=</span> <span class="fl">5</span>)</pre></body></html></div>
+<p><img src="analysis_files/figure-html/unnamed-chunk-44-1.png" width="700"></p>
 <p>It seems that most packages are not on those public repos, not even R packages. Why? Too lazy to write documentations?</p>
-<div class="sourceCode" id="cb56"><html><body><pre class="r"><span class="no">langs</span> <span class="kw">%&gt;%</span>
+<div class="sourceCode" id="cb57"><html><body><pre class="r"><span class="no">langs</span> <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="fu"><a href="https://rdrr.io/r/stats/complete.cases.html">complete.cases</a></span>(<span class="no">.</span>)) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span>(<span class="kw">data</span> <span class="kw">=</span> <span class="no">.</span>, <span class="no">documented</span> ~ <span class="no">`CRAN/Bioc/pip/conda`</span>, <span class="kw">family</span> <span class="kw">=</span> <span class="st">"binomial"</span>) <span class="kw">%&gt;%</span>
   <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>()</pre></body></html></div>
@@ -359,30 +363,30 @@
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -1.8930  -1.2668   0.6039   1.0906   1.0906  
+## -1.5518  -1.4823   0.8726   0.9005   0.9005  
 ## 
 ## Coefficients:
 ##                           Estimate Std. Error z value Pr(&gt;|z|)  
-## (Intercept)                 0.2076     0.2640   0.786   0.4316  
-## `CRAN/Bioc/pip/conda`TRUE   1.4018     0.6853   2.045   0.0408 *
+## (Intercept)                 0.6931     0.3873   1.790   0.0735 .
+## `CRAN/Bioc/pip/conda`TRUE   0.1542     0.7913   0.195   0.8455  
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 101.054  on 75  degrees of freedom
-## Residual deviance:  96.003  on 74  degrees of freedom
-## AIC: 100
+##     Null deviance: 50.446  on 39  degrees of freedom
+## Residual deviance: 50.408  on 38  degrees of freedom
+## AIC: 54.408
 ## 
-## Number of Fisher Scoring iterations: 3</code></pre>
+## Number of Fisher Scoring iterations: 4</code></pre>
 <p>So it seems that packages on those public repos sort of tend to be better documented, though this is not really significant.</p>
-<div class="sourceCode" id="cb58"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span>()</pre></body></html></div>
+<div class="sourceCode" id="cb59"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span>()</pre></body></html></div>
 <pre><code>## R version 4.0.0 (2020-04-24)
 ## Platform: x86_64-apple-darwin17.0 (64-bit)
-## Running under: macOS Catalina 10.15.4
+## Running under: macOS Catalina 10.15.5
 ## 
 ## Matrix products: default
-## BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+## BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib
 ## LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
 ## 
 ## locale:
@@ -392,36 +396,34 @@
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] sf_0.9-3            ggplot2_3.3.1       zeallot_0.1.0      
-## [4] dplyr_1.0.0         purrr_0.3.4         museumst_0.0.0.9000
+## [1] sf_0.9-5            ggplot2_3.3.2       dplyr_1.0.0        
+## [4] purrr_0.3.4         museumst_0.0.0.9002
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] ggrepel_0.8.2           Rcpp_1.0.4.6            rnaturalearth_0.1.0    
-##  [4] lubridate_1.7.8         lattice_0.20-41         tidyr_1.1.0            
-##  [7] png_0.1-7               class_7.3-16            assertthat_0.2.1       
-## [10] rprojroot_1.3-2         digest_0.6.25           R6_2.4.1               
-## [13] cellranger_1.1.0        plyr_1.8.6              backports_1.1.7        
-## [16] rnaturalearthdata_0.1.0 evaluate_0.14           e1071_1.7-3            
-## [19] httr_1.4.1              pillar_1.4.4            RgoogleMaps_1.4.5.3    
-## [22] rlang_0.4.6             googlesheets4_0.2.0     magick_2.3             
-## [25] Matrix_1.2-18           rmarkdown_2.2           pkgdown_1.5.1.9000     
-## [28] desc_1.2.0              labeling_0.3            tidytext_0.2.4         
-## [31] googledrive_1.0.1       stringr_1.4.0           munsell_0.5.0          
-## [34] janeaustenr_0.1.5       compiler_4.0.0          xfun_0.14              
-## [37] pkgconfig_2.0.3         rgeos_0.5-3             htmltools_0.4.0        
-## [40] tidyselect_1.1.0        tibble_3.0.1            viridisLite_0.3.0      
-## [43] crayon_1.3.4            withr_2.2.0             SnowballC_0.7.0        
-## [46] MASS_7.3-51.5           bitops_1.0-6            grid_4.0.0             
-## [49] gtable_0.3.0            lifecycle_0.2.0         DBI_1.1.0              
-## [52] magrittr_1.5            tokenizers_0.2.1        units_0.6-6            
-## [55] scales_1.1.1            KernSmooth_2.23-16      stringi_1.4.6          
-## [58] farver_2.0.3            fs_1.4.1                sp_1.4-2               
-## [61] ellipsis_0.3.1          generics_0.0.2          vctrs_0.3.0            
-## [64] wordcloud_2.6           rjson_0.2.20            RColorBrewer_1.1-2     
-## [67] tools_4.0.0             forcats_0.5.0           ggmap_3.0.0            
-## [70] glue_1.4.1              jpeg_0.1-8.1            yaml_2.2.1             
-## [73] colorspace_1.4-1        gargle_0.5.0            ggtextures_0.0.1       
-## [76] classInt_0.4-3          memoise_1.1.0           knitr_1.28</code></pre>
+##  [1] ggrepel_0.8.2           Rcpp_1.0.5              rnaturalearth_0.1.0    
+##  [4] lubridate_1.7.9         lattice_0.20-41         tidyr_1.1.0            
+##  [7] class_7.3-17            assertthat_0.2.1        rprojroot_1.3-2        
+## [10] digest_0.6.25           R6_2.4.1                cellranger_1.1.0       
+## [13] backports_1.1.8         rnaturalearthdata_0.1.0 evaluate_0.14          
+## [16] e1071_1.7-3             pillar_1.4.6            rlang_0.4.7            
+## [19] googlesheets4_0.2.0     rstudioapi_0.11         magick_2.4.0           
+## [22] Matrix_1.2-18           rmarkdown_2.3           pkgdown_1.5.1          
+## [25] desc_1.2.0              labeling_0.3            tidytext_0.2.5         
+## [28] googledrive_1.0.1       stringr_1.4.0           munsell_0.5.0          
+## [31] compiler_4.0.0          janeaustenr_0.1.5       xfun_0.16              
+## [34] pkgconfig_2.0.3         rgeos_0.5-3             htmltools_0.5.0.9000   
+## [37] tidyselect_1.1.0        tibble_3.0.3            viridisLite_0.3.0      
+## [40] crayon_1.3.4            withr_2.2.0             MASS_7.3-51.6          
+## [43] SnowballC_0.7.0         grid_4.0.0              gtable_0.3.0           
+## [46] lifecycle_0.2.0         DBI_1.1.0               magrittr_1.5           
+## [49] units_0.6-7             scales_1.1.1            tokenizers_0.2.1       
+## [52] KernSmooth_2.23-17      stringi_1.4.6           farver_2.0.3           
+## [55] fs_1.4.2                sp_1.4-2                ellipsis_0.3.1         
+## [58] generics_0.0.2          vctrs_0.3.2             wordcloud_2.6          
+## [61] RColorBrewer_1.1-2      tools_4.0.0             forcats_0.5.0          
+## [64] glue_1.4.1              urbnmapr_0.0.0.9002     yaml_2.2.1             
+## [67] colorspace_1.4-1        gargle_0.5.0            ggtextures_0.0.1       
+## [70] classInt_0.4-3          memoise_1.1.0           knitr_1.29</code></pre>
 </div>
   </div>
 
@@ -440,7 +442,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>
