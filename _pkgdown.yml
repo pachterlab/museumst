@@ -1,5 +1,5 @@
 template:
   params:
-    bootswatch: minty
+    bootswatch: flatly
 development:
   mode: auto
