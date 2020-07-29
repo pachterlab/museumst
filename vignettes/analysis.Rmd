@@ -64,7 +64,7 @@ pubs_per_cat(category, category)
 ```
 
 ```{r, fig.width=4, fig.height=4}
-pubs_per_year(category, facet_by = "category", n_top = 7, sort_by = "recent_count")
+pubs_per_year(category, facet_by = "category", n_top = 5, sort_by = "recent_count")
 ```
 
 ```{r}
@@ -110,7 +110,7 @@ How about per capita? Actually this probably does not say much since many resear
 pubs_per_capita(sheet, plot = "bar")
 ```
 
-How about country over time? There might not be enough publications to show a trend.
+How about country over time? 
 ```{r, fig.height=12, fig.width=6}
 pubs_per_year(sheet, facet_by = "country")
 ```
@@ -163,7 +163,7 @@ Maybe I just made this plot for fun. Not sure what to say about it.
 Also a plot just for America. I did not encounter a publication in this spreadsheet that is from Hawaii or Alaska, but I'll include Hawaii and Alaska in the map anyway in case I get one in the future.
 
 ```{r}
-pubs_on_map2(sheet, zoom = "usa")
+pubs_on_map(sheet, zoom = "usa", city_gc = city_gc)
 ```
 
 ```{r}

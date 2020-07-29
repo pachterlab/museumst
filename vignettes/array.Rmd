@@ -75,7 +75,8 @@ methods <- unnest_cat(sheet, method)
 ```
 
 ```{r, fig.width=4, fig.height=4}
-pubs_per_year(methods, facet_by = "method", binwidth = 100, preprints = TRUE)
+pubs_per_year(methods, facet_by = "method", binwidth = 100, preprints = TRUE,
+              sort_by = "recent")
 ```
 
 I don't know how much this actually says due to the small sample size. This is also kind of confusing since Geo-seq really is a form of LCM coupled with SMART-seq, so it should be categorized as LCM, but the authors gave it a new name. 
@@ -263,3 +264,7 @@ hist_bool_line(publications, !is.na(accession), binwidth = 100, preprints = TRUE
 ```
 
 I don't think it's significant.
+```{r}
+sessionInfo()
+```
+

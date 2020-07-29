@@ -142,7 +142,7 @@ current <- data_sheets %>%
 current2 <- publications %>% filter(era == "current")
 ```
 
-How many per sheet? Again, I definitely don't think the LCM collection (within Microdissection) is anywhere close to complete, so microdissection is definitely the most popular one so far. Maybe after I make the LCM collection more complete, I should plot the LCM collection separately.
+How many per sheet? Again, I definitely don't think the LCM collection (within Microdissection) is anywhere close to complete, so microdissection is definitely the most popular one so far. LCM abstracts from PubMed search are analyzed separately.
 ```{r}
 pubs_per_cat(current, sheet)
 ```
@@ -161,9 +161,9 @@ pubs_per_cat(methods_current, method)
 
 I'm not sure what to do with LCM, since I did a separate analysis on LCM literature from PubMed search. Here we see Visium has really taken off though it just got commercialized late last year.
 
-Sheet over time
+Sheet over time. Those on RStudio Cloud: Please try different binwidths!
 ```{r, fig.width=5, fig.height=5}
-pubs_per_year(current, "sheet", binwidth = 150)
+pubs_per_year(current, "sheet", binwidth = 150, sort_by = "recent")
 ```
 
 Also break this down further: this is to reproduce this plot in the other notebooks, faceted by methods.
@@ -186,7 +186,7 @@ Also plot the most common methods
 methods_current %>% 
   filter(method != "LCM") %>% 
   pubs_per_year(facet_by = "method", binwidth = 150, preprints = TRUE, n_top = 4, 
-                sort_by = "recent_count")
+                sort_by = "recent")
 ```
 
 Species in all the current sheets. For prequels, it has already been plotted in the prequel notebook.
