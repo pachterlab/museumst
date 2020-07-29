@@ -117,6 +117,8 @@ word_prop_scatter <- function(pubs, col_use = title, era = sheet, n_top = 20,
 #' @export
 
 my_searchK <- function(documents, K, prevalence = ~ 1, seed = 19, ...) {
+  .pkg_check("quanteda")
+  .pkg_check("stm")
   heldout <- stm::make.heldout(documents, seed = seed)
   dc <- heldout$documents
   vocab <- heldout$vocab
