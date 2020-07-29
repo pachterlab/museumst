@@ -158,7 +158,7 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
 #' @export
 pubs_per_year <- function(pubs, facet_by = NULL, binwidth = 365,
                           preprints = FALSE, n_top = Inf,
-                          sort_by = c("first_appeared", "count")) {
+                          sort_by = c("first_appeared", "count", "recent_count")) {
   journal <- date_published <- facets <- NULL
   sort_by <- match.arg(sort_by)
   if (!preprints) {
@@ -167,14 +167,23 @@ pubs_per_year <- function(pubs, facet_by = NULL, binwidth = 365,
   }
   if (!is.null(facet_by)) {
     pubs <- pubs %>%
-      mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top))
+      mutate(facets = !!sym(facet_by))
     if (sort_by == "first_appeared") {
       pubs <- pubs %>%
-        mutate(facets = fct_reorder(facets, date_published, .fun = "min"))
-    } else {
+        mutate(facets = fct_reorder(facets, date_published, .fun = "min"),
+               w = 1)
+    } else if (sort_by == "count") {
       pubs <- pubs %>%
-        mutate(facets = fct_infreq(facets))
+        mutate(facets = fct_infreq(facets),
+               w = 1)
+    } else {
+      date_thresh <- lubridate::as_date(max(pubs$date_published) - lubridate::ddays(binwidth))
+      pubs <- pubs %>%
+        mutate(w = as.numeric(date_published > date_thresh),
+               facets = fct_reorder(facets, w, .fun = "sum", .desc = TRUE))
     }
+    pubs <- pubs %>%
+      mutate(facets = fct_lump_n(facets, n = n_top, ties.method = "first", w = w))
   }
   p <- ggplot(pubs, aes(date_published))
   if (!is.null(facet_by)) {
@@ -304,6 +313,10 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
 #' plot.
 #' @param per_year Logical, whether to do the count for each year separately.
 #' This is for making animations with gganimate.
+#' @param plot Whether to plot points, rectangular bins (bin2d), or hexagonal
+#' bins (hexbin). The binned options are useful when there's overplotting.
+#' @param bins Numeric vector of length 2, the number of bins for bin2d or hex
+#' in the x and y directions. Ignored if plotting points.
 #' @return A ggplot2 object
 #' @importFrom rlang !!!
 #' @importFrom dplyr left_join count semi_join vars
@@ -313,14 +326,19 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
 #' @export
 pubs_on_map <- function(pubs, city_gc,
                         zoom = c("world", "europe", "usa"),
+                        plot = c("point", "bin2d", "hexbin"),
                         facet_by = "none", n_top = Inf,
                         ncol = 3, label_cities = TRUE, n_label = 10,
-                        per_year = FALSE) {
+                        per_year = FALSE, bins = c(70, 70)) {
   zoom <- match.arg(zoom)
+  plot <- match.arg(plot)
   .pkg_check("sf")
   .pkg_check("rnaturalearth")
   .pkg_check("rnaturalearthdata")
   .pkg_check("rgeos")
+  if (plot == "hexbin") {
+    .pkg_check("hexbin")
+  }
   if (per_year) {
     .pkg_check("gganimate")
     vars_count <- c("country", "state/province", "city", "year")
@@ -375,66 +393,99 @@ pubs_on_map <- function(pubs, city_gc,
                                    min(inst_count$n, na.rm = TRUE))/4)
   }
   n <- NULL
-  p <- ggplot() +
-    geom_sf(data = map_use) +
-    scale_size_area(name = "Number of\npublications",
-                    breaks = breaks_width(size_break_width)) +
-    theme(panel.border = element_blank(), axis.title = element_blank())
-  city2 <- city <- NULL
-  if (facet_by == "none") {
-    if (per_year) {
+  if (plot == "point") {
+    p <- ggplot() +
+      geom_sf(data = map_use) +
+      scale_size_area(name = "Number of\npublications",
+                      breaks = breaks_width(size_break_width)) +
+      theme(panel.border = element_blank(), axis.title = element_blank())
+    city2 <- city <- NULL
+    if (facet_by == "none") {
+      if (per_year) {
+        p <- p +
+          geom_sf(data = inst_count, aes(geometry = geometry, size = n, color = n,
+                                         group = city2),
+                  alpha = 0.7, show.legend = "point")
+      } else {
+        p <- p +
+          geom_sf(data = inst_count, aes(geometry = geometry, size = n, color = n),
+                  alpha = 0.7, show.legend = "point")
+      }
       p <- p +
-        geom_sf(data = inst_count, aes(geometry = geometry, size = n, color = n,
-                                       group = city2),
-                alpha = 0.7, show.legend = "point")
+        scale_color_viridis_c(name = "", breaks_width(size_break_width))
     } else {
-      p <- p +
-        geom_sf(data = inst_count, aes(geometry = geometry, size = n, color = n),
-                alpha = 0.7, show.legend = "point")
-    }
-    p <- p +
-      scale_color_viridis_c(name = "", breaks_width(size_break_width))
-    if (label_cities) {
       inst_count <- inst_count %>%
-        mutate(city_rank = row_number(desc(n)),
-               city_label = case_when(city_rank <= n_label ~ city,
-                                      TRUE ~ ""))
+        mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top))
+      if (per_year) {
+        p <- p +
+          geom_sf(data = inst_count, aes(geometry = geometry, size = n,
+                                         group = city2,
+                                         color = facets),
+                  alpha = 0.7, show.legend = "point")
+      } else {
+        p <- p +
+          geom_sf(data = inst_count, aes(geometry = geometry, size = n,
+                                         color = facets),
+                  alpha = 0.7, show.legend = "point")
+      }
       p <- p +
-        geom_label_repel(data = inst_count, aes(geometry = geometry, label = city_label),
-                         alpha = 0.7, stat = "sf_coordinates")
+        facet_wrap(vars(facets), ncol = ncol) +
+        theme(legend.position = "none")
+    }
+    if (zoom == "europe") {
+      # Limit to that box
+      p <- p +
+        coord_sf(xlim = xylims[c("xmin", "xmax")], ylim = xylims[c("ymin", "ymax")],
+                 crs = crs_europe)
+    }
+    if (per_year) {
+      year <- NULL
+      p <- p +
+        gganimate::transition_states(year, state_length = 5, transition_length = 1) +
+        labs(title = "{closest_state}") +
+        gganimate::enter_fade() +
+        gganimate::exit_fade()
     }
   } else {
-    inst_count <- inst_count %>%
-      mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top))
-    if (per_year) {
-      p <- p +
-        geom_sf(data = inst_count, aes(geometry = geometry, size = n,
-                                        group = city2,
-                                        color = facets),
-                alpha = 0.7, show.legend = "point")
-    } else {
-      p <- p +
-        geom_sf(data = inst_count, aes(geometry = geometry, size = n,
-                    color = facets),
-                alpha = 0.7, show.legend = "point")
+    inst_count2 <- uncount(inst_count, n)
+    coords <- sf::st_coordinates(inst_count2$geometry)
+    colnames(coords) <- c("lon", "lat")
+    coords <- as_tibble(coords)
+    inst_count2 <- cbind(inst_count2, coords)
+    if (facet_by != "none") {
+      inst_count <- inst_count %>%
+        mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top))
     }
-    p <- p +
-      facet_wrap(vars(facets), ncol = ncol) +
-      theme(legend.position = "none")
+    p <- ggplot() +
+      geom_sf(data = map_use) +
+      scale_fill_distiller(palette = "Blues", direction = 1) +
+      theme(panel.border = element_blank(), axis.title = element_blank())
+    if (zoom == "europe") {
+      # Limit to that box
+      p <- p +
+        coord_sf(xlim = xylims[c("xmin", "xmax")], ylim = xylims[c("ymin", "ymax")],
+                 crs = crs_europe)
+    }
+    if (plot == "hexbin") {
+      p <- p +
+        geom_hex(data = inst_count2, aes(lon, lat), bins = bins)
+    } else if (plot == "bin2d") {
+      p <- p +
+        geom_bin2d(data = inst_count2, aes(lon, lat), bins = bins)
+    }
+    if (facet_by != "none") {
+      p <- p +
+        facet_wrap(vars(facets), ncol = ncol)
+    }
   }
-  if (zoom == "europe") {
-    # Limit to that box
+  if (label_cities && !per_year) {
+    inst_count <- inst_count %>%
+      mutate(city_rank = row_number(desc(n)),
+             city_label = case_when(city_rank <= n_label ~ city,
+                                    TRUE ~ ""))
     p <- p +
-      coord_sf(xlim = xylims[c("xmin", "xmax")], ylim = xylims[c("ymin", "ymax")],
-               crs = crs_europe)
-  }
-  if (per_year) {
-    year <- NULL
-    p <- p +
-      gganimate::transition_states(year, state_length = 5, transition_length = 1) +
-      labs(title = "{closest_state}") +
-      gganimate::enter_fade() +
-      gganimate::exit_fade()
+      geom_label_repel(data = inst_count, aes(geometry = geometry, label = city_label),
+                       alpha = 0.7, stat = "sf_coordinates")
   }
   p
 }
