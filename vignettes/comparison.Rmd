@@ -4,7 +4,7 @@ author: "Lambda Moses"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{comparisons}
+  %\VignetteIndexEntry{Comparisons between sheets}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
