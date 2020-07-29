@@ -8,12 +8,14 @@ pubs_on_map(
   pubs,
   city_gc,
   zoom = c("world", "europe", "usa"),
+  plot = c("point", "bin2d", "hexbin"),
   facet_by = "none",
   n_top = Inf,
   ncol = 3,
   label_cities = TRUE,
   n_label = 10,
-  per_year = FALSE
+  per_year = FALSE,
+  bins = c(70, 70)
 )
 }
 \arguments{
@@ -32,6 +34,9 @@ if faceting by those. If facetting, then a column whose name is the value in
 Europe and some Eastern European countries are partially cropped off) or only
 the US.}
 
+\item{plot}{Whether to plot points, rectangular bins (bin2d), or hexagonal
+bins (hexbin). The binned options are useful when there's overplotting.}
+
 \item{facet_by}{Name of a column for facetting.}
 
 \item{n_top}{Number of categories with the most publications to plot in facets;
@@ -47,6 +52,9 @@ plot.}
 
 \item{per_year}{Logical, whether to do the count for each year separately.
 This is for making animations with gganimate.}
+
+\item{bins}{Numeric vector of length 2, the number of bins for bin2d or hex
+in the x and y directions. Ignored if plotting points.}
 }
 \value{
 A ggplot2 object

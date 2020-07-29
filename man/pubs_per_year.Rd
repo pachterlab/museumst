@@ -10,7 +10,7 @@ pubs_per_year(
   binwidth = 365,
   preprints = FALSE,
   n_top = Inf,
-  sort_by = c("first_appeared", "count")
+  sort_by = c("first_appeared", "count", "recent_count")
 )
 }
 \arguments{
