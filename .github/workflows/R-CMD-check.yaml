@@ -74,6 +74,7 @@ jobs:
         run: |
           remotes::install_github("wilkelab/ggtext")
           remotes::install_github("clauswilke/ggtextures")
+          remotes::install_github("UrbanInstitute/urbnmapr")
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
