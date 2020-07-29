@@ -60,16 +60,21 @@ jobs:
           sysreqs=$(Rscript -e "cat(sysreqs::sysreq_commands('DESCRIPTION'))")
           sudo -s eval "$sysreqs"
 
+          # install spatial dependencies
+          sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+          sudo apt update
+          sudo apt install \
+            libudunits2-dev \
+            libgdal-dev \
+            libgeos-dev \
+            libproj-dev
+
       - name: Install system dependencies for Mac OS
         if: runner.os == 'macOS'
         run: |
-          brew install imagemagick@6
-          brew install udunits
-          brew install libgit2
-          brew install libssh2
-          brew install gcc
-          brew link --overwrite gcc
-          brew install gdal
+          brew install pkg-config \
+            udunits \
+            gdal
 
       - name: Install dependencies
         run: |
