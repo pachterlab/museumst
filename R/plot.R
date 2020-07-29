@@ -177,7 +177,7 @@ pubs_per_year <- function(pubs, facet_by = NULL, binwidth = 365,
         mutate(facets = fct_infreq(facets),
                w = 1)
     } else {
-      date_thresh <- lubridate::as_date(max(pubs$date_published) - lubridate::ddays(binwidth))
+      date_thresh <- lubridate::as_date(max(pubs$date_published) - lubridate::ddays(binwidth) * 2)
       pubs <- pubs %>%
         mutate(w = as.numeric(date_published > date_thresh),
                facets = fct_reorder(facets, w, .fun = "sum", .desc = TRUE))
