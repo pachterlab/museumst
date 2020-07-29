@@ -150,7 +150,7 @@ pubs_per_cat(current, sheet)
 How about when broken down by the specific methods, like Visium and MERFISH?
 ```{r}
 methods_current <- data_sheets %>% 
-  select(title, method, sheet, era) %>% 
+  select(title, date_published, method, sheet, era) %>% 
   filter(era == "current", !is.na(method)) %>% 
   distinct()
 ```
@@ -181,6 +181,13 @@ pmap(binwidths, ~ data_sheets %>%
        ggtitle(..1))
 ```
 
+Also plot the most common methods
+```{r, fig.width=4, fig.height=4}
+methods_current %>% 
+  filter(method != "LCM") %>% 
+  pubs_per_year(facet_by = "method", binwidth = 150, preprints = TRUE, n_top = 4, 
+                sort_by = "recent_count")
+```
 
 Species in all the current sheets. For prequels, it has already been plotted in the prequel notebook.
 ```{r}

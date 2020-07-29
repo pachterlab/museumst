@@ -63,8 +63,8 @@ category <- unnest_cat(sheet, category)
 pubs_per_cat(category, category)
 ```
 
-```{r, fig.width=6, fig.height=12}
-pubs_per_year(category, facet_by = "category", n_top = 7, sort_by = "count")
+```{r, fig.width=4, fig.height=4}
+pubs_per_year(category, facet_by = "category", n_top = 7, sort_by = "recent_count")
 ```
 
 ```{r}

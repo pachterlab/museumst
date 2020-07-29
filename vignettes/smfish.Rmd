@@ -291,7 +291,10 @@ mean_genes <- sheet %>%
 
 ```{r}
 ggplot(mean_genes, aes(date_published, n_genes, color = method)) +
-  geom_point()
+  geom_point() +
+  geom_text_repel(aes(label = method), segment.alpha = 0.5) +
+  labs(x = "Date published", y = "Mean number of genes per study") +
+  theme(legend.position = "none")
 ```
 
 While the max possible number of genes increased, I don't think people necessarily want to go for the max.
@@ -300,7 +303,10 @@ mean_genes %>%
   filter(n_genes < 1000) %>% 
   ggplot(aes(date_published, n_genes)) +
   geom_point(aes(color = method)) +
-  geom_smooth(method = "lm")
+  geom_text_repel(aes(label = method, color = method), segment.alpha = 0.5) +
+  geom_smooth(method = "lm") +
+  labs(x = "Date published", y = "Mean number of genes per study") +
+  theme(legend.position = "none")
 ```
 
 See, without those 3 outliers, there really does not seem to be an increase (if not a decrease). I wonder why people aren't opting for the larger number of genes possible. Is it because the probes are expensive or it's too challenging to process the sheer number of images, which is exacerbated by poor documentation of much of the existing code written for this task and lack of a unified pipeline? Now I wonder if growth of ST is in part because of STPipeline, which makes data preprocessing easier. Now I also wonder how Cell Ranger and Seurat contributed to spread of scRNA-seq in general.
@@ -309,22 +315,29 @@ How about number of cells? Here the total number of cells from each study per me
 ```{r}
 sum_cells <- sheet %>% 
   group_by(date_published, title, method) %>% 
-  summarize(n_cells = sum(n_cells, na.rm = TRUE))
+  summarize(n_cells = sum(n_cells, na.rm = TRUE)) %>% 
+  filter(n_cells > 0)
 ```
 
 ```{r}
 ggplot(sum_cells, aes(date_published, n_cells, color = method)) +
-  geom_point()
+  geom_point() +
+  geom_text_repel(aes(label = method), segment.alpha = 0.5) +
+  labs(x = "Date published", y = "Total number of cells per study") +
+  theme(legend.position = "none")
 ```
 
 That outlier is the crazy hypothalamus MERFISH study.
 
 ```{r}
 sum_cells2 <- sum_cells %>% 
-  filter(n_cells < 1e5)
+  filter(n_cells < 5e5)
 ggplot(sum_cells2, aes(date_published, n_cells)) +
   geom_point(aes(color = method)) +
-  geom_smooth(method = "lm")
+  geom_text_repel(aes(label = method, color = method), segment.alpha = 0.5) +
+  geom_smooth(method = "lm") +
+  labs(x = "Date published", y = "Total number of cells per study") +
+  theme(legend.position = "none")
 ```
 
 I don't think it's significant. Here I formally test if beta is not 0:
