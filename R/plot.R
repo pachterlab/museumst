@@ -145,6 +145,8 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
 #' @param preprints Logical, whether preprints should be included.
 #' @param n_top Number of categories with the most publications to plot in facets;
 #' the other categories are lumped into "other".
+#' @param n_top_fill Number of categories with the most publications to be
+#' differentiated by color.
 #' @param sort_by How to sort the facets. first_appeared means the category that
 #' appeared earlier will be nearer to the top. count means the category with more
 #' count (number of publications) will be nearer to the top. Ignored if not
@@ -156,8 +158,8 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
 #' @importFrom ggplot2 geom_bar scale_x_continuous labs theme facet_wrap
 #' @importFrom scales breaks_pretty
 #' @export
-pubs_per_year <- function(pubs, facet_by = NULL, binwidth = 365,
-                          preprints = FALSE, n_top = Inf,
+pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
+                          preprints = FALSE, n_top = Inf, n_top_fill = Inf,
                           sort_by = c("first_appeared", "count", "recent_count")) {
   journal <- date_published <- facets <- NULL
   sort_by <- match.arg(sort_by)
@@ -185,20 +187,54 @@ pubs_per_year <- function(pubs, facet_by = NULL, binwidth = 365,
     pubs <- pubs %>%
       mutate(facets = fct_lump_n(facets, n = n_top, ties.method = "first", w = w))
   }
+  if (!is.null(fill_by)) {
+    if (fill_by == "species") {
+      # Use fixed colors for species
+      pubs <- pubs %>%
+        mutate(fill = case_when(species %in% names(species_cols) ~ species,
+                                TRUE ~ "Other"),
+               fill = fct_infreq(fill) %>% fct_relevel("Other", after = Inf))
+    } else {
+      if (n_top_fill > 11) {
+        warning("Maximum of 12 colors are supported for colorblind friend palette, ",
+                "less common categories are lumped into Other.")
+        n_top_fill <- 11
+      }
+      pubs <- pubs %>%
+        mutate(fill = fct_infreq(!!sym(fill_by)),
+               fill = fct_lump_n(fill, n = n_top_fill, ties.method = "first"),
+               fill = fct_infreq(fill) %>% fct_relevel("Other", after = Inf))
+    }
+  }
   p <- ggplot(pubs, aes(date_published))
   if (!is.null(facet_by)) {
     p <- p +
       geom_histogram(aes(fill = "all"), binwidth = binwidth,
                      data = select(pubs, -facets),
-                     fill = "gray70", alpha = 0.5)
+                     fill = "gray70", alpha = 0.5, show.legend = FALSE)
+  }
+  if (!is.null(fill_by)) {
+    p <- p +
+      geom_histogram(aes(fill = fill), binwidth = binwidth)
+    if (fill_by != "species") {
+      pal_use <- ifelse(n_top_fill > 7, "Paired", "Set2")
+      p <- p +
+        scale_fill_brewer(palette = pal_use, name = "")
+    } else {
+      p <- p +
+        scale_fill_manual(values = species_cols, name = "") +
+        theme(legend.text = element_text(face = "italic"))
+    }
+  } else {
+    p <- p +
+      geom_histogram(binwidth = binwidth)
   }
   p <- p +
-    geom_histogram(binwidth = binwidth) +
     scale_y_continuous(expand = expansion(mult = c(0, 0.05)),
                        breaks = breaks_pretty()) +
     scale_x_date(breaks = breaks_pretty(10)) +
     labs(y = "Number of publications", x = "Date published") +
-    theme(panel.grid.minor = element_blank(), legend.position = "none")
+    theme(panel.grid.minor = element_blank())
   if (!is.null(facet_by)) {
     p <- p +
       facet_wrap(~ facets, ncol = 1)

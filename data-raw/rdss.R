@@ -79,3 +79,15 @@ map2(sheets, fns, ~ saveRDS(.x, file = paste0("inst/sheets_cache/", .y, ".rds"),
 url_use <- "https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154"
 events <- read_sheet(url_use, "major events")
 saveRDS(events, "inst/major_events.rds", version = 2)
+
+# When coloring by species, give each species a fixed color.
+# Also, when there are too many species, the colors are hard to tell from each other
+# So colors are only for the most commonly used species.
+species <- c("Mus musculus", "Drosophila melanogaster",
+             "Danio rerio", "Caenorhabditis elegans", "Xenopus laevis",
+             "Ciona intestinalis", "Gallus gallus", "Arabidopsis thaliana")
+species_cols <- scales::brewer_pal(palette = "Set2")(8)
+species_cols <- c(species_cols, "gray50")
+names(species_cols) <- c(species, "Other")
+usethis::use_data(species_cols, lang_img, species_img, usa_w_pop,
+                  europe_countries, xylims, internal = TRUE, overwrite = TRUE)
