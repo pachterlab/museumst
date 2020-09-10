@@ -26,6 +26,7 @@ library(uwot)
 library(tidytext)
 library(broom)
 library(gam)
+devtools::load_all()
 plan(multiprocess)
 theme_set(theme_bw())
 ```
@@ -38,12 +39,13 @@ abstracts <- readRDS("abstracts.rds")
 ```
 
 ```{r}
-pubs_on_map(df_1st, cities_gc, plot = "hexbin")
+pubs_on_map(df_1st, cities_gc, plot = "hexbin", label_insts = FALSE, 
+            label_cities = TRUE)
 ```
 
 Not sure if this is a good idea, since it's plotting number of publications per unit area. I think per capita is confusing, again, because researchers move a lot and I'm not sure who are the "locals". Is per unit area more reasonable? Maybe. It helps when there's overplotting in the scatter plot.
 ```{r}
-pubs_on_map(df_1st, city_gc = cities_gc)
+pubs_on_map(df_1st, city_gc = cities_gc, label_cities = TRUE)
 ```
 
 ```{r}
@@ -69,7 +71,7 @@ pubs_per_capita(df_1st, plot = "bar")
 That's very different from other areas of spatial transcriptomics.
 
 ```{r}
-pubs_on_map(df_1st, cities_gc, "europe")
+pubs_on_map(df_1st, cities_gc, "europe", label_cities = TRUE)
 ```
 
 ```{r}
@@ -83,14 +85,15 @@ pubs_per_capita(df_1st, "europe", plot = "bar")
 Denmark never showed up for the other areas in spatial transcriptomics. 
 
 ```{r}
-pubs_on_map(df_1st, cities_gc, "usa")
+pubs_on_map(df_1st, cities_gc, "usa", label_cities = TRUE)
 ```
 
 ```{r}
-pubs_on_map(df_1st, cities_gc, "usa", plot = "hexbin", bins = c(40, 40))
+pubs_on_map(df_1st, cities_gc, "usa", plot = "hexbin", bins = c(40, 40),
+            label_cities = TRUE)
 ```
 
-Orangeburg. Never heard about it. It's the Nathan Kline Institute, which again, I've never heard about. I think this shows how LCM is different from other fields of spatial transcriptomics; the other fields are more confined to the very elite institutions.
+Orangeburg. Never heard about it. It's the Nathan Kline Institute, which again, I've never heard of. I think this shows how LCM is different from other fields of spatial transcriptomics; the other fields are more confined to the very elite institutions.
 ```{r}
 pubs_per_capita(df_1st, "usa")
 ```
@@ -311,13 +314,13 @@ plot_k_result(k_result2)
 Looks like the number of topics should be 25 to 40 according to the residuals, but held-out likelihood and semantic coherence. suggest a smaller number. The "residuals" here means dispersion of the residuals, and ideally it should be 1. 
 
 ```{r}
-plot_ec(k_result2, c(10, 25, 30, 40, 60))
+plot_ec(k_result2, c(10, 25, 35, 40, 60))
 ```
 
 As expected, fewer topics results into higher semantic coherence and lower exclusivity. This is really a trade off. Sort of a compromise, here I choose the model with K = 25. Since I have held out part of the data when choosing K, I'll use this K to fit the model with the full data.
 
 ```{r}
-stm_res <- stm(ac_dfm2, K = 40, prevalence = ~ stm::s(date_num, df = 3) + city_eff,
+stm_res <- stm(ac_dfm2, K = 35, prevalence = ~ stm::s(date_num, df = 3) + city_eff,
                gamma.prior = "L1", seed = 1919)
 ```
 
@@ -326,12 +329,12 @@ plot(stm_res)
 ```
 
 ```{r}
-labelTopics(stm_res, c(11, 19, 14, 29, 37, 34, 40))
+labelTopics(stm_res, c(10, 22, 15, 11, 35))
 ```
 
 Upon manual inspection, 40 topics seem to give more reasonable results.
 ```{r}
-saveRDS(k_result, "k_result_lcm.rds")
+saveRDS(k_result2, "k_result_lcm.rds")
 saveRDS(stm_res, "stm_res_lcm.rds")
 ```
 
@@ -343,7 +346,7 @@ td_beta %>%
   top_n(10, beta) %>%
   ungroup() %>%
   mutate(topic = paste0("Topic ", topic),
-         topic = fct_relevel(topic, paste0("Topic ", 1:40)),
+         topic = fct_relevel(topic, paste0("Topic ", 1:35)),
          term = reorder_within(term, beta, topic)) %>%
   ggplot(aes(term, beta)) +
   geom_segment(aes(xend = term), yend = 0, show.legend = FALSE) +
@@ -399,7 +402,12 @@ td_beta %>%
 40. Molecular aspect of cancer, especially breast cancer
 
 ```{r}
-plot(stm_res, type = "perspectives", topics = c(11, 40))
+plot(stm_res, type = "perspectives", topics = c(1, 33))
+```
+
+```{r}
+usethis::use_data(ac_dfm2)
+usethis::use_data(stm_res)
 ```
 
 
@@ -412,7 +420,7 @@ effs <- estimateEffect( ~ stm::s(date_num, df = 3), stm_res,
 ```{r}
 effs_df <- get_effects(effs, "date_num", type = "continuous")
 effs_df <- effs_df %>% 
-  mutate(topic = fct_relevel(topic, as.character(1:40)),
+  mutate(topic = fct_relevel(topic, as.character(1:35)),
          date_published = as_date(value))
 ```
 
@@ -434,10 +442,10 @@ abstracts <- cbind(abstracts, as.data.frame(stm_res$theta))
 ```{r}
 year_theta_long <- abstracts %>% 
   mutate(date_bin = floor_date(date_published, unit = "year")) %>% 
-  select(date_bin, V1:V40) %>% 
-  pivot_longer(cols = V1:V40, names_to = "topic", values_to = "theta") %>% 
+  select(date_bin, V1:V35) %>% 
+  pivot_longer(cols = V1:V35, names_to = "topic", values_to = "theta") %>% 
   mutate(topic = str_remove(topic, "^V"),
-         topic = fct_relevel(topic, as.character(1:40)))
+         topic = fct_relevel(topic, as.character(1:35)))
 year_means <- year_theta_long %>% 
   group_by(date_bin, topic) %>% 
   summarize(means = mean(theta)) 
@@ -445,7 +453,7 @@ year_means <- year_theta_long %>%
 
 ```{r}
 year_means %>% 
-  filter(topic %in% as.character(c(9, 14, 37, 18, 24, 35))) %>% 
+  filter(topic %in% as.character(c(1, 10, 11, 15, 30, 33))) %>% 
   ggplot(aes(date_bin, means, color = topic)) +
   geom_line() +
   facet_wrap(~ topic) +
@@ -462,7 +470,7 @@ year_counts <- year_theta_long %>%
 
 ```{r}
 year_counts %>% 
-  filter(topic %in% as.character(c(9, 14, 37, 18, 24, 35))) %>% 
+  filter(topic %in% as.character(c(1, 10, 11, 15, 30, 33))) %>% 
   ggplot(aes(date_bin, n, color = topic)) +
   geom_line() +
   facet_wrap(~ topic) +
@@ -494,10 +502,6 @@ effs_loc <- estimateEffect( ~ city_eff, stm_res,
 ```
 
 ```{r}
-labelTopics(stm_res, 21)
-```
-
-```{r}
 effs_loc_summ <- tidy(effs_loc)
 effs_loc_summ <- effs_loc_summ %>% 
   mutate(p_val_adj = p.adjust(p.value))
@@ -510,13 +514,13 @@ I think in some cases this actually helps identifying institutions (actually I w
 ```{r}
 effs_df_loc <- get_effects(effs_loc, "city_eff", type = "pointestimate")
 effs_df_loc <- effs_df_loc %>% 
-  mutate(topic = fct_relevel(topic, as.character(1:40)),
+  mutate(topic = fct_relevel(topic, as.character(1:35)),
          mid = (upper + lower)/2)
 ```
 
 ```{r}
 effs_df_loc %>% 
-  filter(topic == 21) %>% 
+  filter(topic == 9) %>% 
   mutate(value = fct_reorder(value, mid, .desc = FALSE)) %>% 
   top_n(10, mid) %>% 
   ggplot(aes(y = value)) +
@@ -530,6 +534,10 @@ heatmap(stm_res$theta)
 ```{r}
 topic_cor <- topicCorr(stm_res)
 plot(topic_cor)
+```
+
+```{r}
+labelTopics(stm_res, 18)
 ```
 
 Here the cancer topics are connected (37, 11, 29, 35, 17), the technical ones are connected to plant ones somehow (9, 31, 12, 24), the epithelium and immune responses are connected (1, 7) presumably because some abstracts in topic 1 mentions inflammation and some abstractions in topic 7 mention inflammation of the skin. There's another cluster of cancer topics (14, 19, 8). The CNS topics are connected (23, 3, 39). Both 30 and 34 are about vasculature.
@@ -764,14 +772,14 @@ rownames(word_mat) <- word_mat_df$word
 word_mat <- t(scale(t(word_mat)))
 ```
 
-```{r}
+```{r, fig.width=6, fig.height=6}
 heatmap(word_mat, Colv = NA, scale = "none")
 ```
 
 Which topics are those words associated with?
 ```{r}
 td_beta %>% 
-  filter(term == "key") %>% 
+  filter(term == "seq") %>% 
   arrange(desc(beta))
 ```
 

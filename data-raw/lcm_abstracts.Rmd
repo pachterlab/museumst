@@ -37,7 +37,7 @@ close(con)
 df <- map_dfr(xmlx_list, article_to_df, max_chars = 0)
 ```
 
-Cool, that took a while. There's some extra information here that I don't necessarily need, but I'll save the whor thing for now.
+Cool, that took a while. There's some extra information here that I don't necessarily need, but I'll save the whole thing for now.
 
 ```{r}
 saveRDS(df, "lcm_info.rds")
@@ -187,3 +187,9 @@ saveRDS(abstracts, "abstracts.rds")
 ```
 
 To do: Before I submit the paper, I should write functions to update the LCM abstracts without having to start over all the API queries.
+
+```{r}
+usethis::use_data(abstracts)
+usethis::use_data(cities_gc)
+```
+
