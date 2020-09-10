@@ -55,3 +55,13 @@
 #' repo of this package](https://www.github.com/pachterlab/museumst) for how
 #' this model was fitted.
 "stm_res"
+
+#' quanteda tokens for LCM abstracts
+#'
+#' Common phrases and unigrams, without stop words, and stemmed.
+#'
+#' @format A quanteda tokens object
+#' @source See the `lcm_text_mining.Rmd` file in the `data-raw` in the [GitHub
+#' repo of this package](https://www.github.com/pachterlab/museumst) for how
+#' tokenization was performed.
+"lcm_tokens"

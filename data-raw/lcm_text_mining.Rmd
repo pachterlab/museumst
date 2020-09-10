@@ -291,6 +291,11 @@ ac_tokens <- tokens(ac, remove_punct = TRUE,
 ```
 
 ```{r}
+lcm_tokens <- ac_tokens
+usethis::use_data(lcm_tokens)
+```
+
+```{r}
 ac_dfm <- dfm(ac_tokens)
 ```
 
