@@ -195,15 +195,36 @@ pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
                                 TRUE ~ "Other"),
                fill = fct_infreq(fill) %>% fct_relevel("Other", after = Inf))
     } else {
-      if (n_top_fill > 11) {
-        warning("Maximum of 12 colors are supported for colorblind friend palette, ",
-                "less common categories are lumped into Other.")
-        n_top_fill <- 11
+      # For continuous variables
+      is_discrete <- is.character(pubs[[fill_by]]) | is.factor(pubs[[fill_by]])
+      if (is_discrete) {
+        if (n_top_fill > 11) {
+          warning("Maximum of 12 colors are supported for colorblind friendly palette, ",
+                  "less common categories are lumped into Other.")
+          n_top_fill <- 11
+        }
+        pubs <- pubs %>%
+          mutate(fill = fct_infreq(!!sym(fill_by)),
+                 fill = fct_lump_n(fill, n = n_top_fill, ties.method = "first"))
+        if ("Other" %in% pubs$fill) {
+          pubs <- pubs %>%
+            mutate(fill = fct_infreq(fill) %>% fct_relevel("Other", after = Inf))
+        }
+      } else {
+        use_int <- is.integer(pubs[[fill_by]]) & length(unique(pubs[[fill_by]])) < 10
+        if (use_int) {
+          pubs <- pubs %>%
+            mutate(fill = factor(!!sym(fill_by), levels = seq.int(min(pubs[[fill_by]]),
+                                                                  max(pubs[[fill_by]]), 1)))
+        } else {
+          if (n_top_fill > 9) {
+            warning("Maximum of 9 colors are supported for binned palette.")
+            n_top_fill <- 9
+          }
+          pubs <- pubs %>%
+            mutate(fill = cut(!!sym(fill_by), breaks = n_top_fill))
+        }
       }
-      pubs <- pubs %>%
-        mutate(fill = fct_infreq(!!sym(fill_by)),
-               fill = fct_lump_n(fill, n = n_top_fill, ties.method = "first"),
-               fill = fct_infreq(fill) %>% fct_relevel("Other", after = Inf))
     }
   }
   p <- ggplot(pubs, aes(date_published))
@@ -217,9 +238,20 @@ pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
     p <- p +
       geom_histogram(aes(fill = fill), binwidth = binwidth)
     if (fill_by != "species") {
-      pal_use <- ifelse(n_top_fill > 7, "Paired", "Set2")
-      p <- p +
-        scale_fill_brewer(palette = pal_use, name = "")
+      if (is_discrete) {
+        pal_use <- ifelse(n_top_fill > 7, "Paired", "Set2")
+        p <- p +
+          scale_fill_brewer(palette = pal_use)
+      } else if (use_int) {
+        n_viridis <- max(pubs[[fill_by]]) - min(pubs[[fill_by]]) + 1
+        pal_use <- scales::viridis_pal()(n_viridis)
+        names(pal_use) <- as.character(seq.int(min(pubs[[fill_by]]),
+                                               max(pubs[[fill_by]]), 1))
+        p <- p + scale_fill_manual(values = pal_use, drop = FALSE)
+      } else {
+        p <- p +
+          scale_fill_viridis_d()
+      }
     } else {
       p <- p +
         scale_fill_manual(values = species_cols, name = "") +
@@ -269,6 +301,7 @@ pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
 #' @importFrom ggplot2 coord_flip theme element_blank
 #' @importFrom purrr map_chr map
 #' @importFrom dplyr row_number desc inner_join
+#' @importFrom stringr str_to_sentence
 #' @export
 pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df = NULL,
                          img_unit = NULL) {
@@ -318,7 +351,7 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
   p <- p +
     scale_y_continuous(expand = expansion(mult = c(0, 0.05)),
                        breaks = breaks_pretty()) +
-    labs(y = "Number of publications", x = quo_name(category)) +
+    labs(y = "Number of publications", x = str_to_sentence(quo_name(category))) +
     coord_flip() +
     theme(panel.grid.minor = element_blank(), panel.grid.major.y = element_blank())
   p
@@ -343,8 +376,8 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
 #' Europe and some Eastern European countries are partially cropped off) or only
 #' the US.
 #' @param ncol Number of columns in facetted plot.
-#' @param label_cities Logical, whether to label cities. In facetted plots, cities
-#' are not labeled to reduce clutter.
+#' @param label_insts Logical, whether to label institutions.
+#' @param label_cities Logical, whether to label cities.
 #' @param n_label Number of top cities to label, so the labels won't clutter the
 #' plot.
 #' @param per_year Logical, whether to do the count for each year separately.
@@ -363,8 +396,9 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
 pubs_on_map <- function(pubs, city_gc,
                         zoom = c("world", "europe", "usa"),
                         plot = c("point", "bin2d", "hexbin"),
-                        facet_by = "none", n_top = Inf,
-                        ncol = 3, label_cities = TRUE, n_label = 10,
+                        facet_by = NULL, n_top = Inf,
+                        ncol = 3, label_insts = TRUE, label_cities = FALSE,
+                        n_label = 10,
                         per_year = FALSE, bins = c(70, 70)) {
   zoom <- match.arg(zoom)
   plot <- match.arg(plot)
@@ -380,16 +414,14 @@ pubs_on_map <- function(pubs, city_gc,
     .pkg_check("gganimate")
     vars_count <- c("country", "state/province", "city", "year")
     label_cities <- FALSE
+    label_insts <- FALSE
+  } else if (!is.null(facet_by)) {
+    vars_count <- c("country", "state/province", "city", facet_by)
   } else {
     vars_count <- c("country", "state/province", "city")
   }
-  if (facet_by == "none") {
-    inst_count <- pubs %>%
-      count(!!!syms(vars_count))
-  } else {
-    inst_count <- pubs %>%
-      count(!!!syms(c(vars_count, facet_by)))
-  }
+  inst_count <- pubs %>%
+    count(!!!syms(vars_count))
   inst_count <- inst_count %>%
     left_join(city_gc, by = c("country", "state/province", "city"))
   country <- geometry <- NULL
@@ -437,7 +469,7 @@ pubs_on_map <- function(pubs, city_gc,
                       breaks = breaks_width(size_break_width)) +
       theme(panel.border = element_blank(), axis.title = element_blank())
     city2 <- city <- NULL
-    if (facet_by == "none") {
+    if (is.null(facet_by)) {
       if (per_year) {
         p <- p +
           geom_sf(data = inst_count, aes(geometry = geometry, size = n, color = n,
@@ -452,7 +484,7 @@ pubs_on_map <- function(pubs, city_gc,
         scale_color_viridis_c(name = "", breaks_width(size_break_width))
     } else {
       inst_count <- inst_count %>%
-        mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top))
+        mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top, w = n))
       if (per_year) {
         p <- p +
           geom_sf(data = inst_count, aes(geometry = geometry, size = n,
@@ -460,7 +492,15 @@ pubs_on_map <- function(pubs, city_gc,
                                          color = facets),
                   alpha = 0.7, show.legend = "point")
       } else {
+        inst_count_all <- inst_count %>%
+          group_by(country, `state/province`, city) %>%
+          summarize(n_all = sum(n)) %>%
+          left_join(inst_count[, c("country", "state/province", "city", "geometry")],
+                    by = c("country", "state/province", "city"))
         p <- p +
+          geom_sf(data = inst_count_all,
+                  aes(geometry = geometry, size = n_all, color = "all"),
+                  alpha = 0.5, color = "gray50", show.legend = "point") +
           geom_sf(data = inst_count, aes(geometry = geometry, size = n,
                                          color = facets),
                   alpha = 0.7, show.legend = "point")
@@ -489,7 +529,7 @@ pubs_on_map <- function(pubs, city_gc,
     colnames(coords) <- c("lon", "lat")
     coords <- as_tibble(coords)
     inst_count2 <- cbind(inst_count2, coords)
-    if (facet_by != "none") {
+    if (!is.null(facet_by)) {
       inst_count <- inst_count %>%
         mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top))
     }
@@ -510,19 +550,42 @@ pubs_on_map <- function(pubs, city_gc,
       p <- p +
         geom_bin2d(data = inst_count2, aes(lon, lat), bins = bins)
     }
-    if (facet_by != "none") {
+    if (!is.null(facet_by)) {
       p <- p +
         facet_wrap(vars(facets), ncol = ncol)
     }
   }
-  if (label_cities && !per_year) {
-    inst_count <- inst_count %>%
-      mutate(city_rank = row_number(desc(n)),
-             city_label = case_when(city_rank <= n_label ~ city,
-                                    TRUE ~ ""))
-    p <- p +
-      geom_label_repel(data = inst_count, aes(geometry = geometry, label = city_label),
-                       alpha = 0.7, stat = "sf_coordinates")
+  if (!per_year) {
+    if (label_cities) {
+      if (!is.null(facet_by)) {
+        inst_count <- inst_count %>%
+          group_by(facets)
+      }
+      inst_count <- inst_count %>%
+        mutate(city_rank = row_number(desc(n)),
+               city_label = case_when(city_rank <= n_label ~ city,
+                                      TRUE ~ ""))
+      p <- p +
+        geom_label_repel(data = inst_count, aes(geometry = geometry, label = city_label),
+                         alpha = 0.7, stat = "sf_coordinates")
+    } else if (label_insts) {
+      inst_sn <- pubs %>%
+        count(!!!syms(c(vars_count, "short_name")), name = "nn") %>%
+        mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top, w = nn))
+      inst_count <- inst_count %>%
+        left_join(inst_sn, by = c("country", "state/province", "city", "facets"))
+      if (!is.null(facet_by)) {
+        inst_count <- inst_count %>%
+          group_by(facets)
+      }
+      inst_count <- inst_count %>%
+        mutate(inst_rank = row_number(desc(nn)),
+               inst_label = case_when(inst_rank <= n_label ~ short_name,
+                                      TRUE ~ ""))
+      p <- p +
+        geom_label_repel(data = inst_count, aes(geometry = geometry, label = inst_label),
+                         alpha = 0.7, stat = "sf_coordinates")
+    }
   }
   p
 }

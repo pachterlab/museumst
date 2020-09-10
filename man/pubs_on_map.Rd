@@ -9,10 +9,11 @@ pubs_on_map(
   city_gc,
   zoom = c("world", "europe", "usa"),
   plot = c("point", "bin2d", "hexbin"),
-  facet_by = "none",
+  facet_by = NULL,
   n_top = Inf,
   ncol = 3,
-  label_cities = TRUE,
+  label_insts = TRUE,
+  label_cities = FALSE,
   n_label = 10,
   per_year = FALSE,
   bins = c(70, 70)
@@ -44,8 +45,9 @@ the other categories are lumped into "other".}
 
 \item{ncol}{Number of columns in facetted plot.}
 
-\item{label_cities}{Logical, whether to label cities. In facetted plots, cities
-are not labeled to reduce clutter.}
+\item{label_insts}{Logical, whether to label institutions.}
+
+\item{label_cities}{Logical, whether to label cities.}
 
 \item{n_label}{Number of top cities to label, so the labels won't clutter the
 plot.}

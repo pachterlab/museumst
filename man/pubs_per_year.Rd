@@ -7,9 +7,11 @@
 pubs_per_year(
   pubs,
   facet_by = NULL,
+  fill_by = NULL,
   binwidth = 365,
   preprints = FALSE,
   n_top = Inf,
+  n_top_fill = Inf,
   sort_by = c("first_appeared", "count", "recent_count")
 )
 }
@@ -31,6 +33,9 @@ if faceting by those. If facetting, then a column whose name is the value in
 
 \item{n_top}{Number of categories with the most publications to plot in facets;
 the other categories are lumped into "other".}
+
+\item{n_top_fill}{Number of categories with the most publications to be
+differentiated by color.}
 
 \item{sort_by}{How to sort the facets. first_appeared means the category that
 appeared earlier will be nearer to the top. count means the category with more
