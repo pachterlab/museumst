@@ -87,7 +87,8 @@ species <- c("Mus musculus", "Drosophila melanogaster",
              "Danio rerio", "Caenorhabditis elegans", "Xenopus laevis",
              "Ciona intestinalis", "Gallus gallus", "Arabidopsis thaliana")
 species_cols <- scales::brewer_pal(palette = "Set2")(8)
-species_cols <- c(species_cols, "gray50")
-names(species_cols) <- c(species, "Other")
-usethis::use_data(species_cols, lang_img, species_img, usa_w_pop,
+species_cols <- c(species_cols, scales::brewer_pal(palette = "Paired")(1), "gray50")
+names(species_cols) <- c(species, "Homo sapiens", "Other")
+usethis::use_data(species_cols)
+usethis::use_data(lang_img, species_img, usa_w_pop,
                   europe_countries, xylims, internal = TRUE, overwrite = TRUE)
