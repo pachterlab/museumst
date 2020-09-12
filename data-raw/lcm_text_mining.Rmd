@@ -307,7 +307,7 @@ Here spectral means using NMF for initialization. I debated for a while whether 
 
 ```{r}
 k_result2 <- my_searchK(ac_dfm2, K = seq(5, 60, by = 5), 
-                       prevalence = ~ stm::s(date_num, df = 3) + city_eff,
+                       prevalence = ~ date_num + city_eff,
                        gamma.prior = "L1",
                        verbose = FALSE, seed = 1891)
 ```
@@ -325,7 +325,7 @@ plot_ec(k_result2, c(10, 25, 35, 40, 60))
 As expected, fewer topics results into higher semantic coherence and lower exclusivity. This is really a trade off. Sort of a compromise, here I choose the model with K = 25. Since I have held out part of the data when choosing K, I'll use this K to fit the model with the full data.
 
 ```{r}
-stm_res <- stm(ac_dfm2, K = 35, prevalence = ~ stm::s(date_num, df = 3) + city_eff,
+stm_res <- stm(ac_dfm2, K = 35, prevalence = ~ date_num + city_eff,
                gamma.prior = "L1", seed = 1919)
 ```
 
@@ -418,7 +418,7 @@ usethis::use_data(stm_res)
 
 # Topics over time
 ```{r}
-effs <- estimateEffect( ~ stm::s(date_num, df = 3), stm_res, 
+effs <- estimateEffect( ~ date_num, stm_res, 
                        metadata = docvars(ac_dfm2))
 ```
 
@@ -488,7 +488,8 @@ Remember that the number of publication here increased until it peaked around 20
 ```{r}
 effs_summ <- tidy(effs)
 effs_summ <- effs_summ %>% 
-  mutate(p_val_adj = p.adjust(p.value))
+  filter(!str_detect(term, "Intercept")) %>% 
+  mutate(p_val_adj = p.adjust(p.value, method = "BH"))
 ```
 
 ```{r}
