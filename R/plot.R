@@ -535,7 +535,8 @@ pubs_on_map <- function(pubs, city_gc,
     }
     p <- ggplot() +
       geom_sf(data = map_use) +
-      scale_fill_distiller(palette = "Blues", direction = 1) +
+      #scale_fill_distiller(palette = "Blues", direction = 1) +
+      scale_fill_viridis_c() +
       theme(panel.border = element_blank(), axis.title = element_blank())
     if (zoom == "europe") {
       # Limit to that box
