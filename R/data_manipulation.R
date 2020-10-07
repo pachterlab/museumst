@@ -78,6 +78,8 @@ read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS",
       }
       if (any(need_update) && !all(need_update)) {
         out <- c(out, out2)
+        # reorder sheet names
+        sheet_use <- c(sheet_use[need_update], sheet_use[!need_update])
       }
       if (all(!need_update)) {
         out <- out2
