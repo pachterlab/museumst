@@ -416,9 +416,18 @@ pubs_on_map <- function(pubs, city_gc,
     label_cities <- FALSE
     label_insts <- FALSE
   } else if (!is.null(facet_by)) {
-    vars_count <- c("country", "state/province", "city", facet_by)
+    vars_count <- c("country", "state/province", "city", "facets")
   } else {
     vars_count <- c("country", "state/province", "city")
+  }
+  if (!is.null(facet_by)) {
+    pubs <- pubs %>%
+      mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top),
+             facets = fct_infreq(facets, ordered = TRUE))
+    if (!is.infinite(n_top)) {
+      pubs <- pubs %>%
+        mutate(facets = fct_relevel(facets, "Other", after = Inf))
+    }
   }
   inst_count <- pubs %>%
     count(!!!syms(vars_count))
@@ -467,7 +476,8 @@ pubs_on_map <- function(pubs, city_gc,
       geom_sf(data = map_use) +
       scale_size_area(name = "Number of\npublications",
                       breaks = breaks_width(size_break_width)) +
-      theme(panel.border = element_blank(), axis.title = element_blank())
+      theme(panel.border = element_blank(), axis.title = element_blank()) +
+      scale_color_viridis_c(name = "", breaks_width(size_break_width))
     city2 <- city <- NULL
     if (is.null(facet_by)) {
       if (per_year) {
@@ -480,11 +490,7 @@ pubs_on_map <- function(pubs, city_gc,
           geom_sf(data = inst_count, aes(geometry = geometry, size = n, color = n),
                   alpha = 0.7, show.legend = "point")
       }
-      p <- p +
-        scale_color_viridis_c(name = "", breaks_width(size_break_width))
     } else {
-      inst_count <- inst_count %>%
-        mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top, w = n))
       if (per_year) {
         p <- p +
           geom_sf(data = inst_count, aes(geometry = geometry, size = n,
@@ -502,12 +508,12 @@ pubs_on_map <- function(pubs, city_gc,
                   aes(geometry = geometry, size = n_all, color = "all"),
                   alpha = 0.5, color = "gray50", show.legend = "point") +
           geom_sf(data = inst_count, aes(geometry = geometry, size = n,
-                                         color = facets),
+                                         color = n),
                   alpha = 0.7, show.legend = "point")
       }
       p <- p +
-        facet_wrap(vars(facets), ncol = ncol) +
-        theme(legend.position = "none")
+        facet_wrap(vars(facets), ncol = ncol) #+
+        #theme(legend.position = "none")
     }
     if (zoom == "europe") {
       # Limit to that box
@@ -529,10 +535,6 @@ pubs_on_map <- function(pubs, city_gc,
     colnames(coords) <- c("lon", "lat")
     coords <- as_tibble(coords)
     inst_count2 <- cbind(inst_count2, coords)
-    if (!is.null(facet_by)) {
-      inst_count <- inst_count %>%
-        mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top))
-    }
     p <- ggplot() +
       geom_sf(data = map_use) +
       #scale_fill_distiller(palette = "Blues", direction = 1) +
@@ -570,11 +572,11 @@ pubs_on_map <- function(pubs, city_gc,
         geom_label_repel(data = inst_count, aes(geometry = geometry, label = city_label),
                          alpha = 0.7, stat = "sf_coordinates")
     } else if (label_insts) {
+      # Find out what the "top" institutions are
       inst_sn <- pubs %>%
-        count(!!!syms(c(vars_count, "short_name")), name = "nn") %>%
-        mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top, w = nn))
+        count(!!!syms(c(vars_count, "short_name")), name = "nn")
       inst_count <- inst_count %>%
-        left_join(inst_sn, by = c("country", "state/province", "city", "facets"))
+        left_join(inst_sn, by = vars_count)
       if (!is.null(facet_by)) {
         inst_count <- inst_count %>%
           group_by(facets)
