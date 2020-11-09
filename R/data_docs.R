@@ -13,6 +13,15 @@
 #' @source Brewer
 "species_cols"
 
+#' Color palette for sheets
+#'
+#' To give each sheet, i.e. each category of technologies, a fixed color for a
+#' unified look among figures.
+#'
+#' @format A named vector of colors; the names are the sheets for data collection
+#' @source Brewer
+"sheet_fill"
+
 #' LCM abstracts from PubMed search
 #'
 #' Abstracts of LCM literautre from PubMed API in a data frame, last updated on

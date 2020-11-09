@@ -92,3 +92,11 @@ names(species_cols) <- c(species, "Homo sapiens", "Other")
 usethis::use_data(species_cols)
 usethis::use_data(lang_img, species_img, usa_w_pop,
                   europe_countries, xylims, internal = TRUE, overwrite = TRUE)
+
+# Colors for sheets for plotting
+sheets <- c("Prequel", "Microdissection", "Array", "smFISH", "ISS",
+            "No imaging")
+sheet_fill <- scales::brewer_pal(palette = "Pastel2")(length(sheets))
+names(sheet_fill) <- sheets
+usethis::use_data(sheet_fill)
+

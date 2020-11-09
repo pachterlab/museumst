@@ -115,10 +115,11 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
     geom_point(aes(x = date_published), y = 0) +
     geom_hline(yintercept = 0) +
     geom_segment(aes(x = date_published, y = 0, xend = date_published, yend = ys)) +
-    ggtext::geom_richtext(aes(x = date_published, y = ys, label = lab, vjust = vjusts),
-                  color = "blue", fill = "white") +
+    ggtext::geom_richtext(aes(x = date_published, y = ys, fill = sheet,
+                              label = lab, vjust = vjusts)) +
     scale_x_date(expand = expansion(expand_x)) +
     scale_y_continuous(expand = expansion(expand_y)) +
+    scale_fill_manual(values = sheet_fill) +
     theme_void() +
     annotate("point", x = axis, y = 0, shape = 3) +
     annotate("text", x = axis, y = 0, label = format(axis, "%Y"),
@@ -790,7 +791,13 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, n_top = Inf
     mutate(v = !!col_use)
   if (!is.null(facet_by)) {
     pubs <- pubs %>%
-      mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top))
+      mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top,
+                                 ties.method = "first"),
+             facets = fct_infreq(facets))
+    if ("Other" %in% pubs$facets) {
+      pubs <- pubs %>%
+        mutate(facets = fct_relevel(facets, "Other", after = Inf))
+    }
   }
   p <- ggplot(pubs, aes(date_published)) +
     geom_histogram(aes(fill = 'all'), alpha = 0.7, fill = "gray90",
@@ -802,7 +809,7 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, n_top = Inf
     theme(panel.grid.minor = element_blank(), legend.position = "top") +
     labs(y = "count", x = "date published")
   if (!is.null(facet_by)) {
-    p <- p + facet_wrap(vars(!!sym(facet_by)), ncol = ncol)
+    p <- p + facet_wrap(~ facets, ncol = ncol)
   }
   p
 }
