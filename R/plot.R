@@ -1,66 +1,31 @@
-#' Construct HTML image labels for time lines
+#' Construct plotmath labels for time lines
 #'
 #' Internal, called by `plot_timeline`.
 #'
-#' @param image_path Character vector, paths to the images of interest. Should be NA for
-#' items that don't have an image.
-#' @param width Width of the images on the time line in pixels to be shown on the
-#' plot.
 #' @param description The text for the items to be shown beneath the images.
 #' Should be a character vector of the same length as `image_path`.
 #' @param description_width Width of the description text in characters to wrap
 #' the text in the labels.
-#' @return A character vector of HTML code to plot the images and descriptions
-#' with `geom_richtext`.
-make_image_labs <- function(image_path, width, description, description_width) {
+#' @return A character vector of plotmath, to enable superscripts, italics, and
+#' text wrapping.
+#' @importFrom stringr str_replace_all
+make_labs <- function(description, description_width, ref_number) {
   descr_wrap <- strwrap(description, width = description_width)
-  descr_wrap <- paste(descr_wrap, collapse = "<br>")
-  if (is.na(image_path)) {
+  descr_wrap <- paste0(descr_wrap, collapse = "<br>")
+  if (is.na(ref_number)) {
     descr_wrap
   } else {
-    paste0("<img src='", image_path, "' width='", width, "' /><br>", descr_wrap)
+    paste0(descr_wrap, "<sup>", ref_number, "</sup>")
   }
 }
 
 #' Plot time line with images and descriptions of each event
 #'
 #' The time line is plotted horizontally with ticks for years. The labels with
-#' images and descriptions are above and/or below that line.
-#'
-#' These are the sources of images that are not stated to be under public domain
-#' found online with filter "free to share and use".
-#' No changes were made to the images unless indicated. The author and license,
-#' if found, are listed here as well.
-#'
-#' \describe{
-#'   \item{drosophila.jpg}{http://gompel.org/images-2/drosophilidae}
-#'   \item{zebrafish.jpg}{https://thumbs.dreamstime.com/m/zebrafish-zebra-barb-danio-rerio-freshwater-aquarium-fish-isolated-white-background-50201849.jpg}
-#'   \item{ciona.jpg}{http://www.habitas.org.uk/marinelife/tunicata/cioints.jpg}
-#'   \item{xenopus.jpg}{https://en.wikipedia.org/wiki/African_clawed_frog#/media/File:Xenopus_laevis_02.jpg
-#'     by Brian Gratwicke. License: https://creativecommons.org/licenses/by/2.0/
-#'   }
-#'   \item{celegans.jpg}{https://en.wikipedia.org/wiki/Caenorhabditis_elegans#/media/File:Adult_Caenorhabditis_elegans.jpg
-#'     by Kbradnam at English Wikipedia. License: https://creativecommons.org/licenses/by-sa/2.5/
-#'     A smaller version of the original is used here.
-#'   }
-#'   \item{arabidopsis.jpg}{http://parts.igem.org/wiki/images/b/bd/Plants_Arabidopsis_thaliana_400px.jpg}
-#'   \item{skull.jpg}{http://pngimg.com/download/42558 License: https://creativecommons.org/licenses/by-nc/4.0/
-#'     The original was compressed and converted to jpg here.
-#'   }
-#'   \item{platynereis.jpg}{https://en.wikipedia.org/wiki/Epitoky#/media/File:PlatynereisDumeriliiFemaleEpitoke.tif
-#'     By Martin Gühmann. A smaller jpg version of the original is used here.
-#'     License: https://creativecommons.org/licenses/by-sa/4.0/
-#'   }
-#'   \item{yeast.jpg}{https://en.wikipedia.org/wiki/Shmoo#/media/File:Shmoos_s_cerevisiae.jpg
-#'     By Pilarbini. This is a smaller version of the original.
-#'     License: https://creativecommons.org/licenses/by-sa/4.0/deed.en
-#'   }
-#' }
+#' descriptions are above and/or below that line.
 #'
 #' @param events_df A data frame with at least these columns:
 #' \describe{
-#'   \item{image}{Paths to the images to use in the label. NA for items without
-#'   an image.}
 #'   \item{date_published}{A vector of Date objects for dates when the event of
 #'   interest was published. Note that the actual time when those events occurred
 #'   is most likely earlier, sometimes much earlier than the publication date,
@@ -73,9 +38,6 @@ make_image_labs <- function(image_path, width, description, description_width) {
 #' know how to implement the ggrepel algorithm to make sure that the labels don't
 #' overlap for geom_richtext, I have to manually set the y coordinates to make
 #' sure that the labels don't overlap and look good.
-#' @param width Width of the labels in pixels. How the labels will look depends
-#' on the size of the plot. Would be cool if this can be specified in terms of
-#' units within the plot.
 #' @param description_width Width of the description text in characters to wrap
 #' the text in the labels.
 #' @param expand_x A numeric vector of length 2 of the proportion to expand the
@@ -87,18 +49,21 @@ make_image_labs <- function(image_path, width, description, description_width) {
 #' @importFrom purrr map2_chr
 #' @importFrom lubridate floor_date ceiling_date
 #' @importFrom ggplot2 ggplot geom_point aes geom_hline geom_segment scale_x_date
-#' expansion scale_y_continuous theme_void annotate
+#' expansion scale_y_continuous theme_void annotate scale_fill_manual
+#' @importFrom rlang %||%
 #' @export
-plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
+plot_timeline <- function(events_df, ys, description_width = 20,
                           expand_x = c(0.1, 0.1), expand_y = c(0.05, 0.05)) {
-  .pkg_check("ggtext")
+  .pkg_check("grid")
+  .pkg_check("gridtext")
   image <- date_published <- description <- lab <- vjusts <- NULL
   events_df <- events_df %>%
     mutate(image = case_when(is.na(image) ~ NA_character_,
                              TRUE ~ image),
-           description = paste(year(date_published), description),
-           lab = map2_chr(image, description,
-                          ~ make_image_labs(.x, width, .y, description_width))) %>%
+           description = paste0(year(date_published), " ", description),
+           lab = map2_chr(description, ref_number,
+                         ~ make_labs(.x, description_width, .y))
+           ) %>%
     arrange(date_published) %>%
     mutate(vjusts = case_when(ys >= 0 ~ 1,
                               TRUE ~ 0),
@@ -115,11 +80,11 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
     geom_point(aes(x = date_published), y = 0) +
     geom_hline(yintercept = 0) +
     geom_segment(aes(x = date_published, y = 0, xend = date_published, yend = ys)) +
-    ggtext::geom_richtext(aes(x = date_published, y = ys, fill = sheet,
-                              label = lab, vjust = vjusts)) +
+    geom_richtext(aes(x = date_published, y = ys, fill = sheet,
+                     label = lab, vjust = vjusts)) +
     scale_x_date(expand = expansion(expand_x)) +
     scale_y_continuous(expand = expansion(expand_y)) +
-    scale_fill_manual(values = sheet_fill) +
+    scale_fill_manual(values = sheet_fill, name = "Type") +
     theme_void() +
     annotate("point", x = axis, y = 0, shape = 3) +
     annotate("text", x = axis, y = 0, label = format(axis, "%Y"),
@@ -156,7 +121,8 @@ plot_timeline <- function(events_df, ys, width = 100, description_width = 20,
 #' @importFrom dplyr filter select
 #' @importFrom forcats fct_reorder fct_lump_n
 #' @importFrom rlang !! sym
-#' @importFrom ggplot2 geom_bar scale_x_continuous labs theme facet_wrap
+#' @importFrom ggplot2 geom_bar scale_x_continuous labs theme facet_wrap ggproto
+#' layer
 #' @importFrom scales breaks_pretty
 #' @export
 pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
@@ -281,6 +247,36 @@ pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
 #' names easier to read, as the names can be quite long. This will plot a bar
 #' chart for the number of publications per category, sorted according to the
 #' number of publications.
+#'
+#' These are the sources of images that are not stated to be under public domain
+#' found online with filter "free to share and use".
+#' No changes were made to the images unless indicated. The author and license,
+#' if found, are listed here as well.
+#'
+#' \describe{
+#'   \item{drosophila.jpg}{http://gompel.org/images-2/drosophilidae}
+#'   \item{zebrafish.jpg}{https://thumbs.dreamstime.com/m/zebrafish-zebra-barb-danio-rerio-freshwater-aquarium-fish-isolated-white-background-50201849.jpg}
+#'   \item{ciona.jpg}{http://www.habitas.org.uk/marinelife/tunicata/cioints.jpg}
+#'   \item{xenopus.jpg}{https://en.wikipedia.org/wiki/African_clawed_frog#/media/File:Xenopus_laevis_02.jpg
+#'     by Brian Gratwicke. License: https://creativecommons.org/licenses/by/2.0/
+#'   }
+#'   \item{celegans.jpg}{https://en.wikipedia.org/wiki/Caenorhabditis_elegans#/media/File:Adult_Caenorhabditis_elegans.jpg
+#'     by Kbradnam at English Wikipedia. License: https://creativecommons.org/licenses/by-sa/2.5/
+#'     A smaller version of the original is used here.
+#'   }
+#'   \item{arabidopsis.jpg}{http://parts.igem.org/wiki/images/b/bd/Plants_Arabidopsis_thaliana_400px.jpg}
+#'   \item{skull.jpg}{http://pngimg.com/download/42558 License: https://creativecommons.org/licenses/by-nc/4.0/
+#'     The original was compressed and converted to jpg here.
+#'   }
+#'   \item{platynereis.jpg}{https://en.wikipedia.org/wiki/Epitoky#/media/File:PlatynereisDumeriliiFemaleEpitoke.tif
+#'     By Martin Gühmann. A smaller jpg version of the original is used here.
+#'     License: https://creativecommons.org/licenses/by-sa/4.0/
+#'   }
+#'   \item{yeast.jpg}{https://en.wikipedia.org/wiki/Shmoo#/media/File:Shmoos_s_cerevisiae.jpg
+#'     By Pilarbini. This is a smaller version of the original.
+#'     License: https://creativecommons.org/licenses/by-sa/4.0/deed.en
+#'   }
+#' }
 #'
 #' @param pubs A data frame at least with a column for the category of interest.
 #' @param category Column name to plot. Tidyeval is supported. If it's species
