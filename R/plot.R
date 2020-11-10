@@ -58,8 +58,7 @@ plot_timeline <- function(events_df, ys, description_width = 20,
   .pkg_check("gridtext")
   image <- date_published <- description <- lab <- vjusts <- NULL
   events_df <- events_df %>%
-    mutate(image = case_when(is.na(image) ~ NA_character_,
-                             TRUE ~ image),
+    mutate(sheet = factor(sheet, levels = names(sheet_fill)),
            description = paste0(year(date_published), " ", description),
            lab = map2_chr(description, ref_number,
                          ~ make_labs(.x, description_width, .y))
@@ -84,7 +83,7 @@ plot_timeline <- function(events_df, ys, description_width = 20,
                      label = lab, vjust = vjusts)) +
     scale_x_date(expand = expansion(expand_x)) +
     scale_y_continuous(expand = expansion(expand_y)) +
-    scale_fill_manual(values = sheet_fill, name = "Type") +
+    scale_fill_manual(values = sheet_fill, name = "Type", drop = FALSE) +
     theme_void() +
     annotate("point", x = axis, y = 0, shape = 3) +
     annotate("text", x = axis, y = 0, label = format(axis, "%Y"),
