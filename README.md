@@ -2,7 +2,6 @@
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
-[![R build status](https://github.com/pachterlab/museumst/workflows/R-CMD-check/badge.svg)](https://github.com/pachterlab/museumst/actions)
 ![pkgdown](https://github.com/pachterlab/museumst/workflows/pkgdown/badge.svg)
 <!-- badges: end -->
 
