@@ -9,7 +9,8 @@ plot_timeline(
   ys,
   description_width = 20,
   expand_x = c(0.1, 0.1),
-  expand_y = c(0.05, 0.05)
+  expand_y = c(0.05, 0.05),
+  include_refs = TRUE
 )
 }
 \arguments{
@@ -37,6 +38,9 @@ x axis on the left and the right. This is a way to manually make sure that the
 labels are not cropped off at the edge of the plot.}
 
 \item{expand_y}{Same as expand_x, but for the y axis.}
+
+\item{include_refs}{Logical, indicating whether to include references in the
+text box.}
 }
 \value{
 A ggplot2 object for the plot.

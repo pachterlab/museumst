@@ -12,6 +12,9 @@ Should be a character vector of the same length as `image_path`.}
 
 \item{description_width}{Width of the description text in characters to wrap
 the text in the labels.}
+
+\item{ref_number}{A string of the number for reference. If NA, then the
+reference will not be included in the plot.}
 }
 \value{
 A character vector of plotmath, to enable superscripts, italics, and

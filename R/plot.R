@@ -6,6 +6,8 @@
 #' Should be a character vector of the same length as `image_path`.
 #' @param description_width Width of the description text in characters to wrap
 #' the text in the labels.
+#' @param ref_number A string of the number for reference. If NA, then the
+#' reference will not be included in the plot.
 #' @return A character vector of plotmath, to enable superscripts, italics, and
 #' text wrapping.
 #' @importFrom stringr str_replace_all
@@ -44,6 +46,8 @@ make_labs <- function(description, description_width, ref_number) {
 #' x axis on the left and the right. This is a way to manually make sure that the
 #' labels are not cropped off at the edge of the plot.
 #' @param expand_y Same as expand_x, but for the y axis.
+#' @param include_refs Logical, indicating whether to include references in the
+#' text box.
 #' @return A ggplot2 object for the plot.
 #' @importFrom dplyr case_when arrange between
 #' @importFrom purrr map2_chr
@@ -53,16 +57,25 @@ make_labs <- function(description, description_width, ref_number) {
 #' @importFrom rlang %||%
 #' @export
 plot_timeline <- function(events_df, ys, description_width = 20,
-                          expand_x = c(0.1, 0.1), expand_y = c(0.05, 0.05)) {
+                          expand_x = c(0.1, 0.1), expand_y = c(0.05, 0.05),
+                          include_refs = TRUE) {
   .pkg_check("grid")
   .pkg_check("gridtext")
   image <- date_published <- description <- lab <- vjusts <- NULL
   events_df <- events_df %>%
     mutate(sheet = factor(sheet, levels = names(sheet_fill)),
-           description = paste0(year(date_published), " ", description),
-           lab = map2_chr(description, ref_number,
-                         ~ make_labs(.x, description_width, .y))
-           ) %>%
+           description = paste0(year(date_published), " ", description))
+  if (include_refs) {
+    events_df <- events_df %>%
+      mutate(lab = map2_chr(description, ref_number,
+                            ~ make_labs(.x, description_width, .y)))
+  } else {
+    events_df <- events_df %>%
+      mutate(lab = map_chr(description,
+                            ~ make_labs(.x, description_width,
+                                        ref_number = NA)))
+  }
+  events_df <- events_df %>%
     arrange(date_published) %>%
     mutate(vjusts = case_when(ys >= 0 ~ 1,
                               TRUE ~ 0),
@@ -106,6 +119,8 @@ plot_timeline <- function(events_df, ys, description_width = 20,
 #' if faceting by those. If facetting, then a column whose name is the value in
 #' `facet_by` must be present.
 #' @param facet_by Name of a column for facetting.
+#' @param fill_by Name of a column of a categorical variable with which to color
+#' the histogram.
 #' @param binwidth Width of bins for the histogram in days.
 #' @param preprints Logical, whether preprints should be included.
 #' @param n_top Number of categories with the most publications to plot in facets;
@@ -463,17 +478,19 @@ pubs_on_map <- function(pubs, city_gc,
   if (max(inst_count$n, na.rm = TRUE) < 4) {
     size_break_width <- 1
   } else {
-    size_break_width <- ceiling((max(inst_count$n, na.rm = TRUE) -
-                                   min(inst_count$n, na.rm = TRUE))/4)
+    size_break_width1 <- ceiling((max(inst_count$n, na.rm = TRUE) -
+                                   min(inst_count$n, na.rm = TRUE))/3)
+    size_break_width2 <- ceiling((max(inst_count$n, na.rm = TRUE) -
+                                    min(inst_count$n, na.rm = TRUE))/4)
   }
   n <- NULL
   if (plot == "point") {
     p <- ggplot() +
       geom_sf(data = map_use) +
       scale_size_area(name = "Number of\npublications",
-                      breaks = breaks_width(size_break_width)) +
+                      breaks = breaks_width(size_break_width1)) +
       theme(panel.border = element_blank(), axis.title = element_blank()) +
-      scale_color_viridis_c(name = "", breaks_width(size_break_width))
+      scale_color_viridis_c(name = "", breaks_width(size_break_width2))
     city2 <- city <- NULL
     if (is.null(facet_by)) {
       if (per_year) {
