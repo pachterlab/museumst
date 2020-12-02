@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Plot the metrics for each K tried — plot_k_result • museumst</title>
+<title>Construct plotmath labels for time lines — make_labs • museumst</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Plot the metrics for each K tried — plot_k_result" />
-<meta property="og:description" content="Adapted from Julia Silge's blog." />
+<meta property="og:title" content="Construct plotmath labels for time lines — make_labs" />
+<meta property="og:description" content="Internal, called by `plot_timeline`." />
 
 
 
@@ -109,29 +109,41 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Plot the metrics for each K tried</h1>
+    <h1>Construct plotmath labels for time lines</h1>
     
-    <div class="hidden name"><code>plot_k_result.Rd</code></div>
+    <div class="hidden name"><code>make_labs.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Adapted from Julia Silge's blog.</p>
+    <p>Internal, called by `plot_timeline`.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>plot_k_result</span><span class='op'>(</span><span class='va'>k_result</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>make_labs</span><span class='op'>(</span><span class='va'>description</span>, <span class='va'>description_width</span>, <span class='va'>ref_number</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>k_result</th>
-      <td><p>output of my_searchK</p></td>
+      <th>description</th>
+      <td><p>The text for the items to be shown beneath the images.
+Should be a character vector of the same length as `image_path`.</p></td>
+    </tr>
+    <tr>
+      <th>description_width</th>
+      <td><p>Width of the description text in characters to wrap
+the text in the labels.</p></td>
+    </tr>
+    <tr>
+      <th>ref_number</th>
+      <td><p>A string of the number for reference. If NA, then the
+reference will not be included in the plot.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A ggplot object.</p>
+    <p>A character vector of plotmath, to enable superscripts, italics, and
+text wrapping.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

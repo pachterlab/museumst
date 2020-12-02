@@ -75,19 +75,13 @@ number of publications." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">museumst</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9002</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9004</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
-<li>
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
@@ -98,28 +92,7 @@ number of publications." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/analysis.html">Analysis</a>
-    </li>
-    <li>
-      <a href="../articles/array.html">Array</a>
-    </li>
-    <li>
-      <a href="../articles/comparison.html">Comparisons between sheets</a>
-    </li>
-    <li>
-      <a href="../articles/iss.html">ISS</a>
-    </li>
-    <li>
-      <a href="../articles/microdissection.html">Microdissection</a>
-    </li>
-    <li>
-      <a href="../articles/prequel2.html">Prequel</a>
-    </li>
-    <li>
-      <a href="../articles/prequel_analysis.html">Prequel Analysis</a>
-    </li>
-    <li>
-      <a href="../articles/smfish.html">smFISH</a>
+      <a href="../articles/Intro.html">Intro</a>
     </li>
   </ul>
 </li>
@@ -151,14 +124,14 @@ chart for the number of publications per category, sorted according to the
 number of publications.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>pubs_per_cat</span>(
-  <span class='kw'>pubs</span>,
-  <span class='kw'>category</span>,
-  n_top = <span class='kw'>NULL</span>,
-  isotype = <span class='fl'>FALSE</span>,
-  img_df = <span class='kw'>NULL</span>,
-  img_unit = <span class='kw'>NULL</span>
-)</pre>
+    <pre class="usage"><span class='fu'>pubs_per_cat</span><span class='op'>(</span>
+  <span class='va'>pubs</span>,
+  <span class='va'>category</span>,
+  n_top <span class='op'>=</span> <span class='cn'>NULL</span>,
+  isotype <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  img_df <span class='op'>=</span> <span class='cn'>NULL</span>,
+  img_unit <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -199,6 +172,33 @@ cases, the `img_df` is provided internally.</p></td>
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A ggplot2 object.</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>These are the sources of images that are not stated to be under public domain
+found online with filter "free to share and use".
+No changes were made to the images unless indicated. The author and license,
+if found, are listed here as well.</p>
+<dl>
+  <dt>drosophila.jpg</dt><dd><p>http://gompel.org/images-2/drosophilidae</p></dd>
+  <dt>zebrafish.jpg</dt><dd><p>https://thumbs.dreamstime.com/m/zebrafish-zebra-barb-danio-rerio-freshwater-aquarium-fish-isolated-white-background-50201849.jpg</p></dd>
+  <dt>ciona.jpg</dt><dd><p>http://www.habitas.org.uk/marinelife/tunicata/cioints.jpg</p></dd>
+  <dt>xenopus.jpg</dt><dd><p>https://en.wikipedia.org/wiki/African_clawed_frog#/media/File:Xenopus_laevis_02.jpg
+    by Brian Gratwicke. License: https://creativecommons.org/licenses/by/2.0/</p></dd>
+  <dt>celegans.jpg</dt><dd><p>https://en.wikipedia.org/wiki/Caenorhabditis_elegans#/media/File:Adult_Caenorhabditis_elegans.jpg
+    by Kbradnam at English Wikipedia. License: https://creativecommons.org/licenses/by-sa/2.5/
+    A smaller version of the original is used here.</p></dd>
+  <dt>arabidopsis.jpg</dt><dd><p>http://parts.igem.org/wiki/images/b/bd/Plants_Arabidopsis_thaliana_400px.jpg</p></dd>
+  <dt>skull.jpg</dt><dd><p>http://pngimg.com/download/42558 License: https://creativecommons.org/licenses/by-nc/4.0/
+    The original was compressed and converted to jpg here.</p></dd>
+  <dt>platynereis.jpg</dt><dd><p>https://en.wikipedia.org/wiki/Epitoky#/media/File:PlatynereisDumeriliiFemaleEpitoke.tif
+    By Martin Gühmann. A smaller jpg version of the original is used here.
+    License: https://creativecommons.org/licenses/by-sa/4.0/</p></dd>
+  <dt>yeast.jpg</dt><dd><p>https://en.wikipedia.org/wiki/Shmoo#/media/File:Shmoos_s_cerevisiae.jpg
+    By Pilarbini. This is a smaller version of the original.
+    License: https://creativecommons.org/licenses/by-sa/4.0/deed.en</p></dd>
+
+</dl>
+
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -215,7 +215,7 @@ cases, the `img_df` is provided internally.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.9000.</p>
 </div>
 
       </footer>

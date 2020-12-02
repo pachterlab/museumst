@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Plot the metrics for each K tried — plot_k_result • museumst</title>
+<title>quanteda tokens for LCM abstracts — lcm_tokens • museumst</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Plot the metrics for each K tried — plot_k_result" />
-<meta property="og:description" content="Adapted from Julia Silge's blog." />
+<meta property="og:title" content="quanteda tokens for LCM abstracts — lcm_tokens" />
+<meta property="og:description" content="Common phrases and unigrams, without stop words, and stemmed." />
 
 
 
@@ -109,29 +109,26 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Plot the metrics for each K tried</h1>
+    <h1>quanteda tokens for LCM abstracts</h1>
     
-    <div class="hidden name"><code>plot_k_result.Rd</code></div>
+    <div class="hidden name"><code>lcm_tokens.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Adapted from Julia Silge's blog.</p>
+    <p>Common phrases and unigrams, without stop words, and stemmed.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>plot_k_result</span><span class='op'>(</span><span class='va'>k_result</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='va'>lcm_tokens</span></pre>
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>k_result</th>
-      <td><p>output of my_searchK</p></td>
-    </tr>
-    </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>A ggplot object.</p>
+    <p>A quanteda tokens object</p>
+    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
+
+    <p>See the `lcm_text_mining.Rmd` file in the `data-raw` in the [GitHub
+repo of this package](https://www.github.com/pachterlab/museumst) for how
+tokenization was performed.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
