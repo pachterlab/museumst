@@ -292,7 +292,7 @@ ac_tokens <- tokens(ac, remove_punct = TRUE,
 
 ```{r}
 lcm_tokens <- ac_tokens
-usethis::use_data(lcm_tokens)
+usethis::use_data(lcm_tokens, overwrite = TRUE)
 ```
 
 ```{r}
@@ -322,10 +322,10 @@ Looks like the number of topics should be 25 to 40 according to the residuals, b
 plot_ec(k_result2, c(10, 25, 35, 40, 60))
 ```
 
-As expected, fewer topics results into higher semantic coherence and lower exclusivity. This is really a trade off. Sort of a compromise, here I choose the model with K = 25. Since I have held out part of the data when choosing K, I'll use this K to fit the model with the full data.
+As expected, fewer topics results into higher semantic coherence and lower exclusivity. This is really a trade off. Sort of a compromise, here I choose the model with K = 40. Since I have held out part of the data when choosing K, I'll use this K to fit the model with the full data.
 
 ```{r}
-stm_res <- stm(ac_dfm2, K = 35, prevalence = ~ date_num + city_eff,
+stm_res <- stm(ac_dfm2, K = 40, prevalence = ~ date_num + city_eff,
                gamma.prior = "L1", seed = 1919)
 ```
 
@@ -407,12 +407,12 @@ td_beta %>%
 40. Molecular aspect of cancer, especially breast cancer
 
 ```{r}
-plot(stm_res, type = "perspectives", topics = c(1, 33))
+plot(stm_res, type = "perspectives", topics = c(4, 40))
 ```
 
 ```{r}
 usethis::use_data(ac_dfm2)
-usethis::use_data(stm_res)
+usethis::use_data(stm_res, overwrite = TRUE)
 ```
 
 
@@ -425,9 +425,10 @@ effs <- estimateEffect( ~ date_num, stm_res,
 ```{r}
 effs_df <- get_effects(effs, "date_num", type = "continuous")
 effs_df <- effs_df %>% 
-  mutate(topic = fct_relevel(topic, as.character(1:35)),
+  mutate(topic = fct_relevel(topic, as.character(1:40)),
          date_published = as_date(value))
 ```
+
 
 ```{r, fig.width=6, fig.height=6}
 ggplot(effs_df, aes(date_published, proportion)) +
@@ -437,7 +438,7 @@ ggplot(effs_df, aes(date_published, proportion)) +
   coord_cartesian(ylim = c(0, 0.4))
 ```
 
-Remember the histogram over time. There are two peaks. The topic proportions here are from the fitted model, and what's plotted is the spline smoothed topic proportion over time. Because of the smoothing, there can be some negative values. That's why I prefer histograms to density plots that use kernel smoothing. It seems that topics 9, 14, and 37 have decreasing proportion. Explanations: 1. those topics became less popular. 2. while these topics remained as popular as ever, other topics emerged or grew more popular, and thus taking away more proportions; indeed, the proportion of some other topics seems to grow, though not statistically significant here after correcting for multiple testing. Topic 9 is about the technical aspect of LCM + microarray, especially linear amplification. It makes sense that it declined when the technique is more well-established and when people switched to RNA-seq. I still wonder why topics 14 and 37 declined. Those are about cancer, and cancer is as relevant now as it was 20 years ago. One hypothesis is that stm picked up some wordings that were once popular, but not anymore, though the underlying topics have not changed. I don't want to overinterpret the other results.
+Remember the histogram over time. There are two peaks. The topic proportions here are from the fitted model, and what's plotted is the spline smoothed topic proportion over time. Because of the smoothing, there can be some negative values. That's why I prefer histograms to density plots that use kernel smoothing. 
 
 Just to inspect to verify the above results
 ```{r}
@@ -447,10 +448,10 @@ abstracts <- cbind(abstracts, as.data.frame(stm_res$theta))
 ```{r}
 year_theta_long <- abstracts %>% 
   mutate(date_bin = floor_date(date_published, unit = "year")) %>% 
-  select(date_bin, V1:V35) %>% 
-  pivot_longer(cols = V1:V35, names_to = "topic", values_to = "theta") %>% 
+  select(date_bin, V1:V40) %>% 
+  pivot_longer(cols = V1:V40, names_to = "topic", values_to = "theta") %>% 
   mutate(topic = str_remove(topic, "^V"),
-         topic = fct_relevel(topic, as.character(1:35)))
+         topic = fct_relevel(topic, as.character(1:40)))
 year_means <- year_theta_long %>% 
   group_by(date_bin, topic) %>% 
   summarize(means = mean(theta)) 
@@ -458,7 +459,7 @@ year_means <- year_theta_long %>%
 
 ```{r}
 year_means %>% 
-  filter(topic %in% as.character(c(1, 10, 11, 15, 30, 33))) %>% 
+  filter(topic %in% as.character(c(1,2,5,6,16,21:23,37))) %>% 
   ggplot(aes(date_bin, means, color = topic)) +
   geom_line() +
   facet_wrap(~ topic) +
@@ -475,7 +476,7 @@ year_counts <- year_theta_long %>%
 
 ```{r}
 year_counts %>% 
-  filter(topic %in% as.character(c(1, 10, 11, 15, 30, 33))) %>% 
+  filter(topic %in% as.character(c(1,2,5,6,16,21:23,37))) %>% 
   ggplot(aes(date_bin, n, color = topic)) +
   geom_line() +
   facet_wrap(~ topic) +
@@ -495,6 +496,27 @@ effs_summ <- effs_summ %>%
 ```{r}
 effs_summ %>% arrange(p.value)
 ```
+
+```{r}
+labelTopics(stm_res, 22)
+```
+
+```{r}
+findThoughts(stm_res, topics = 22, texts = abstracts$abstract, n = 5)
+```
+
+Topic 1: cancer marker genes from transcriptomics
+Topic 5: prostate cancer
+Topic 21: microarray technicalities
+Topic 6: cancer cell genome stability
+Topic 23: cancer proteomics
+Topic 2: neurological disorders
+Topic 16: miRNAs, especially in the kidney
+Topic 38: development of flowers and leaves
+Topic 14: bone growth plate
+Topic 31: infectious diseases, especially in plants
+Topic 37: plant seed development
+Topic 22: plant roots
 
 # Topics per city
 
@@ -526,7 +548,7 @@ effs_df_loc <- effs_df_loc %>%
 
 ```{r}
 effs_df_loc %>% 
-  filter(topic == 9) %>% 
+  filter(topic == 14) %>% 
   mutate(value = fct_reorder(value, mid, .desc = FALSE)) %>% 
   top_n(10, mid) %>% 
   ggplot(aes(y = value)) +
@@ -543,7 +565,7 @@ plot(topic_cor)
 ```
 
 ```{r}
-labelTopics(stm_res, 18)
+labelTopics(stm_res, 36)
 ```
 
 Here the cancer topics are connected (37, 11, 29, 35, 17), the technical ones are connected to plant ones somehow (9, 31, 12, 24), the epithelium and immune responses are connected (1, 7) presumably because some abstracts in topic 1 mentions inflammation and some abstractions in topic 7 mention inflammation of the skin. There's another cluster of cancer topics (14, 19, 8). The CNS topics are connected (23, 3, 39). Both 30 and 34 are about vasculature.
