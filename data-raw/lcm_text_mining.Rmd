@@ -39,6 +39,13 @@ abstracts <- readRDS("abstracts.rds")
 ```
 
 ```{r}
+lcm_city_gc <- cities_gc
+usethis::use_data(lcm_city_gc)
+lcm_abstracts <- abstracts
+usethis::use_data(lcm_abstracts)
+```
+
+```{r}
 pubs_on_map(df_1st, cities_gc, plot = "hexbin", label_insts = FALSE, 
             label_cities = TRUE)
 ```
@@ -411,7 +418,8 @@ plot(stm_res, type = "perspectives", topics = c(4, 40))
 ```
 
 ```{r}
-usethis::use_data(ac_dfm2)
+lcm_dfm2 <- ac_dfm2
+usethis::use_data(lcm_dfm2)
 usethis::use_data(stm_res, overwrite = TRUE)
 ```
 
