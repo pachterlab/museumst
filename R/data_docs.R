@@ -22,23 +22,28 @@
 #' @source Brewer
 "sheet_fill"
 
-#' LCM abstracts from PubMed search
+#' LCM abstracts from PubMed and bioRxiv search
 #'
 #' Abstracts of LCM literautre from PubMed API in a data frame, last updated on
-#' 2020-09-07
+#' 2021-03-27. See `data-raw/lcm_abstracts.Rmd`, `data-raw/update_lcm.Rmd`, and
+#' `data-raw/lcm_biorxiv.Rmd` in the GitHub repo of this package.
 #'
 #' @format Data frame
-#' @source The search term was "((laser capture microdissection) OR (laser microdissection)) AND ((microarray) OR (transcriptome) OR (RNA-seq))"
+#' @source The search term was "((laser capture microdissection) OR (laser
+#'   microdissection)) AND ((microarray) OR (transcriptome) OR (RNA-seq))" on
+#'   PubMed, and "laser microdissection" on bioRxiv.
 "lcm_abstracts"
 
 #' City geocodes of LCM literature
 #'
 #' Longitude and latitude of institutions of first authors of LCM literature as
-#' of publication, for plotting on maps.
+#' of publication, for plotting on maps. See `data-raw/lcm_abstracts.Rmd`,
+#' `data-raw/update_lcm.Rmd`, and `data-raw/lcm_biorxiv.Rmd` in the GitHub repo
+#' of this package.
 #'
 #' @format sf data frame with longitude and latitude in the geometry column.
-#' @source Address was pulled from the PubMed API, and geocoded with the Google
-#' geocoding API with my own API key.
+#' @source Address was pulled from the PubMed or bioRxiv API, and geocoded with
+#'   the Google geocoding API with my own API key.
 "lcm_city_gc"
 
 #' Document term matrix of LCM abstracts

@@ -3,18 +3,21 @@
 \docType{data}
 \name{lcm_abstracts}
 \alias{lcm_abstracts}
-\title{LCM abstracts from PubMed search}
+\title{LCM abstracts from PubMed and bioRxiv search}
 \format{
 Data frame
 }
 \source{
-The search term was "((laser capture microdissection) OR (laser microdissection)) AND ((microarray) OR (transcriptome) OR (RNA-seq))"
+The search term was "((laser capture microdissection) OR (laser
+  microdissection)) AND ((microarray) OR (transcriptome) OR (RNA-seq))" on
+  PubMed, and "laser microdissection" on bioRxiv.
 }
 \usage{
 lcm_abstracts
 }
 \description{
 Abstracts of LCM literautre from PubMed API in a data frame, last updated on
-2020-09-07
+2021-03-27. See `data-raw/lcm_abstracts.Rmd`, `data-raw/update_lcm.Rmd`, and
+`data-raw/lcm_biorxiv.Rmd` in the GitHub repo of this package.
 }
 \keyword{datasets}

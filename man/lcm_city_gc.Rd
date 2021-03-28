@@ -8,14 +8,16 @@
 sf data frame with longitude and latitude in the geometry column.
 }
 \source{
-Address was pulled from the PubMed API, and geocoded with the Google
-geocoding API with my own API key.
+Address was pulled from the PubMed or bioRxiv API, and geocoded with
+  the Google geocoding API with my own API key.
 }
 \usage{
 lcm_city_gc
 }
 \description{
 Longitude and latitude of institutions of first authors of LCM literature as
-of publication, for plotting on maps.
+of publication, for plotting on maps. See `data-raw/lcm_abstracts.Rmd`,
+`data-raw/update_lcm.Rmd`, and `data-raw/lcm_biorxiv.Rmd` in the GitHub repo
+of this package.
 }
 \keyword{datasets}

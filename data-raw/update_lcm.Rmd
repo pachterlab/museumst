@@ -1,0 +1,216 @@
+---
+title: "Update LCM abstracts"
+author: "Lambda Moses"
+date: "3/25/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+I used to update LCM abstract data by querying PubMed and downloading everything again and geocoding everything again. That's not very efficient, because I only need to query abstracts and geocode for new entries. So here I'll do that and later I'll add the code to the museumst package.
+
+```{r}
+library(tidyverse)
+library(XML)
+library(ggmap)
+library(easyPubMed)
+library(lubridate)
+library(museumst)
+```
+
+```{r}
+my_query <- "((laser capture microdissection) OR (laser microdissection)) AND ((microarray) OR (transcriptome) OR (RNA-seq))"
+my_ids <- get_pubmed_ids(my_query, api_key = Sys.getenv("PUBMED_API_KEY"))
+```
+
+```{r}
+my_xmls <- fetch_pubmed_data(my_ids, format = "xml", retmax = 2000)
+xmlx_list <- articles_to_list(my_xmls)
+```
+
+```{r}
+con <- file("pubmed_lcm.xml")
+writeLines(my_xmls, con = con)
+close(con)
+```
+
+```{r}
+df <- map_dfr(xmlx_list, article_to_df, max_chars = 0)
+```
+
+```{r}
+saveRDS(df, "lcm_info.rds")
+```
+
+For now, I only care about the address of the first author.
+```{r}
+df_1st <- df %>% 
+  group_by(pmid, title) %>% 
+  mutate(author_ord = seq_along(title)) %>% 
+  filter(author_ord == 1) %>% 
+  select(-author_ord)
+```
+
+Also, I want to exclude reviews, which means I need to get article types.
+```{r}
+xmls <- xmlParse("pubmed_lcm.xml")
+types <- xpathApply(xmls, "//PublicationTypeList")
+types <- lapply(types, function(x) xmlSApply(x, xmlValue))
+is_review <- map_lgl(types, ~ any(.x == "Review"))
+```
+
+What proportion is reviews?
+```{r}
+mean(is_review)
+```
+
+```{r}
+# Old
+data("lcm_abstracts")
+```
+
+I'll only keep entries not already in the collection and are not reviews.
+```{r}
+inds_keep <- !is_review & (!df_1st$pmid %in% lcm_abstracts$pmid)
+```
+
+```{r}
+df_1st <- df_1st[inds_keep, ]
+```
+
+```{r}
+df_1st <- df_1st %>% 
+  unite(col = "date_published", year, month, day, sep = "-") %>% 
+  mutate(date_published = ymd(date_published))
+```
+
+```{r}
+# Old
+data("lcm_city_gc")
+```
+
+Just learnt this from Stack Overflow.
+```{r}
+df_gc <- df_1st %>% 
+  mutate(geodata = purrr::map(address, 
+                              ~ {if (is.na(.x)) NA else geocode(.x, output = "all")})) %>% 
+  filter(!is.na(address))
+```
+
+```{r}
+df_gc <- df_gc %>% 
+  mutate(address_components = purrr::map(geodata, list("results", 1, "address_components")),
+         to_rm = map_lgl(address_components, is.null)) %>% 
+  filter(!to_rm) %>% 
+  select(-to_rm)
+```
+
+```{r}
+df_gc <- df_gc %>% 
+  mutate(address_components = purrr::map(address_components, 
+                                  ~ as_tibble(transpose(.x)) %>% 
+                                    unnest(c("long_name", "short_name")) %>% 
+                                    unnest("types") %>% 
+                                    unnest("types")),
+         country = map_chr(address_components, ~ .x$long_name[.x$types == "country"]),
+         `state/province` = map_chr(address_components, 
+                         ~ {out <- .x$long_name[.x$types == "administrative_area_level_1"]
+                         if (length(out) == 0) NA_character_ else out
+                         }))
+df_gc <- df_gc %>% 
+  mutate(city = map_chr(address_components, 
+                        ~ {out <- .x$long_name[.x$types == "postal_town"]
+                        if (length(out) == 0)
+                          out <- .x$long_name[.x$types == "locality"]
+                        if (length(out) == 0) 
+                          out <- .x$long_name[.x$types == "administrative_area_level_2"]
+                        if (length(out) == 0)
+                          out <- .x$long_name[.x$types == "administrative_area_level_1"]
+                        if (length(out) == 0) out <- NA_character_
+                        out
+                        }))
+```
+
+Sounds like really dumb, but I'm going to geocode the cities again. 
+
+```{r}
+df_gc <- df_gc %>% 
+  mutate(`state/province` = str_remove(`state/province`, "\\s(Sheng)|(Shi)$"),
+         city = str_remove(city, "\\s(City)|(Shi)$")) %>% 
+  ungroup()
+```
+
+```{r}
+# Only do cities not already in the collection
+cities <- df_gc %>%
+  select(city, `state/province`, country) %>%
+  distinct() %>%
+  filter(!is.na(city)) %>%
+  unite(col = "city2", city, `state/province`, country, remove = FALSE, sep = ", ") %>%
+  mutate(city2 = str_remove(city2, "NA, ")) %>% 
+  anti_join(lcm_city_gc, by = "city2")
+cities_gc <- geocode(cities$city2)
+cities_gc <- cbind(cities, cities_gc)
+cities_gc <- sf::st_as_sf(cities_gc, coords = c("lon", "lat"), crs = sf::st_crs(4326)) %>%
+  select(city, city2, `state/province`, country, geometry)
+```
+
+```{r}
+cities_gc <- bind_rows(cities_gc, lcm_city_gc)
+```
+
+```{r}
+saveRDS(cities_gc, "lcm_city_gc.rds")
+```
+
+I'll only get the abstracts of new entries
+```{r}
+abstracts <- map_dfr(xmlx_list[inds_keep], article_to_df, getAuthors = FALSE, 
+                     max_chars = 1e6)
+```
+
+```{r}
+abstracts <- abstracts %>% 
+  select(pmid:journal)
+```
+
+```{r}
+abstracts <- abstracts %>% 
+  unite(col = "date_published", year, month, day, sep = "-") %>% 
+  mutate(date_published = ymd(date_published)) %>% 
+  inner_join(df_gc[, c("pmid", "address", "country", "state/province", "city")])
+```
+
+Also remove empty abstracts
+```{r}
+abstracts <- abstracts %>% 
+  filter(abstract != "")
+```
+
+```{r}
+abstracts <- abstracts %>% 
+  mutate(date_num = as.numeric(date_published))
+```
+
+```{r}
+abstracts <- abstracts %>% 
+  unite(col = "city2", city, country, sep = ", ", remove = FALSE) 
+```
+
+```{r}
+# append to old collection
+abstracts <- bind_rows(abstracts, lcm_abstracts)
+```
+
+```{r}
+lcm_abstracts <- abstracts
+lcm_city_gc <- cities_gc
+```
+
+```{r}
+usethis::use_data(lcm_abstracts, overwrite = TRUE)
+usethis::use_data(lcm_city_gc, overwrite = TRUE)
+```
+

@@ -1,0 +1,146 @@
+---
+title: "Get LCM abstracts from bioRxiv and medRxiv"
+author: "Lambda Moses"
+date: "3/25/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(medrxivr)
+library(jsonlite)
+library(museumst)
+library(lubridate)
+library(ggmap)
+```
+
+Last time I only got abstracts from PubMed. This time, with the `medrxivr` package, I can get not only abstracts but also full texts from bioRxiv and medRxiv. The rbiorxiv package can only query based on date range instead of keyword. But the medrxivr package can search keywords, though I have to download the metadata of all bioRxiv papers, which will take a while. Also, unfortunately, the API only gives me the institution of the corresponding author, which is usually the last author instead of the first author which I use to map the institutions in PubMed LCM papers. The medrxivr package basically uses regex to search for key terms in titles and abstracts. The actual bioRxiv search returns more results, some of which, upon inspection, are irrelevant, but some of which are relevant despite not having "laser capture microdissection" in the abstract or title. Anyway, I'm sure that some of the PubMed results aren't relevant either; I haven't read all those abstracts. So I'll just use the search results. I'll use the Python package biorxiv_retriever to get the search results by web scraping. It doesn't return the author institutions which I want for geocoding, so I'll first use that to get the dois and then use medrxivr to get the other metadata. BTW, I can get the full text. Shall I do it? But mining the full text is quite different from mining the abstracts. It would also require more cleaning to get rid of line numbers, headers, footers, references, and etc. But I can still get the full text, save it, and deal with it later.
+
+```{python}
+from biorxiv_retriever import BiorxivRetriever
+br = BiorxivRetriever()
+papers = br.query("laser microdissection", metadata = True, full_text = True)
+```
+
+```{python}
+import json
+with open("biorxiv_lcm.json", "w") as jf:
+  json.dump(papers, jf)
+
+```
+
+```{r}
+biorxiv_lcm <- read_json("biorxiv_lcm.json")
+```
+
+This has title, url, date, abstract, and full text.
+```{r}
+dois <- map_chr(biorxiv_lcm, ~ str_extract(.$biorxiv_url, "(?<=content/)[\\d\\./]+"))
+```
+
+How many have full text that have been pulled successfully?
+```{r}
+full_text_lengths <- map_int(biorxiv_lcm, ~ str_length(.$full_text))
+summary(full_text_lengths)
+```
+
+```{r}
+hist(full_text_lengths)
+```
+
+That's the length in characters. Say, with street fighting math, that each word plus spaces is on average 10 character, then most of the results have 3000 to 7000 words, which is reasonable. Anyway, I'll worry about full texts later. I already saved them in a json file.
+
+```{r}
+biorxiv_lcm_metas <- map_dfr(dois, mx_api_doi, server = "biorxiv")
+```
+
+```{r}
+biorxiv_lcm_metas %>% 
+  count(version)
+```
+
+Ah, that's why some papers have more than 1 row. I have seen preprints with 2 or 3 versions before, but not 7. Here I'll get the most recent version.
+```{r}
+biorxiv_lcm_metas2 <- biorxiv_lcm_metas %>% 
+  select(-node) %>% 
+  # No idea what it is but somehow otherwise identical rows can have different nodes.
+  group_by(doi) %>% 
+  slice_max(version) %>% 
+  distinct()
+```
+
+Now I have the institutions of the corresponding authors. Again, it would be nice I have the institutions of first authors because often the first authors did most of the work. But this is the best I can get programattically. I won't blame medrxivr; bioRxiv's website says that the API only returns the institution of the corresponding authors.
+
+So again, I'll geocode the institutions. I won't be able to get museumst to CRAN soon because the ggmap package doesn't work well inside a package. It needs to be attached to work.
+
+```{r}
+biorxiv_city_gc <- geocode_address(biorxiv_lcm_metas2, author_corresponding_institution)
+```
+
+```{r}
+head(biorxiv_city_gc)
+```
+
+```{r}
+data("lcm_city_gc")
+```
+
+```{r}
+city_gc2 <- geocode_city(biorxiv_city_gc, existing = lcm_city_gc, 
+                         geocode_method = "Google")
+```
+
+```{r}
+lcm_city_gc <- city_gc2
+```
+
+```{r}
+usethis::use_data(lcm_city_gc, overwrite = TRUE)
+```
+
+```{r}
+biorxiv_lcm_metas2 <- biorxiv_lcm_metas2 %>% 
+  left_join(biorxiv_city_gc[, c("address", "country", "state/province", "city")],
+            by = c("author_corresponding_institution" = "address"))
+```
+
+```{r}
+biorxiv_abstracts <- biorxiv_lcm_metas2 %>% 
+  select(doi, title, abstract, date_published = date, 
+         address = author_corresponding_institution, city, `state/province`,
+         country) %>% 
+  mutate(date_published = ymd(date_published),
+         date_num = as.numeric(date_published),
+         city2 = paste(country, `state/province`, city, sep = ", "),
+         city2 = str_remove(city2, "NA, "),
+         journal = "bioRxiv",
+         jabbrv = "bioRxiv")
+```
+
+```{r}
+lcm_abstracts <- bind_rows(biorxiv_abstracts, lcm_abstracts)
+lcm_abstracts <- lcm_abstracts %>% ungroup()
+```
+
+```{r}
+usethis::use_data(lcm_abstracts, overwrite = TRUE)
+```
+
+```{r}
+pubs_on_map(biorxiv_city_gc, city_gc2, plot = "hexbin", label_cities = TRUE, n_label = 5)
+```
+
+```{r}
+pubs_on_map(biorxiv_city_gc, city_gc2, plot = "point", label_cities = TRUE, 
+            n_label = 5, zoom = "europe")
+```
+
+```{r}
+pubs_on_map(biorxiv_city_gc, city_gc2, plot = "point", label_cities = TRUE, 
+            n_label = 5, zoom = "usa") +
+  theme(panel.background = element_rect(fill = "lightblue"))
+```
