@@ -452,6 +452,7 @@ pubs_on_map <- function(pubs, city_gc,
     map_use <- sf::st_transform(map_use, robin)
     inst_count <- inst_count %>%
       mutate(geometry = sf::st_transform(geometry, robin))
+    map_all <- sf::st_transform(one_world_small, robin)
   } else if (zoom == "europe") {
     map_use <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
     crs_europe <- 3035
@@ -460,20 +461,15 @@ pubs_on_map <- function(pubs, city_gc,
       mutate(geometry = sf::st_transform(geometry, crs = crs_europe))
     # project on European transformation
     map_use <- sf::st_transform(map_use, crs = crs_europe)
+    map_all <- sf::st_transform(one_world_medium, crs = crs_europe)
   } else if (zoom == "usa") {
-    map_use <- usa_w_pop
+    map_use <- na_w_pop
     crs_usa <- 2163
     inst_count <- inst_count %>%
-      filter(country %in% c("USA", "US", "United States", "United States of America")) %>%
+      filter(country %in% c("USA", "US", "United States",
+                            "United States of America", "Canada", "Mexico")) %>%
       mutate(geometry = sf::st_transform(geometry, crs = crs_usa))
-    # Temporary solution for Hawaii and Alaska
-    if (any(inst_count$`state/province` %in% c("HI", "AK", "Hawaii", "Alaska"))) {
-      state_labs <- urbnmapr::get_urbn_labels(sf = TRUE)
-      inst_count$geometry[inst_count$`state/province` %in% c("HI", "Hawaii")] <-
-        state_labs$geometry[state_labs$state_abbv == "HI"]
-      inst_count$geometry[inst_count$`state/province` %in% c("AK", "Alaska")] <-
-        state_labs$geometry[state_labs$state_abbv == "AK"]
-    }
+    map_all <- sf::st_transform(one_world_medium, crs = crs_usa)
   }
   if (max(inst_count$n, na.rm = TRUE) < 4) {
     size_break_width <- 1
@@ -486,11 +482,12 @@ pubs_on_map <- function(pubs, city_gc,
   n <- NULL
   if (plot == "point") {
     p <- ggplot() +
-      geom_sf(data = map_use) +
-      scale_size_area(name = "Number of\npublications",
-                      breaks = breaks_width(size_break_width1)) +
+      geom_sf(data = map_use, linetype = "dotted") +
+      geom_sf(data = map_all, fill = NA) +
+      scale_size_area(breaks = breaks_width(size_break_width1),
+                      name = "Number of\npublications") +
       theme(panel.border = element_blank(), axis.title = element_blank()) +
-      scale_color_viridis_c(name = "", breaks_width(size_break_width2))
+      scale_color_viridis_c(breaks_width(size_break_width2), name = "")
     city2 <- city <- NULL
     if (is.null(facet_by)) {
       if (per_year) {
@@ -528,11 +525,13 @@ pubs_on_map <- function(pubs, city_gc,
         facet_wrap(vars(facets), ncol = ncol) #+
         #theme(legend.position = "none")
     }
-    if (zoom == "europe") {
+    if (zoom != "world") {
       # Limit to that box
+      xylims_use <- if (zoom == "europe") xylims else xylims_us
+      crs_use <- if (zoom == "europe") crs_europe else crs_usa
       p <- p +
-        coord_sf(xlim = xylims[c("xmin", "xmax")], ylim = xylims[c("ymin", "ymax")],
-                 crs = crs_europe)
+        coord_sf(xlim = xylims_use[c("xmin", "xmax")], ylim = xylims_use[c("ymin", "ymax")],
+                 crs = crs_use)
     }
     if (per_year) {
       year <- NULL
@@ -549,15 +548,18 @@ pubs_on_map <- function(pubs, city_gc,
     coords <- as_tibble(coords)
     inst_count2 <- cbind(inst_count2, coords)
     p <- ggplot() +
-      geom_sf(data = map_use) +
+      geom_sf(data = map_use, linetype = "dotted") +
+      geom_sf(data = map_all, fill = NA) +
       #scale_fill_distiller(palette = "Blues", direction = 1) +
       scale_fill_viridis_c() +
       theme(panel.border = element_blank(), axis.title = element_blank())
-    if (zoom == "europe") {
+    if (zoom != "world") {
       # Limit to that box
+      xylims_use <- if (zoom == "europe") xylims else xylims_us
+      crs_use <- if (zoom == "europe") crs_europe else crs_usa
       p <- p +
-        coord_sf(xlim = xylims[c("xmin", "xmax")], ylim = xylims[c("ymin", "ymax")],
-                 crs = crs_europe)
+        coord_sf(xlim = xylims_use[c("xmin", "xmax")], ylim = xylims_use[c("ymin", "ymax")],
+                 crs = crs_use)
     }
     if (plot == "hexbin") {
       p <- p +
@@ -583,7 +585,7 @@ pubs_on_map <- function(pubs, city_gc,
                                       TRUE ~ ""))
       p <- p +
         geom_label_repel(data = inst_count, aes(geometry = geometry, label = city_label),
-                         alpha = 0.7, stat = "sf_coordinates")
+                         alpha = 0.7, stat = "sf_coordinates", max.overlaps = Inf)
     } else if (label_insts) {
       # Find out what the "top" institutions are
       inst_sn <- pubs %>%
@@ -600,7 +602,7 @@ pubs_on_map <- function(pubs, city_gc,
                                       TRUE ~ ""))
       p <- p +
         geom_label_repel(data = inst_count, aes(geometry = geometry, label = inst_label),
-                         alpha = 0.7, stat = "sf_coordinates")
+                         alpha = 0.7, stat = "sf_coordinates", max.overlaps = Inf)
     }
   }
   p
@@ -664,7 +666,7 @@ pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
         mutate(area = fct_reorder(country, per_capita))
     }
   } else {
-    map_use <- usa_w_pop
+    map_use <- na_w_pop
     pubs_count <- pubs %>%
       filter(country %in% c("USA", "US", "United States", "United States of America")) %>%
       count(`state/province`)
