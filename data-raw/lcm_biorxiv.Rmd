@@ -115,8 +115,6 @@ biorxiv_abstracts <- biorxiv_lcm_metas2 %>%
          country) %>% 
   mutate(date_published = ymd(date_published),
          date_num = as.numeric(date_published),
-         city2 = paste(country, `state/province`, city, sep = ", "),
-         city2 = str_remove(city2, "NA, "),
          journal = "bioRxiv",
          jabbrv = "bioRxiv")
 ```
@@ -124,6 +122,36 @@ biorxiv_abstracts <- biorxiv_lcm_metas2 %>%
 ```{r}
 lcm_abstracts <- bind_rows(biorxiv_abstracts, lcm_abstracts)
 lcm_abstracts <- lcm_abstracts %>% ungroup()
+```
+
+```{r}
+lcm_abstracts <- lcm_abstracts %>% 
+  mutate(city2 = paste(city, `state/province`, country, sep = ", "),
+         city2 = str_remove(city2, "NA, "))
+```
+
+Get rid of duplicated entries
+```{r}
+which(duplicated(lcm_abstracts$title))
+```
+
+```{r}
+lcm_abstracts %>% 
+  count(title) %>% 
+  arrange(desc(n))
+```
+
+```{r}
+lcm_abstracts %>% 
+  filter(str_detect(title, "Type I and III IFNs produced by the nasal epithelia and dimmed inflammation are key features of alpacas re"))
+```
+
+I inspected that case; it's 2 versions of the same paper, so I'll keep the more recent one.
+```{r}
+lcm_abstracts <- lcm_abstracts %>% 
+  group_by(title) %>% 
+  slice_max(date_published) %>% 
+  ungroup()
 ```
 
 ```{r}

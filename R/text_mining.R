@@ -110,25 +110,27 @@ word_prop_scatter <- function(pubs, col_use = title, era = sheet, n_top = 20,
 #' @param documents Quanteda dfm object.
 #' @param K Numeric vector of numbers of topics to try.
 #' @param prevalence Formula of topic prevalence.
-#' @param seed Random seed to use.
+#' @param seed1 Random seed to use.
 #' @param ... Other arguments to pass to \code{stm::stm}.
 #' @return A tibble with the metrics output by searchK, plus a column for the
 #' fitted model for each value of K tried.
 #' @export
 
-my_searchK <- function(documents, K, prevalence = ~ 1, seed = 19, ...) {
+my_searchK <- function(documents, K, prevalence = ~ 1, seed1 = 19, ...) {
   .pkg_check("quanteda")
   .pkg_check("stm")
-  heldout <- stm::make.heldout(documents, seed = seed)
+  heldout <- stm::make.heldout(documents, seed = seed1)
   dc <- heldout$documents
   vocab <- heldout$vocab
   meta <- quanteda::docvars(documents)
-  fun <- function(.x, seed, prevalence, ...) {
-    stm::stm(dc, vocab = vocab, K = .x, seed = seed,
+  fun <- function(.x, seed1, prevalence, ...) {
+    stm::stm(dc, vocab = vocab, K = .x, seed = seed1,
              prevalence = prevalence, data = meta, ...)
   }
   many_models <- tibble(K = sample(K, length(K), replace = FALSE)) %>%
-    mutate(topic_model = furrr::future_map(K, fun, seed = seed, prevalence = prevalence, ...))
+    mutate(topic_model = furrr::future_map(K, fun, seed1 = seed1,
+                                           prevalence = prevalence,
+                                           .options = furrr_options(seed = seed1), ...))
   k_result <- many_models %>%
     mutate(exclusivity = map(topic_model, stm::exclusivity),
            semantic_coherence = map(topic_model, stm::semanticCoherence, dc),
