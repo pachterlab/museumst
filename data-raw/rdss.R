@@ -5,6 +5,7 @@ library(rnaturalearth)
 library(googlesheets4)
 library(sf)
 library(rgeos)
+library(ggmap)
 species_img <- tibble(species = c("Mus musculus", "Drosophila melanogaster",
                                   "Danio rerio", "Ciona intestinalis", "Xenopus laevis",
                                   "Caenorhabditis elegans", "Arabidopsis thaliana",
@@ -60,7 +61,8 @@ institution_words <- c(institution_words, tolower(unique(city_pop$City)))
 sheets <- read_metadata(c("Prequel", "smFISH", "Array", "ISS",
                           "Microdissection", "No imaging",
                           "Analysis", "Prequel analysis"), update = TRUE)
-gcs <- geocode_first_time(sheets, cache = TRUE, cache_location = "inst")
+gcs <- geocode_first_time(sheets, cache = TRUE, cache_location = "inst",
+                          geocode_method = "Google")
 
 # Europe limits
 europe_poly <- matrix(c(30, 68, 30, 35, -7, 35, -7, 68, 30, 68),

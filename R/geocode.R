@@ -123,12 +123,12 @@ geocode_city <- function(sheet, existing = NULL,
   cities_gc
 }
 
-geocode_first_time <- function(sheet, cache = TRUE, cache_location = ".") {
+geocode_first_time <- function(sheet, cache = TRUE, cache_location = ".", ...) {
   if (cache) {
     cache_location <- normalizePath(cache_location, mustWork = FALSE)
     fn <- paste0(cache_location, "/geocode_cache.rds")
   }
-  city_gc <- geocode_city(sheet)
+  city_gc <- geocode_city(sheet, ...)
   if (cache) saveRDS(city_gc, file = fn, version = 2)
   city_gc
 }

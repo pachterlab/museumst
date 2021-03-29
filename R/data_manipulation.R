@@ -1,5 +1,5 @@
 # Update this manually when the copy of metadata within the package is updated
-.pkg_update_time <- "2021-01-13 21:12:01 PST"
+.pkg_update_time <- "2021-03-29 16:53:45 PDT"
 
 read_metadata_fresh <- function(sheet_use) {
   date_published <- NULL
