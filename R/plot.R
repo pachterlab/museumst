@@ -639,11 +639,13 @@ pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
       if (plot == "choropleth") {
         robin <- "+proj=robin +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m no_defs"
         map_use <- sf::st_transform(map_use, robin)
+        map_all <- sf::st_transform(one_world_small, robin)
       }
     } else {
       map_use <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
       if (plot == "choropleth") {
         map_use <- sf::st_transform(map_use, 3035)
+        map_all <- sf::st_transform(one_world_medium, 3035)
       }
     }
     country <- per_capita <- pop_est <- country_full <- n <- `state/province` <-
@@ -667,18 +669,19 @@ pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
     }
   } else {
     map_use <- na_w_pop
+    map_all <- sf::st_transform(one_world_medium, 2163)
     pubs_count <- pubs %>%
       filter(country %in% c("USA", "US", "United States", "United States of America")) %>%
       count(`state/province`)
     # Convert state names to abbreviations
     pubs_count <- pubs_count %>%
       mutate(`state/province` = case_when(
-        `state/province` %in% map_use$state_abbv ~ `state/province`,
-        TRUE ~ map_use$state_abbv[match(`state/province`, map_use$state_name)]
+        `state/province` %in% map_use$postal ~ `state/province`,
+        TRUE ~ map_use$postal[match(`state/province`, map_use$state_name)]
       ))
     map_use <- map_use %>%
       left_join(pubs_count,
-                by = c("state_abbv" = "state/province")) %>%
+                by = c("postal" = "state/province")) %>%
       mutate(per_capita = n/`2019`)
     if (plot == "bar") {
       map_use <- map_use %>%
@@ -688,18 +691,23 @@ pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
   }
   if (plot == "choropleth") {
     p <- ggplot(map_use) +
-      geom_sf(aes(fill = log10(per_capita))) +
+      geom_sf(aes(fill = log10(per_capita)), linetype = "dotted") +
+      geom_sf(data = map_all, fill = NA) +
       scale_fill_distiller(palette = "Blues", na.value = "white", direction = 1,
                            name = "# pub.\nper capita\n(log10)") +
       theme(panel.border = element_blank(), axis.title = element_blank())
-    if (zoom == "europe") {
+    if (zoom != "world") {
+      # Limit to that box
+      xylims_use <- if (zoom == "europe") xylims else xylims_us
+      crs_use <- if (zoom == "europe") 3035 else 2163
       p <- p +
-        coord_sf(xlim = xylims[c("xmin", "xmax")], ylim = xylims[c("ymin", "ymax")],
-                 crs = 3035)
+        coord_sf(xlim = xylims_use[c("xmin", "xmax")], ylim = xylims_use[c("ymin", "ymax")],
+                 crs = crs_use)
     }
     if (zoom == "usa" && label_states) {
       # Label the states
-      state_labels <- urbnmapr::get_urbn_labels("states", sf = TRUE)
+      state_labels <- urbnmapr::get_urbn_labels("states", sf = TRUE) %>%
+        filter(!state_abbv %in% c("AK", "HI"))
       p <- p +
         geom_sf_text(data = state_labels, aes(geometry = geometry, label = state_abbv))
     }
