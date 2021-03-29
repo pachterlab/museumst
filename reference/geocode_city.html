@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Color palette for sheets — sheet_fill • museumst</title>
+<title>Get longitude and latitude of cities — geocode_city • museumst</title>
 
 
 <!-- jquery -->
@@ -39,9 +39,8 @@
 
 
 
-<meta property="og:title" content="Color palette for sheets — sheet_fill" />
-<meta property="og:description" content="To give each sheet, i.e. each category of technologies, a fixed color for a
-unified look among figures." />
+<meta property="og:title" content="Get longitude and latitude of cities — geocode_city" />
+<meta property="og:description" content="Get longitude and latitude of cities" />
 
 
 
@@ -119,25 +118,43 @@ unified look among figures." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Color palette for sheets</h1>
+    <h1>Get longitude and latitude of cities</h1>
     
-    <div class="hidden name"><code>sheet_fill.Rd</code></div>
+    <div class="hidden name"><code>geocode_city.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>To give each sheet, i.e. each category of technologies, a fixed color for a
-unified look among figures.</p>
+    <p>Get longitude and latitude of cities</p>
     </div>
 
-    <pre class="usage"><span class='va'>sheet_fill</span></pre>
+    <pre class="usage"><span class='fu'>geocode_city</span><span class='op'>(</span><span class='va'>sheet</span>, existing <span class='op'>=</span> <span class='cn'>NULL</span>, geocode_method <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"OSM"</span>, <span class='st'>"Google"</span><span class='op'>)</span><span class='op'>)</span></pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>sheet</th>
+      <td><p>A data frame with columns "city", "state/province", and "country".</p></td>
+    </tr>
+    <tr>
+      <th>existing</th>
+      <td><p>A data frame with earlier output of this function, so only
+cities not already in the collection are geocoded.</p></td>
+    </tr>
+    <tr>
+      <th>geocode_method</th>
+      <td><p>Which geocoding service to use. Must be either "OSM"
+(OpenStreetMap) or "Google". If "Google", then an API key must be provided in
+environment variable `GGMAP_GOOGLE_API_KEY`.</p></td>
+    </tr>
+    </table>
 
-    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A named vector of colors; the names are the sheets for data collection</p>
-    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
-
-    <p>Brewer</p>
+    <p>A data frame like the internal data `lcm_city_gc`, with columns
+"city", "city2" (city name is concatenated to state and country in case
+multiple cities around the world have the same name), "state/province",
+"country", and "geometry" (sfc_POINT for the longitudes and latitudes).</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

@@ -41,7 +41,11 @@
 
 <meta property="og:title" content="City geocodes of LCM literature — lcm_city_gc" />
 <meta property="og:description" content="Longitude and latitude of institutions of first authors of LCM literature as
-of publication, for plotting on maps." />
+of publication, for plotting on maps. See `data-raw/lcm_abstracts.Rmd`,
+`data-raw/update_lcm.Rmd`, and `data-raw/lcm_biorxiv.Rmd` in the GitHub repo
+of this package." />
+
+
 
 
 
@@ -57,9 +61,16 @@ of publication, for plotting on maps." />
 
 
 
+
+  
+
+  
+
   </head>
 
   <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -73,7 +84,7 @@ of publication, for plotting on maps." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">museumst</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9004</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9006</span>
       </span>
     </div>
 
@@ -117,7 +128,9 @@ of publication, for plotting on maps." />
 
     <div class="ref-description">
     <p>Longitude and latitude of institutions of first authors of LCM literature as
-of publication, for plotting on maps.</p>
+of publication, for plotting on maps. See `data-raw/lcm_abstracts.Rmd`,
+`data-raw/update_lcm.Rmd`, and `data-raw/lcm_biorxiv.Rmd` in the GitHub repo
+of this package.</p>
     </div>
 
     <pre class="usage"><span class='va'>lcm_city_gc</span></pre>
@@ -128,8 +141,8 @@ of publication, for plotting on maps.</p>
     <p>sf data frame with longitude and latitude in the geometry column.</p>
     <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
 
-    <p>Address was pulled from the PubMed API, and geocoded with the Google
-geocoding API with my own API key.</p>
+    <p>Address was pulled from the PubMed or bioRxiv API, and geocoded with
+  the Google geocoding API with my own API key.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -142,11 +155,11 @@ geocoding API with my own API key.</p>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Lambda Moses, Lior Pachter.</p>
+  <p><p>Developed by Lambda Moses, Lior Pachter.</p></p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.9000.</p>
+  <p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 1.6.1.9001.</p></p>
 </div>
 
       </footer>
@@ -154,6 +167,8 @@ geocoding API with my own API key.</p>
 
   
 
+
+  
 
   </body>
 </html>
