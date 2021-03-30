@@ -18,7 +18,8 @@ if faceting by those. If facetting, then a column whose name is the value in
 
 \item{col_use}{Which logical variable to plot. Tidyeval is supported.}
 
-\item{preprints}{Logical, whether preprints should be included.}
+\item{preprints}{Logical, whether preprints should be included. Defaults to
+`TRUE` to include preprints.}
 }
 \value{
 A glm object is returned invisibly. The summary is printed to screen

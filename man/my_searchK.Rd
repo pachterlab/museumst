@@ -4,7 +4,7 @@
 \alias{my_searchK}
 \title{Find the appropriate number of topics for stm}
 \usage{
-my_searchK(documents, K, prevalence = ~1, seed = 19, ...)
+my_searchK(documents, K, prevalence = ~1, seed1 = 19, ...)
 }
 \arguments{
 \item{documents}{Quanteda dfm object.}
@@ -13,7 +13,7 @@ my_searchK(documents, K, prevalence = ~1, seed = 19, ...)
 
 \item{prevalence}{Formula of topic prevalence.}
 
-\item{seed}{Random seed to use.}
+\item{seed1}{Random seed to use.}
 
 \item{...}{Other arguments to pass to \code{stm::stm}.}
 }

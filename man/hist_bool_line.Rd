@@ -35,7 +35,8 @@ the other categories are lumped into "other".}
 
 \item{binwidth}{Width of bins for the histogram in days.}
 
-\item{preprints}{Logical, whether preprints should be included.}
+\item{preprints}{Logical, whether preprints should be included. Defaults to
+`TRUE` to include preprints.}
 }
 \description{
 Kind of like `hist_bool`, but instead of plotting TRUE, FALSE, and NA in 3

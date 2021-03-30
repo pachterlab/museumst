@@ -9,7 +9,7 @@ era_freqpoly(
   col_use,
   since_first = FALSE,
   binwidth = 365,
-  preprints = FALSE
+  preprints = TRUE
 )
 }
 \arguments{
@@ -29,7 +29,8 @@ appeared.}
 
 \item{binwidth}{Width of bins for the histogram in days.}
 
-\item{preprints}{Logical, whether preprints should be included.}
+\item{preprints}{Logical, whether preprints should be included. Defaults to
+`TRUE` to include preprints.}
 }
 \value{
 A ggplot2 object

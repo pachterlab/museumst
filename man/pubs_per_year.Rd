@@ -32,7 +32,8 @@ the histogram.}
 
 \item{binwidth}{Width of bins for the histogram in days.}
 
-\item{preprints}{Logical, whether preprints should be included.}
+\item{preprints}{Logical, whether preprints should be included. Defaults to
+`TRUE` to include preprints.}
 
 \item{n_top}{Number of categories with the most publications to plot in facets;
 the other categories are lumped into "other".}
@@ -49,7 +50,6 @@ facetting.}
 A ggplot2 object.
 }
 \description{
-Plot bar plot of the number of publications per year. Preprints are excluded
-as the dates are incoherent with those for published papers. I find facetting
+Plot bar plot of the number of publications per year. I find facetting
 makes the plot easier to read than filling with different colors.
 }

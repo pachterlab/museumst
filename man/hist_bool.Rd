@@ -20,7 +20,8 @@ if faceting by those. If facetting, then a column whose name is the value in
 
 \item{binwidth}{Width of bins for the histogram in days.}
 
-\item{preprints}{Logical, whether preprints should be included.}
+\item{preprints}{Logical, whether preprints should be included. Defaults to
+`TRUE` to include preprints.}
 }
 \value{
 A ggplot2 object

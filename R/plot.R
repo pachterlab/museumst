@@ -106,8 +106,7 @@ plot_timeline <- function(events_df, ys, description_width = 20,
 
 #' Number of publications per year
 #'
-#' Plot bar plot of the number of publications per year. Preprints are excluded
-#' as the dates are incoherent with those for published papers. I find facetting
+#' Plot bar plot of the number of publications per year. I find facetting
 #' makes the plot easier to read than filling with different colors.
 #'
 #' @param pubs A data frame with at least these columns:
@@ -122,7 +121,8 @@ plot_timeline <- function(events_df, ys, description_width = 20,
 #' @param fill_by Name of a column of a categorical variable with which to color
 #' the histogram.
 #' @param binwidth Width of bins for the histogram in days.
-#' @param preprints Logical, whether preprints should be included.
+#' @param preprints Logical, whether preprints should be included. Defaults to
+#' `TRUE` to include preprints.
 #' @param n_top Number of categories with the most publications to plot in facets;
 #' the other categories are lumped into "other".
 #' @param n_top_fill Number of categories with the most publications to be
@@ -805,6 +805,7 @@ hist_bool <- function(pubs, col_use, binwidth = 365, preprints = FALSE) {
 #' @importFrom tidyr complete
 #' @importFrom ggplot2 scale_x_continuous
 #' @importFrom rlang quo_name
+#' @importFrom stringr str_to_sentence
 #' @export
 hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, n_top = Inf,
                            binwidth = 365, preprints = FALSE) {
@@ -815,7 +816,8 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, n_top = Inf
       filter(!journal %in% c("bioRxiv", "arXiv"))
   }
   pubs <- pubs %>%
-    mutate(v = !!col_use)
+    mutate(v = !!col_use,
+           date_bin = cut(date_published, paste(binwidth, "days"), right = FALSE))
   if (!is.null(facet_by)) {
     pubs <- pubs %>%
       mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top,
@@ -825,14 +827,21 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, n_top = Inf
       pubs <- pubs %>%
         mutate(facets = fct_relevel(facets, "Other", after = Inf))
     }
+    pubs <- pubs %>% group_by(v, facets, date_bin)
+  } else {
+    pubs <- pubs %>% group_by(v, date_bin)
   }
-  p <- ggplot(pubs, aes(date_published)) +
-    geom_histogram(aes(fill = 'all'), alpha = 0.7, fill = "gray90",
-                   data = select(pubs, -v), binwidth = binwidth) +
-    geom_freqpoly(aes(color = v), binwidth = binwidth) +
+  pubs <- pubs %>%
+    count() %>%
+    mutate(date_bin = as.Date(date_bin))
+  p <- ggplot(pubs, aes(date_bin, n)) +
+    geom_col(aes(fill = 'all'), alpha = 0.7,
+             fill = "gray90", width = 1, data = select(pubs, -v)) +
+    geom_line(aes(color = v)) +
     scale_y_continuous(breaks = breaks_pretty(), expand = expansion(c(0, 0.05))) +
     scale_x_date(breaks = breaks_pretty(10)) +
-    scale_color_brewer(name = quo_name(col_use), palette = "Set1", na.value = "gray50") +
+    scale_color_brewer(name = str_to_sentence(quo_name(col_use)),
+                       palette = "Set1", na.value = "gray50") +
     theme(panel.grid.minor = element_blank(), legend.position = "top") +
     labs(y = "count", x = "date published")
   if (!is.null(facet_by)) {
@@ -883,7 +892,7 @@ test_year_bool <- function(pubs, col_use, preprints = FALSE) {
 #' @importFrom ggplot2 scale_color_brewer geom_freqpoly scale_fill_discrete
 #' @export
 era_freqpoly <- function(pubs, col_use, since_first = FALSE, binwidth = 365,
-                         preprints = FALSE) {
+                         preprints = TRUE) {
   journal <- date_published <- days_since_first <- NULL
   col_use <- enquo(col_use)
   if (!preprints) {
@@ -891,18 +900,31 @@ era_freqpoly <- function(pubs, col_use, since_first = FALSE, binwidth = 365,
       filter(!journal %in% c("bioRxiv", "arXiv"))
   }
   if (since_first) {
-    days_from_start <- pubs %>%
+    df_plt <- pubs %>%
       group_by(!!col_use) %>%
       mutate(days_since_first = as.numeric(date_published - min(date_published)))
-    p <- ggplot(days_from_start, aes(days_since_first)) +
+    breaks_use <- seq(0, max(df_plt$days_since_first) + binwidth, by = binwidth)
+    df_plt <- df_plt %>%
+      mutate(date_bin = cut(days_since_first, breaks_use, right = FALSE,
+                            labels = FALSE)) %>%
+      group_by(!!col_use, date_bin) %>%
+      count() %>%
+      mutate(x = breaks_use[date_bin])
+    p <- ggplot(df_plt, aes(x, n)) +
       labs(x = "Days since the first publication")
   } else {
-    p <- ggplot(pubs, aes(date_published)) +
+    df_plt <- pubs %>%
+      mutate(x = cut(date_published, paste(binwidth, "days"), right = FALSE)) %>%
+      group_by(!!col_use, x) %>%
+      count() %>%
+      mutate(x = as.Date(x))
+    p <- ggplot(df_plt, aes(x, n)) +
       labs(x = "Date published")
   }
   p <- p +
-    geom_freqpoly(binwidth = binwidth, aes(color = !!col_use)) +
-    scale_color_brewer(name = quo_name(col_use), palette = "Set1", na.value = "gray50") +
+    geom_line(aes(color = !!col_use)) +
+    scale_color_brewer(name = str_to_sentence(quo_name(col_use)),
+                       palette = "Set1", na.value = "gray50") +
     labs(y = "Number of publications")
   p
 }
