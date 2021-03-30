@@ -444,6 +444,7 @@ pubs_on_map <- function(pubs, city_gc,
     count(!!!syms(vars_count))
   inst_count <- inst_count %>%
     left_join(city_gc, by = c("country", "state/province", "city"))
+  suppressWarnings(sf::st_crs(inst_count) <- 4326)
   country <- geometry <- NULL
   if (zoom == "world") {
     map_use <- rnaturalearth::ne_countries(scale = "small", returnclass = "sf")
@@ -452,6 +453,8 @@ pubs_on_map <- function(pubs, city_gc,
     map_use <- sf::st_transform(map_use, robin)
     inst_count <- inst_count %>%
       mutate(geometry = sf::st_transform(geometry, robin))
+    # Work around an issue with gdal backward compatibility
+    suppressWarnings(sf::st_crs(one_world_small) <- 4326)
     map_all <- sf::st_transform(one_world_small, robin)
   } else if (zoom == "europe") {
     map_use <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
@@ -461,6 +464,7 @@ pubs_on_map <- function(pubs, city_gc,
       mutate(geometry = sf::st_transform(geometry, crs = crs_europe))
     # project on European transformation
     map_use <- sf::st_transform(map_use, crs = crs_europe)
+    suppressWarnings(sf::st_crs(one_world_medium) <- 4326)
     map_all <- sf::st_transform(one_world_medium, crs = crs_europe)
   } else if (zoom == "usa") {
     map_use <- na_w_pop
@@ -469,6 +473,7 @@ pubs_on_map <- function(pubs, city_gc,
       filter(country %in% c("USA", "US", "United States",
                             "United States of America", "Canada", "Mexico")) %>%
       mutate(geometry = sf::st_transform(geometry, crs = crs_usa))
+    suppressWarnings(sf::st_crs(one_world_medium) <- 4326)
     map_all <- sf::st_transform(one_world_medium, crs = crs_usa)
   }
   if (max(inst_count$n, na.rm = TRUE) < 4) {
