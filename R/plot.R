@@ -442,9 +442,9 @@ pubs_on_map <- function(pubs, city_gc,
   }
   inst_count <- pubs %>%
     count(!!!syms(vars_count))
+  suppressWarnings(sf::st_crs(city_gc) <- 4326)
   inst_count <- inst_count %>%
     left_join(city_gc, by = c("country", "state/province", "city"))
-  suppressWarnings(sf::st_crs(inst_count) <- 4326)
   country <- geometry <- NULL
   if (zoom == "world") {
     map_use <- rnaturalearth::ne_countries(scale = "small", returnclass = "sf")
