@@ -707,20 +707,21 @@ knn_graph <- makeKNNGraph(ac_vectors_select, k = 15)
 ```
 
 ```{r}
+set.seed(2021)
 clusts <- cluster_louvain(knn_graph)
 ```
 
 ```{r}
 clusts_df <- tibble(label = rownames(ac_vectors_select),
                     cluster = clusts$membership)
-mds_plt <- mds_plt %>% 
+mds_plt2 <- mds_plt %>% 
   left_join(clusts_df, by = "label")
-mds_plt <- mds_plt %>% 
+mds_plt2 <- mds_plt2 %>% 
   mutate(cluster = factor(cluster, 1:9))
 ```
 
 ```{r}
-mds_plt %>% 
+mds_plt2 %>% 
   ggplot(aes(X1, X2, color = cluster)) +
   geom_point() +
   geom_text_repel(aes(label = label), segment.alpha = 0.3, max.overlaps = Inf)
@@ -729,7 +730,7 @@ mds_plt %>%
 Here both the clustering and the MDS separate biological terms from technical terms. The magenta cluster is for technical words, while the other clusters are more biological.
 
 ```{r}
-mds_plt %>% 
+mds_plt2 %>% 
   ggplot(aes(X3, X4, color = cluster)) +
   geom_point() +
   geom_text_repel(aes(label = label), segment.alpha = 0.3, max.overlaps = Inf)
@@ -745,9 +746,10 @@ textplot_network(fcm2, min_freq = 0.9, vertex_labelsize = log((rowSums(fcm2) + 1
 ```
 
 ```{r}
-ac_umap <- as.data.frame(umap(ac_vectors[rownames(ac_vectors) %in% mds_plt$label,]))
-ac_umap$label <- rownames(ac_vectors[rownames(ac_vectors) %in% mds_plt$label,])
-ac_umap$cluster <- mds_plt$cluster
+set.seed(2021)
+ac_umap <- as.data.frame(umap(ac_vectors[rownames(ac_vectors) %in% mds_plt2$label,]))
+ac_umap$label <- rownames(ac_vectors[rownames(ac_vectors) %in% mds_plt2$label,])
+ac_umap$cluster <- mds_plt2$cluster
 ```
 
 ```{r}
