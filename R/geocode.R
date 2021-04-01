@@ -29,8 +29,8 @@
     res <- XML::xmlChildren(XML::xmlRoot(doc))
 
     if (length(res)==0) {
-      message(paste("No results found for \"", q[k], "\".", sep="")) #if (n==1)
-      return(NULL)
+      warning(paste("No results found for \"", q[k], "\".", sep="")) #if (n==1)
+      return(c(lat = NA, lon = NA))
     }
 
     idx <- if (return.first.only) 1 else 1:length(res)
@@ -149,7 +149,7 @@ geocode_first_time <- function(sheet, cache = TRUE, cache_location = ".", ...) {
 #' @importFrom stringr str_remove
 #' @importFrom utils download.file
 #' @export
-geocode_inst_city <- function(sheet, cache = TRUE, cache_location = ".") {
+geocode_inst_city <- function(sheet, cache = TRUE, cache_location = ".", ...) {
   city <- NULL
   if (cache) {
     cache_location <- normalizePath(cache_location, mustWork = FALSE)
@@ -159,22 +159,22 @@ geocode_inst_city <- function(sheet, cache = TRUE, cache_location = ".") {
     fn_inst <- system.file("geocode_cache.rds", package = "museumst")
     if (first_time || file.mtime(fn_inst) > file.mtime(fn)) {
       file.copy(fn_inst, fn)
-      return(readRDS(fn))
-    } else {
-      # Get existing cache
-      city_gc <- readRDS(fn)
-      sheet <- sheet %>%
-        filter(!is.na(city))
-      # Check if there's new city
-      sheet_city <- sheet %>%
-        anti_join(city_gc, by = c("country", "state/province", "city"))
-      if (nrow(sheet_city) > 0) {
-        city_gc2 <- geocode_city(sheet_city)
-        city_gc <- rbind(city_gc, city_gc2)
-        message("Added ", nrow(sheet_city), " new cities to cache.")
-      }
-      return(city_gc)
     }
+    # Get existing cache
+    city_gc <- readRDS(fn)
+    sheet <- sheet %>%
+      filter(!is.na(city))
+    # Check if there's new city
+    sheet_city <- sheet %>%
+      anti_join(city_gc, by = c("country", "state/province", "city")) %>%
+      select(country, `state/province`, city) %>%
+      distinct()
+    if (nrow(sheet_city) > 0) {
+      city_gc2 <- geocode_city(sheet_city, ...)
+      city_gc <- rbind(city_gc, city_gc2)
+      message("Added ", nrow(sheet_city), " new cities to cache.")
+    }
+    return(city_gc)
   } else {
     geocode_first_time(sheet, cache = FALSE)
   }
