@@ -259,7 +259,8 @@ I think in the first trial, I'll only use unigrams, do stem the words, do remove
 What are the collocations, i.e. common phrases? 
 ```{r}
 ac_col <- tokens(ac, split_hyphens = TRUE, remove_symbols = TRUE) %>% 
-  tokens_remove(c(stopwords(), "sup")) %>% 
+  tokens_remove(c(stopwords(), "sup", "alt")) %>% 
+  tokens_remove(c("^c_", "^m_", "^o_"), valuetype = "regex") %>% 
   tokens_wordstem() %>% 
   textstat_collocations(min_count = 20, size = 2:4) %>% 
   filter(count_nested < count) %>% 
@@ -272,8 +273,7 @@ ac_col
 
 OK, now I know which phrases are common. While many of the phrases here are relevant and are usually used as if they were words, some are not, so I'll use a list of phrases based on my background.
 ```{r}
-phrases <- c("gene express", "laser captur microdissect", "express profil", "differenti express", "microarray analysi", "laser microdissect", "cell type", "epitheli cell", "cancer cell", "cdna microarray", "cell popul", "prostat cancer", "breast cancer", "polymeras chain reaction", "transcript factor", "cell line", "signal pathway", "growth factor", "tumor cell", "protein express", "lymph node", "situ hybrid", "candid gene", "colorect cancer", "cell cycl", "tissu section", "extracellular matrix", "tissu microarray", "singl cell", "motor neuron", "pathway analysi", "RNA sequenc", "stromal cell", "cell prolifer", "colon cancer", "endotheli cell", "gene ontolog", "therapeut target", "cell death", "dentat gyrus", "alzheimer diseas", "squamous cell carcinoma", "spinal cord", "ovarian cancer", "progenitor cell", "immun respons", "western blot", "type 2", "hierarch cluster", "signal transduct", "growth plate", "quantit polymeras chain reaction", "breast carcinoma", "frozen tissu", "pyramid cell", "formalin fix", "paraffin embed", "arabidopsi thaliana", "real time polymeras chain reaction", "development stage", "breast tumor", "central nervous system", "time point", "plant tissu", "mass spectrometri", "revers transcriptas", "fold chang", "fals discoveri rate", "linear amplif", "cell adhes", "t cell", "b cell", "transform growth factor", "neurodegen diseas", "amino acid", "lung cancer", "gene set enrich analysi")
-phrases <- str_split(phrases, pattern = " ", simplify = FALSE)
+phrases <- str_split(ac_col$collocation, pattern = " ", simplify = FALSE)
 ```
 
 ```{r}
@@ -282,8 +282,9 @@ ac_tokens <- tokens(ac, remove_punct = TRUE,
                     split_hyphens = TRUE) %>% 
   tokens_tolower(keep_acronyms = TRUE) %>% 
   tokens_remove(c(stopwords(), "laser", "capture", "microdissection", "use", 
-                  "using", "used", "uses", "gene", "genes", "lcm", "sup", "lmd",
-                  "express", "expressed", "expression", "cell", "cells", "tissu")) %>% 
+                  "using", "used", "uses", "LCM", "sup", "LMD", "gene", "genes",
+                  "width", "height", "src", "figdir", "alt")) %>% 
+  tokens_remove(c("^c_", "^m_", "^o_"), valuetype = "regex") %>% 
   tokens_wordstem() %>% 
   tokens_compound(phrases)
 ```
@@ -298,7 +299,7 @@ ac_dfm <- dfm(ac_tokens)
 ```
 
 ```{r}
-ac_dfm2 <- dfm_trim(ac_dfm, min_docfreq = 0.002, docfreq_type = "prop")
+ac_dfm2 <- dfm_trim(ac_dfm, min_docfreq = 0.001, docfreq_type = "prop")
 ```
 
 Here spectral means using NMF for initialization. I debated for a while whether I should use the covariates. I eventually decided that I should. Otherwise it's just an intercept. At worst the effects of the covariates are not significant. But I do think some of the covariates are relevant to topic prevalence, such as journal -- the journal Plant Cell obviously is about plants and not about human cancer. OK, it seems that adding the journal covariate only hurts the held out likelihood whether I lump low frequency journals into "Other" or not, so I'll not use it. I lumped cities with fewer than 5 publications into "Other", since using smaller numbers hurts the held-out likelihood, but I still do want to see the effects of city so I don't want to lump too much. Over 80% of cities and about half of publications are now in "Other", so this only shows the effects of the top 15% or so cities.
@@ -317,7 +318,7 @@ plot_k_result(k_result2)
 Looks like the number of topics should be 25 to 40 according to the residuals, but held-out likelihood and semantic coherence. suggest a smaller number. The "residuals" here means dispersion of the residuals, and ideally it should be 1. 
 
 ```{r}
-plot_ec(k_result2, seq(20, 60, by = 10))
+plot_ec(k_result2, seq(30, 60, by = 10))
 ```
 
 As expected, fewer topics results into higher semantic coherence and lower exclusivity. This is really a trade off. Sort of a compromise, here I choose the model with K = 50. Since I have held out part of the data when choosing K, I'll use this K to fit the model with the full data.
@@ -331,17 +332,17 @@ stm_res <- stm(ac_dfm2, K = 50, prevalence = ~ date_num + city_eff,
 plot(stm_res)
 ```
 
-```{r}
-labelTopics(stm_res, c(23, 25, 28, 10, 20))
-```
-
-Upon manual inspection, 40 topics seem to give more reasonable results.
+Upon manual inspection, 50 topics, with the spline for date, seem to give more reasonable results.
 ```{r}
 saveRDS(k_result2, "k_result_lcm.rds")
 saveRDS(stm_res, "stm_res_lcm.rds")
 ```
 
 Tidyverse version: Again, I'm copying and pasting code from Julia Silge's blog. I learnt a lot about text mining from her. However, I don't like her colorful barcharts, so I changed her code to make the lollipop plot here.
+
+```{r}
+findThoughts(stm_res, lcm_abstracts$abstract, 50, n = 10, thresh = 0.9)
+```
 
 ```{r, fig.width=6, fig.height=9}
 td_beta <- tidy(stm_res)
@@ -364,64 +365,65 @@ td_beta %>%
        subtitle = "Different words are associated with different topics")
 ```
 
-1. Diabetes
-2. Biomechanics and morphogenesis
-3. Cancer progression
-4. Plant roots
-5. Connective tissues and ECM
-6. Eye lens
-7. Neurological disorders, especially Alzheimer's
-8. Prostate cancer, though more generally gene regulation in cancer
-9. Blood and lymphatic vessels
-10. Cancer associated stroma
-11. Cancer signaling proteins
-12. Bone growth plate
-13. Plant reproduction
-14. Development, especially when there're epitielial cells
-15. Neuroscience
-16. Not a good topic. Liver diseases, especially HCC, but also endometriosis
-17. Pancreas and lacrimal gland
-18. Lung development and diseases
-19. Plant organ development and shedding
-20. A bad one, so I'm not sure. Some entries are about dendritic spines but there're lots of other stuff as well.
-21. Neural circuits, though there's some other stuff
-22. Cancer genome abnormalities and epigenomics
-23. Multi-omics, especially in cancer
-24. Parasites, hybrids (especially plants), and symbiosis
-25. Combination of scRNA-seq with spatial technologies
-26. Ecology and evolution, especially plants
-27. Mutations and rearrangements in genes expressed by cancer cells
-28. Quantitative analyses of cancer molecular biology
-29. Transcript amplification
-30. Neuroscience, especially memory and behavior
-31. Not a very good one. Fertility, aging, mitochondria
-32. Gene sets from DE
-33. Nitrogen fixation in plants
-34. The ear, and somehow, circadian rhythm
-35. ALS and spinal muscular atrophy, neurodegenerative diseases affecting motor neurons
-36. miRNAs, especially in cancer
-37. Hypothalamus and appetite
-38. DLPFC, especially when it comes to schizophrenia
-39. Skin diseases
-40. Inflammatory diseases, especially atherosclerosis
-41. Clinical oncology
-42. Myocardium, especially myocardial infarction
-43. Genetic screens. Someone DNA methylation also showed up though genetics is more dominant.
-44. Tumor heterogeneity and microenvironment, especially in PDAC
-45. Technical issues in isolation of tissue with LCM
-46. Development, and somehow, smooth muscle, probably because some entries are about development of muscles
-47. Quantitative analyses, especially in the hippocampus
-48. Retina, though there's some other stuff as well
-49. Cancer proteomics
-50. iPSC
+1. Stem cell and fetal development
+2. GWAS, genetic screens, and genetics of complex phenotypes
+3. Biomechanics, ECM, eye lens, muscles, and morphogenesis
+4. Data analysis, especially of RNA-seq, but also of 3D genome structure and microarray
+5. miRNAs in cancer
+6. Quantitative analyses of cancer, clinical and bioinformatic
+7. Hippocampus and Alzheimer's disease, sometimes related to Down syndrome
+8. Prostate cancer and other stuff in molecular biology and biochemistry, probably because some prostate cancer papers have an emphasis on molecular biology
+9. Plant embryos, plant development, and some stuff about evolution and ecology related to plants
+10. Proteomics, especially in cancer
+11. Cancer progression and diagnostics, especially lung cancer
+12. Inflammation and immunology, especially in skin diseases
+13. Breast cancer and liver cancer, with an emphasis in data analysis
+14. Neural circuitry, neural plasticity, brain injury, and behavior
+15. Plant gamitogenesis and reproduction
+16. Spasmolytic polypeptide-expressing metaplasia (SPEM), oncogenes, KRAS
+17. Endometrium and implantation. Somehow the top 2 entries are about hearing loss. Why? Epithelium?
+18. Cell cycle, also hepatic zonation and circadian rhythm (the latter is also a cycle, so...)
+19. Neurons, especially dopaminergic
+20. Tumor stroma and microenvironment
+21. Plant roots
+22. Intestine, especially microbiome and immune response
+23. Hypothalamus, obesity, and appetite
+24. PDAC, and some stuff about glioma and prostate cancer
+25. ALS, and other neurodegenerative diseases affecting motor neurons
+26. Epigenetics
+27. Tumor single cell profiling and cellular heterogeneity
+28. Tissue isolation and preparation
+29. Bone growth plate, especially recovery after radiotherapy, and some other stuff like oocytes, glaucoma, and epithelial injury
+30. Pancreas and diabetes, especially T2D
+31. Lymphocytes, lymphatic and blood vessels
+32. Prefrontal cortex and schizophrenia
+33. Synapses, dendritic spines, neuron potentiation, sometimes related to memory
+34. Cancer genomics, mutations, and phylogeny
+35. Bone formation, but also some other stuff about cancer and kidneys
+36. Neurodegenerative diseases, Alzheimer's, Parkinson's, and multiple system atrophy
+37. Spatial single cell techniques and imaging
+38. Connective tissues and ECM, and some other stuff about circadian rhythms
+39. Stem cells and development
+40. Plant seed development and reproduction
+41. RNA extraction and amplification, especially in microarray, but also in RNA-seq
+42. Lots of different stuff about epithelium
+43. Plant leaves, but also other stuff about gamitogenesis
+44. Cancer pathway analyses and molecular and cellular mechanisms
+45. Plant nitrogen fixation and soil microbiome
+46. Lots of different stuff related to fibrosis and fibroblasts, such as in lung diseases and graft rejection
+47. Neuron morphogenesis, axon guidance, somehow also angiogenesis, protein signaling
+48. Inflammation, immune response, especially in atherosclerosis, though there's some other stuff about blood vessels
+49. Model organisms and in vitro model systems
+50. Intrahepatic cholangiocarcinoma (ICC)
 
 ```{r}
 topic_types <- tribble(~ category, ~ topic,
-                       "Cancer", c(3,8,10,11,22,23,27,28,36,41,44,49),
-                       "Botany", c(4,13,19,24,26,33),
-                       "Neuroscience", c(7,15,21,30,35,37,38,47),
-                       "Development", c(2,12,14,18,46),
-                       "Technical", c(25,29,45))
+                       "Cancer", c(5,6,8,10,11,13,16,20,24,27,34,44,50),
+                       "Botany", c(9,15,21,40,43,45),
+                       "Neuroscience", c(7,14,19,23,25,32,33,36,47),
+                       "Development", c(1,3,17,18,29,35,39),
+                       "Immunology", c(12,22,48),
+                       "Technical", c(4,28,37,41))
 ```
 
 ```{r}
@@ -488,8 +490,12 @@ year_means <- year_theta_long %>%
 ```
 
 ```{r}
+topics_insp <- as.character(c(11,14,15,29,41,45))
+```
+
+```{r}
 year_means %>% 
-  filter(topic %in% as.character(c(3, 7, 14, 23, 38, 49))) %>% 
+  filter(topic %in% topics_insp) %>% 
   ggplot(aes(date_bin, means)) +
   geom_line() +
   facet_wrap(~ topic) +
@@ -506,7 +512,7 @@ year_counts <- year_theta_long %>%
 
 ```{r}
 year_counts %>% 
-  filter(topic %in% as.character(c(3, 7, 14, 23, 38, 49))) %>% 
+  filter(topic %in% topics_insp) %>% 
   ggplot(aes(date_bin, n)) +
   geom_line() +
   facet_wrap(~ topic) +
@@ -514,7 +520,7 @@ year_counts %>%
   geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs", k = 3))
 ```
 
-Here apparently the decline of the proportion of topic 3 and 14 may be in part due to growth of other topics. Growth of 23 and 38 seem more drastic when considering the counts, maybe also because other topics are growing.
+When the count is used, the increases became more prominent while the decreases and bulges became less prominent. Probably that means the drastic increase in the number of papers of some topics led to decline in proportion in other topics. I should show this plot in the book.
 
 ```{r}
 effs_summ <- tidy(effs)
@@ -529,37 +535,32 @@ effs_summ %>% arrange(p.value)
 
 These are the significant ones:
 
-2. Biomechanics and morphogenesis
-3. Cancer progression
-5. Connective tissues and ECM
-7. Neurological disorders, especially Alzheimer's
-8. Prostate cancer, though more generally gene regulation in cancer
-12. Bone growth plate
-14. Development, especially when there're epitielial cells
-15. Neuroscience
-16. Not a good topic. Liver diseases, especially HCC, but also endometriosis
-17. Pancreas and lacrimal gland
-21. Neural circuits, though there's some other stuff
-22. Cancer genome abnormalities and epigenomics
-23. Multi-omics, especially in cancer
-24. Parasites, hybrids (especially plants), and symbiosis
-25. Combination of scRNA-seq with spatial technologies
-26. Ecology and evolution, especially plants
-27. Mutations and rearrangements in genes expressed by cancer cells
-28. Quantitative analyses of cancer molecular biology
-29. Transcript amplification
-30. Neuroscience, especially memory and behavior
-31. Not a very good one. Fertility, aging, mitochondria
-33. Nitrogen fixation in plants
-34. The ear, and somehow, circadian rhythm
-38. DLPFC, especially when it comes to schizophrenia
-43. Genetic screens. Someone DNA methylation also showed up though genetics is more dominant.
-44. Tumor heterogeneity and microenvironment, especially in PDAC
-45. Technical issues in isolation of tissue with LCM
-46. Development, and somehow, smooth muscle, probably because some entries are about development of muscles
-47. Quantitative analyses, especially in the hippocampus
-49. Cancer proteomics
-50. iPSC
+2. GWAS, genetic screens, and genetics of complex phenotypes
+4. Data analysis, especially of RNA-seq, but also of 3D genome structure and microarray
+6. Quantitative analyses of cancer, clinical and bioinformatic
+8. Prostate cancer and other stuff in molecular biology and biochemistry, probably because some prostate cancer papers have an emphasis on molecular biology
+9. Plant embryos, plant development, and some stuff about evolution and ecology related to plants
+10. Proteomics, especially in cancer
+11. Cancer progression and diagnostics, especially lung cancer
+13. Breast cancer and liver cancer, with an emphasis in data analysis
+14. Neural circuitry, neural plasticity, brain injury, and behavior
+18. Cell cycle, also hepatic zonation and circadian rhythm (the latter is also a cycle, so...)
+19. Neurons, especially dopaminergic
+27. Tumor single cell profiling and cellular heterogeneity
+28. Tissue isolation and preparation
+29. Bone growth plate, especially recovery after radiotherapy, and some other stuff like oocytes, glaucoma, and epithelial injury
+33. Synapses, dendritic spines, neuron potentiation, sometimes related to memory
+34. Cancer genomics, mutations, and phylogeny
+36. Neurodegenerative diseases, Alzheimer's, Parkinson's, and multiple system atrophy
+37. Spatial single cell techniques and imaging
+38. Connective tissues and ECM, and some other stuff about circadian rhythms
+39. Stem cells and development
+40. Plant seed development and reproduction
+41. RNA extraction and amplification, especially in microarray, but also in RNA-seq
+43. Plant leaves, but also other stuff about gamitogenesis
+45. Plant nitrogen fixation and soil microbiome
+47. Neuron morphogenesis, axon guidance, somehow also angiogenesis, protein signaling
+49. Model organisms and in vitro model systems
 
 # Topics per city
 
@@ -591,7 +592,7 @@ effs_df_loc <- effs_df_loc %>%
 
 ```{r}
 effs_df_loc %>% 
-  filter(topic == 39) %>% 
+  filter(topic == 45) %>% 
   mutate(value = fct_reorder(value, mid, .desc = FALSE)) %>% 
   top_n(10, mid) %>% 
   ggplot(aes(y = value)) +
@@ -603,7 +604,7 @@ heatmap(stm_res$theta)
 ```
 
 ```{r}
-topic_cor <- topicCorr(stm_res)
+topic_cor <- topicCorr(stm_res, method = "huge")
 plot(topic_cor)
 ```
 
