@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Geocode addresses and institutions with Google's API — geocode_address • museumst</title>
+<title>Color facet strips by a variable — plot_facets_color • museumst</title>
 
 
 <!-- jquery -->
@@ -39,9 +39,8 @@
 
 
 
-<meta property="og:title" content="Geocode addresses and institutions with Google's API — geocode_address" />
-<meta property="og:description" content="I'm using Google's API even though it's not free because it works better than
-OpenStreetMap when it comes to addresses and institution names." />
+<meta property="og:title" content="Color facet strips by a variable — plot_facets_color" />
+<meta property="og:description" content="Color facet strips by a variable" />
 
 
 
@@ -119,36 +118,39 @@ OpenStreetMap when it comes to addresses and institution names." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Geocode addresses and institutions with Google's API</h1>
+    <h1>Color facet strips by a variable</h1>
     
-    <div class="hidden name"><code>geocode_address.Rd</code></div>
+    <div class="hidden name"><code>plot_facets_color.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>I'm using Google's API even though it's not free because it works better than
-OpenStreetMap when it comes to addresses and institution names.</p>
+    <p>Color facet strips by a variable</p>
     </div>
 
-    <pre class="usage"><span class='fu'>geocode_address</span><span class='op'>(</span><span class='va'>df</span>, <span class='va'>address_col</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>plot_facets_color</span><span class='op'>(</span><span class='va'>p</span>, <span class='va'>strip_color</span>, <span class='va'>palette</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>df</th>
-      <td><p>A data frame that has a column for addresses.</p></td>
+      <th>p</th>
+      <td><p>A ggplot object for the original facetted plot.</p></td>
     </tr>
     <tr>
-      <th>address_col</th>
-      <td><p>Column for addresses. Tidyeval is used here so it doesn't
-need to be quoted.</p></td>
+      <th>strip_color</th>
+      <td><p>Categorical column in the data for the original plot to
+use to color the facet strips. Tidyeval is used here.</p></td>
+    </tr>
+    <tr>
+      <th>palette</th>
+      <td><p>A character vector of colors. Can be named to assign each
+color to a value in `strip_color`.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A data frame with all columns of df, but with city, state, and country
-added. Only rows with valid geocoding results are returned.</p>
+    <p>Nothing, the plot is printed to device.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
