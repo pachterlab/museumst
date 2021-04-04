@@ -930,3 +930,60 @@ era_freqpoly <- function(pubs, col_use, since_first = FALSE, binwidth = 365,
     labs(y = "Number of publications")
   p
 }
+
+# From https://stackoverflow.com/a/44090582/8916916
+gtable_stack <- function(g1, g2) {
+  g1$grobs <- c(g1$grobs, g2$grobs)
+  g1$layout <- transform(g1$layout, z= z-max(z), name="g2")
+  g1$layout <- rbind(g1$layout, g2$layout)
+  g1
+}
+
+gtable_select <- function (x, ...) {
+  matches <- c(...)
+  x$layout <- x$layout[matches, , drop = FALSE]
+  x$grobs <- x$grobs[matches]
+  x
+}
+
+#' Color facet strips by a variable
+#'
+#' @param p A ggplot object for the original facetted plot.
+#' @param strip_color Categorical column in the data for the original plot to
+#'   use to color the facet strips. Tidyeval is used here.
+#' @param palette A character vector of colors. Can be named to assign each
+#'   color to a value in `strip_color`.
+#' @return Nothing, the plot is printed to device.
+#' @importFrom ggplot2 ggplotGrob
+#' @importFrom grid grid.newpage grid.draw
+#' @export
+plot_facets_color <- function(p, strip_color, palette) {
+  strip_color <- enquo(strip_color)
+  dummy <- ggplot(p$data, p$mapping) +
+    facet_wrap(vars(!!!p$facet$params$facets),
+               ncol = p$facet$params$ncol,
+               labeller = p$facet$params$labeller)  +
+    geom_rect(aes(fill = !!strip_color), xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf) +
+    theme_minimal() +
+    scale_fill_manual(values = palette)
+  if ("legend.position" %in% names(p$theme)) {
+    dummy <- dummy +
+      theme(legend.position = p$theme$legend.position)
+  }
+
+  g1 <- ggplotGrob(p)
+  g2 <- ggplotGrob(dummy)
+
+  # move dummy panels one cell up
+  panels <- grepl(pattern="panel", g2$layout$name)
+  strips <- grepl(pattern="strip-t", g2$layout$name)
+  g2$layout$t[panels] <- g2$layout$t[panels] - 1
+  g2$layout$b[panels] <- g2$layout$b[panels] - 1
+
+  new_strips <- gtable_select(g2, panels | strips)
+  # stack new strips on top of gtable
+  # ideally you'd remove the old strips, for now they're just covered
+  new_plot <- gtable_stack(g1, new_strips)
+  grid.newpage()
+  grid.draw(new_plot)
+}
