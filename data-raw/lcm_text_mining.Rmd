@@ -345,24 +345,7 @@ findThoughts(stm_res, lcm_abstracts$abstract, 50, n = 10, thresh = 0.9)
 ```
 
 ```{r, fig.width=6, fig.height=9}
-td_beta <- tidy(stm_res)
-td_beta %>%
-  group_by(topic) %>%
-  top_n(10, beta) %>%
-  ungroup() %>%
-  mutate(topic = paste0("Topic ", topic),
-         topic = fct_relevel(topic, paste0("Topic ", 1:50)),
-         term = reorder_within(term, beta, topic)) %>%
-  ggplot(aes(term, beta)) +
-  geom_segment(aes(xend = term), yend = 0, show.legend = FALSE) +
-  geom_point(color = "blue") +
-  facet_wrap(~ topic, scales = "free_y", ncol = 5) +
-  coord_flip() +
-  scale_x_reordered() +
-  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
-  labs(x = NULL, y = expression(beta),
-       title = "Highest word probabilities for each topic",
-       subtitle = "Different words are associated with different topics")
+plot_topic_words(stm_res)
 ```
 
 1. Stem cell and fetal development

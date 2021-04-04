@@ -189,3 +189,75 @@ plot_ec <- function(k_result, Ks) {
          title = "Comparing exclusivity and semantic coherence",
          subtitle = "Models with fewer topics have higher semantic coherence for more topics, but lower exclusivity")
 }
+
+#' Plot probability of each word in each topic
+#'
+#' Adapted from Julia Silge's blog.
+#'
+#' @inheritParams pubs_on_map
+#' @param stm_res A `STM` object.
+#' @param n_top Number of top words to show per topic.
+#' @return A ggplot object
+#' @export
+plot_topic_words <- function(stm_res, n_top = 10, ncol = 5) {
+  .pkg_check("tidytext")
+  td_beta <- tidytext::tidy(stm_res)
+  td_beta %>%
+    group_by(topic) %>%
+    top_n(n_top, beta) %>%
+    ungroup() %>%
+    mutate(topic = paste0("Topic ", topic),
+           topic = fct_relevel(topic, paste0("Topic ",
+                                             seq_len(ncol(stm_res$theta)))),
+           term = tidytext::reorder_within(term, beta, topic)) %>%
+    ggplot(aes(beta, term)) +
+    geom_segment(aes(yend = term), xend = 0, show.legend = FALSE) +
+    geom_point(color = "blue") +
+    facet_wrap(~ topic, scales = "free_y", ncol = ncol) +
+    tidytext::scale_y_reordered() +
+    scale_x_continuous(expand = expansion(mult = c(0, 0.05))) +
+    labs(x = NULL, y = expression(beta),
+         title = "Highest word probabilities for each topic",
+         subtitle = "Different words are associated with different topics")
+}
+
+#' Plot expected topic proportion in the corpus
+#'
+#' This is equivalent to `plot(stm_res, type = "symmary")`, but it uses `ggplot2`
+#' and looks nicer. Adapted from Julia Silge's blog.
+#'
+#' @inheritParams plot_topic_words
+#' @param x_max Max in the x axis so all words will show in the plot.
+#' @return A ggplot object
+#' @importFrom scales label_percent
+#' @export
+plot_topic_prop <- function(stm_res, n_top = 5, x_max = 0.15) {
+  .pkg_check("tidytext")
+  td_beta <- tidytext::tidy(stm_res, matrix = "beta")
+  td_gamma <- tidytext::tidy(stm_res, matrix = "gamma")
+  top_terms <- td_beta %>%
+    arrange(beta) %>%
+    group_by(topic) %>%
+    top_n(5, beta) %>%
+    arrange(-beta) %>%
+    select(topic, term) %>%
+    summarise(terms = list(term)) %>%
+    mutate(terms = map(terms, paste, collapse = ", ")) %>%
+    unnest(cols = "terms")
+  gamma_terms <- td_gamma %>%
+    group_by(topic) %>%
+    summarize(gamma = mean(gamma)) %>%
+    arrange(desc(gamma)) %>%
+    left_join(top_terms, by = "topic") %>%
+    mutate(topic = reorder(topic, gamma))
+  ggplot(gamma_terms, aes(gamma, topic, label = terms)) +
+    geom_segment(aes(yend = topic), xend = 0, show.legend = FALSE) +
+    geom_point(show.legend = FALSE, color = "blue") +
+    geom_text(hjust = 0, nudge_x = 0.001) +
+    scale_x_continuous(expand = expansion(c(0, 0.05)),
+                       limits = c(0, x_max),
+                       breaks = breaks_width(0.02),
+                       labels = label_percent(drop0trailing = TRUE)) +
+    labs(y = "Topic", x = "Expected topic prevalence") +
+    theme(panel.grid.major.y = element_blank())
+}
