@@ -4,7 +4,7 @@
 \alias{geocode_inst_city}
 \title{Geocode institutions and cities}
 \usage{
-geocode_inst_city(sheet, cache = TRUE, cache_location = ".")
+geocode_inst_city(sheet, cache = TRUE, cache_location = ".", ...)
 }
 \arguments{
 \item{sheet}{The tibble read from Google Sheets, which has columns country,
