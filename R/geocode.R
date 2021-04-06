@@ -30,7 +30,7 @@
 
     if (length(res)==0) {
       warning(paste("No results found for \"", q[k], "\".", sep="")) #if (n==1)
-      return(c(lat = NA, lon = NA))
+      return(list(data.frame(query = q[k], lat = NA, lon = NA)))
     }
 
     idx <- if (return.first.only) 1 else 1:length(res)
