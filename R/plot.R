@@ -837,8 +837,8 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, n_top = Inf
     count() %>%
     mutate(date_bin = as.Date(date_bin))
   p <- ggplot(pubs, aes(date_bin, n)) +
-    geom_col(aes(fill = 'all'), alpha = 0.7,
-             fill = "gray90", width = 1, data = select(pubs, -v)) +
+    geom_col(aes(fill = 'all'), alpha = 0.7, fill = "gray90", width = binwidth,
+             data = select(ungroup(pubs), -v)) +
     geom_line(aes(color = v)) +
     scale_y_continuous(breaks = breaks_pretty(), expand = expansion(c(0, 0.05))) +
     scale_x_date(breaks = breaks_pretty(10)) +
