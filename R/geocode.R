@@ -227,6 +227,8 @@ geocode_address <- function(df, address_col) {
                             if (length(out) == 0)
                               out <- .x$long_name[.x$types == "administrative_area_level_2"]
                             if (length(out) == 0)
+                              out <- .x$long_name[.x$types == "administrative_area_level_3"]
+                            if (length(out) == 0)
                               out <- .x$long_name[.x$types == "administrative_area_level_1"]
                             if (length(out) == 0) out <- NA_character_
                             if (length(out) > 1L) out <- out[1]
