@@ -107,9 +107,11 @@ europe_countries <- c("Albania", "Andorra", "Austria", "Belgium", "Bosnia and He
 # So colors are only for the most commonly used species.
 species <- c("Mus musculus", "Drosophila melanogaster",
              "Danio rerio", "Caenorhabditis elegans", "Xenopus laevis",
-             "Ciona intestinalis", "Gallus gallus", "Arabidopsis thaliana")
+             "Ciona intestinalis", "Gallus gallus", "Arabidopsis thaliana",
+             "Sus scrofa")
 species_cols <- scales::brewer_pal(palette = "Set2")(8)
-species_cols <- c(species_cols, scales::brewer_pal(palette = "Paired")(1), "gray50")
+species_cols <- c(species_cols, scales::brewer_pal(palette = "Paired")(12)[c(12,1)],
+                  "gray50")
 names(species_cols) <- c(species, "Homo sapiens", "Other")
 usethis::use_data(species_cols)
 usethis::use_data(lang_img, species_img, na_w_pop,
