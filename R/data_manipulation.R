@@ -1,5 +1,16 @@
 # Update this manually when the copy of metadata within the package is updated
-.pkg_update_time <- "2021-03-31 18:02:50 PDT"
+.pkg_update_time <- "2021-05-11 13:00:48 PDT"
+
+#' Get the timestamp of the internal version of the metadata
+#'
+#' This is the date and time when the version of metadata inside this package
+#' was last updated. This applies the the internal geocoding cache as well.
+#'
+#' @return A string showing date, time, and timezone.
+#' @export
+cache_timestamp <- function() {
+  .pkg_update_time
+}
 
 read_metadata_fresh <- function(sheet_use) {
   date_published <- NULL
