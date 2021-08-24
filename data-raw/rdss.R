@@ -44,6 +44,21 @@ na <- na %>%
 na_w_pop <- na %>%
   mutate(geometry = sf::st_transform(geometry, crs = 2163))
 
+# Northeast Asia
+map_use1 <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf") %>%
+  filter(admin %in% c("South Korea", "North Korea", "Taiwan", "Japan",
+                      "Russia", "Vietnam", "Mongolia", "Laos"))
+ne <- ne_states("China", returnclass = "sf")
+names_use <- intersect(names(map_use1), names(ne))
+ne <- rbind(ne[,names_use], map_use1[,names_use])
+
+ne_poly <- matrix(c(145, 45, 145, 20, 105, 20, 105, 45, 145, 45),
+                  ncol = 2, byrow = TRUE)
+ne_limits <- st_polygon(list(ne_poly)) %>% st_sfc()
+ne_limits <- st_as_sf(ne_limits, crs = 4326)
+xylims_ne <- st_bbox(ne_limits)
+# The 4490 CRS doesn't seem to do anything anyway
+
 # Words to remove when plotting word cloud for department names
 institution_words <- c("institute", "institution", "school", "college",
                        "department", "division", "faculty", "center", "centre",
@@ -114,7 +129,7 @@ species_cols <- c(species_cols, scales::brewer_pal(palette = "Paired")(12)[c(12,
                   "gray50")
 names(species_cols) <- c(species, "Homo sapiens", "Other")
 usethis::use_data(species_cols)
-usethis::use_data(lang_img, species_img, na_w_pop,
+usethis::use_data(lang_img, species_img, na_w_pop, ne, xylims_ne,
                   europe_countries, xylims, xylims_us, internal = TRUE,
                   overwrite = TRUE)
 

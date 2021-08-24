@@ -47,6 +47,7 @@ Suggests:
     rmarkdown,
     rnaturalearthdata,
     rnaturalearth,
+    rnaturalearthhires,
     sf,
     stm,
     stminsights,

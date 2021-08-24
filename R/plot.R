@@ -407,7 +407,7 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
 #' @importFrom ggrepel geom_label_repel
 #' @export
 pubs_on_map <- function(pubs, city_gc,
-                        zoom = c("world", "europe", "usa"),
+                        zoom = c("world", "europe", "usa", "ne_asia"),
                         plot = c("point", "bin2d", "hexbin"),
                         facet_by = NULL, n_top = Inf,
                         ncol = 3, label_insts = TRUE, label_cities = FALSE,
@@ -477,6 +477,12 @@ pubs_on_map <- function(pubs, city_gc,
       mutate(geometry = sf::st_transform(geometry, crs = crs_usa))
     suppressWarnings(sf::st_crs(one_world_medium) <- 4326)
     map_all <- sf::st_transform(one_world_medium, crs = crs_usa)
+  } else if (zoom == "ne_asia") {
+    map_use <- ne
+    inst_count <- inst_count %>%
+      filter(country %in% c("China", "Taiwan", "Korea", "Japan", "Mongolia",
+                            "Vietnam"))
+    map_all <- one_world_medium
   }
   if (max(inst_count$n, na.rm = TRUE) < 4) {
     size_break_width <- 1
@@ -534,8 +540,16 @@ pubs_on_map <- function(pubs, city_gc,
     }
     if (zoom != "world") {
       # Limit to that box
-      xylims_use <- if (zoom == "europe") xylims else xylims_us
-      crs_use <- if (zoom == "europe") crs_europe else crs_usa
+      xylims_use <- switch (zoom,
+        europe = xylims,
+        usa = xylims_us,
+        ne_asia = xylims_ne
+      )
+      crs_use <- switch (zoom,
+        europe = crs_europe,
+        usa = crs_usa,
+        ne_asia = 4326
+      )
       p <- p +
         coord_sf(xlim = xylims_use[c("xmin", "xmax")], ylim = xylims_use[c("ymin", "ymax")],
                  crs = crs_use)
