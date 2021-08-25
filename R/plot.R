@@ -905,7 +905,8 @@ test_year_bool <- function(pubs, col_use, preprints = FALSE) {
 #' @importFrom ggplot2 after_stat
 #' @export
 era_freqpoly <- function(pubs, col_use, since_first = FALSE, binwidth = 365,
-                         preprints = TRUE) {
+                         preprints = TRUE, do_smooth = FALSE,
+                         smooth_method = NULL, smooth_formula = NULL) {
   journal <- date_published <- days_since_first <- NULL
   col_use <- enquo(col_use)
   if (!preprints) {
@@ -916,17 +917,39 @@ era_freqpoly <- function(pubs, col_use, since_first = FALSE, binwidth = 365,
     df_plt <- pubs %>%
       group_by(!!col_use) %>%
       mutate(days_since_first = as.numeric(date_published - min(date_published)))
-    breaks_use <- seq(0, max(df_plt$days_since_first) + binwidth, by = binwidth)
-    p <- ggplot(df_plt, aes(days_since_first, after_stat(count),
-                            color = !!col_use)) +
+    breaks_use <- seq(-binwidth, max(df_plt$days_since_first), by = binwidth)
+    df_plt <- df_plt %>%
+      mutate(date_bin = cut(days_since_first, breaks_use, right = TRUE,
+                            labels = FALSE)) %>%
+      group_by(!!col_use, date_bin, .drop = FALSE) %>%
+      count() %>%
+      mutate(x = breaks_use[date_bin+1],
+             is_last = x == date_bin[which.max(date_bin)])
+    p <- ggplot(df_plt, aes(x, n, color = !!col_use)) +
       labs(x = "Days since the first publication")
   } else {
-    p <- ggplot(pubs, aes(date_published, after_stat(count),
-                            color = !!col_use)) +
+    df_plt <- pubs %>%
+      mutate(x = cut(date_published, paste(binwidth, "days"), right = TRUE,
+                     include.lowest = TRUE)) %>%
+      group_by(!!col_use, x, .drop = FALSE) %>%
+      count() %>%
+      mutate(is_last = x == tail(levels(x), 1),
+             x = as.Date(x))
+    p <- ggplot(df_plt, aes(x, n, color = !!col_use)) +
       labs(x = "Date published")
   }
+  if (do_smooth) {
+    p <- p +
+      geom_smooth(data = df_plt %>% filter(!is_last), se = FALSE,
+                  method = smooth_method, formula = smooth_formula) +
+      geom_point(aes(shape = is_last)) +
+      scale_shape_manual(values = c(16, 4))
+  } else {
+    p <- p +
+      geom_line(data = df_plt %>% filter(!is_last)) +
+      geom_point(data = df_plt %>% filter(is_last), shape = 4)
+  }
   p <- p +
-    geom_line(stat = "bin", binwidth = binwidth) +
     scale_color_brewer(name = str_to_sentence(quo_name(col_use)),
                        palette = "Set1", na.value = "gray50") +
     labs(y = "Number of publications")
