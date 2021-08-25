@@ -387,7 +387,7 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
 #' @param city_gc From geocode_inst_city
 #' @param zoom Whether to plot the world map or only Europe (centered on Western
 #' Europe and some Eastern European countries are partially cropped off) or only
-#' the US.
+#' the US or only northeast Asia.
 #' @param ncol Number of columns in facetted plot.
 #' @param label_insts Logical, whether to label institutions.
 #' @param label_cities Logical, whether to label cities.
@@ -900,6 +900,10 @@ test_year_bool <- function(pubs, col_use, preprints = FALSE) {
 #' @inheritParams hist_bool
 #' @param since_first Logical. Whether to plot days after the first publication
 #' appeared.
+#' @param do_smooth Logical. Whether to plot smoothed curve for the trend rather
+#' than freqpoly.
+#' @param smooth_method Method of smoothing, passed to \code{geom_smooth}.
+#' @param smooth_formula Formula of smoothing, passed to \code{geom_smooth}.
 #' @return A ggplot2 object
 #' @importFrom ggplot2 scale_color_brewer geom_freqpoly scale_fill_discrete
 #' @importFrom ggplot2 after_stat
