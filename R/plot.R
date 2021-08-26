@@ -847,12 +847,11 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, n_top = Inf
     pubs <- pubs %>% group_by(v)
   }
   p <- ggplot(pubs, aes(date_published, after_stat(count))) +
-    geom_histogram(aes(fill = 'all'), alpha = 0.7, fill = "gray90", binwidth = binwidth,
-                   data = select(ungroup(pubs), -v)) +
-    geom_line(aes(color = v), stat = "bin", binwidth = binwidth) +
+    geom_histogram(aes(fill = v), alpha = 0.7, binwidth = binwidth) +
+    #geom_line(aes(color = v), stat = "bin", binwidth = binwidth) +
     scale_y_continuous(breaks = breaks_pretty(), expand = expansion(c(0, 0.05))) +
     scale_x_date(breaks = breaks_pretty(10)) +
-    scale_color_brewer(name = str_to_sentence(quo_name(col_use)),
+    scale_fill_brewer(name = str_to_sentence(quo_name(col_use)),
                        palette = "Set1", na.value = "gray50") +
     theme(panel.grid.minor = element_blank(), legend.position = "top") +
     labs(y = "count", x = "date published")
