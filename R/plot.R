@@ -141,7 +141,7 @@ plot_timeline <- function(events_df, ys, description_width = 20,
 #' @importFrom scales breaks_pretty
 #' @export
 pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
-                          preprints = FALSE, n_top = Inf, n_top_fill = Inf,
+                          preprints = TRUE, n_top = Inf, n_top_fill = Inf,
                           sort_by = c("first_appeared", "count", "recent_count")) {
   journal <- date_published <- facets <- NULL
   sort_by <- match.arg(sort_by)
@@ -206,8 +206,6 @@ pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
           pubs <- pubs %>%
             mutate(fill = cut(!!sym(fill_by), breaks = n_top_fill))
         }
-        pubs <- pubs %>%
-          mutate(fill = fct_rev(fill))
       }
     }
   }
@@ -789,7 +787,7 @@ cat_heatmap <- function(pubs, row_var, col_var, ...) {
 #' @return A ggplot2 object
 #' @importFrom ggplot2 geom_histogram facet_grid scale_fill_brewer
 #' @export
-hist_bool <- function(pubs, col_use, binwidth = 365, preprints = FALSE) {
+hist_bool <- function(pubs, col_use, binwidth = 365, preprints = TRUE) {
   date_published <- journal <- v <- NULL
   col_use <- enquo(col_use)
   if (!preprints) {
@@ -826,7 +824,7 @@ hist_bool <- function(pubs, col_use, binwidth = 365, preprints = FALSE) {
 #' @importFrom stringr str_to_sentence
 #' @export
 hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, n_top = Inf,
-                           binwidth = 365, preprints = FALSE) {
+                           binwidth = 365, preprints = TRUE) {
   date_published <- journal <- v <- NULL
   col_use <- enquo(col_use)
   if (!preprints) {
@@ -874,7 +872,7 @@ hist_bool_line <- function(pubs, col_use, facet_by = NULL, ncol = 3, n_top = Inf
 #' @importFrom dplyr group_by summarize
 #' @importFrom stats glm
 #' @export
-test_year_bool <- function(pubs, col_use, preprints = FALSE) {
+test_year_bool <- function(pubs, col_use, preprints = TRUE) {
   journal <- NULL
   col_use <- enquo(col_use)
   if (!preprints) {
