@@ -88,6 +88,7 @@ plot_timeline <- function(events_df, ys, description_width = 20,
   axis <- seq(floor_date(min(events_df$date_published), "year"),
               ceiling_date(max(events_df$date_published), "year"),
               by = date_brks)
+  sheet_fill <- sheet_fill[names(sheet_fill) %in% unique(events_df$sheet)]
   p <- ggplot(events_df) +
     geom_point(aes(x = date_published), y = 0) +
     geom_hline(yintercept = 0) +
@@ -96,7 +97,7 @@ plot_timeline <- function(events_df, ys, description_width = 20,
                      label = lab, vjust = vjusts)) +
     scale_x_date(expand = expansion(expand_x)) +
     scale_y_continuous(expand = expansion(expand_y)) +
-    scale_fill_manual(values = sheet_fill, name = "Type", drop = FALSE) +
+    scale_fill_manual(values = sheet_fill, name = "Type") +
     theme_void() +
     annotate("point", x = axis, y = 0, shape = 3) +
     annotate("text", x = axis, y = 0, label = format(axis, "%Y"),
@@ -236,8 +237,9 @@ pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
           scale_fill_viridis_d()
       }
     } else {
+      species_cols <- species_cols[names(species_cols) %in% unique(pubs$fill)]
       p <- p +
-        scale_fill_manual(values = species_cols, name = "") +
+        scale_fill_manual(values = species_cols, name = "", drop = TRUE) +
         theme(legend.text = element_text(face = "italic"))
     }
   } else {
