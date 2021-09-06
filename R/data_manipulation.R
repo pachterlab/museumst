@@ -45,8 +45,8 @@ read_metadata_fresh <- function(sheet_use) {
 #' @importFrom purrr map reduce map2_dfr
 #' @importFrom stringr str_replace
 #' @export
-read_metadata <- function(sheet_use = c("Prequel", "smFISH", "Array", "ISS",
-                                        "Microdissection", "No imaging",
+read_metadata <- function(sheet_use = c("Prequel", "smFISH", "NGS wo MD", "ISS",
+                                        "Microdissection", "No priori", "Other",
                                         "Analysis", "Prequel analysis"),
                           cache = TRUE, cache_location = "./sheets_cache",
                           update = FALSE) {
