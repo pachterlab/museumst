@@ -138,7 +138,7 @@ sheets <- c("Prequel", "Microdissection", "NGS wo MD", "smFISH", "ISS",
             "No priori", "Other")
 sheet_fill <- scales::brewer_pal(palette = "Pastel2")(length(sheets))
 names(sheet_fill) <- sheets
-usethis::use_data(sheet_fill)
+usethis::use_data(sheet_fill, overwrite = TRUE)
 
 # World map without borders, just coastal lines
 # For now store in this package, but will move to native territory package
