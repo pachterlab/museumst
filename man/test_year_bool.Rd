@@ -4,7 +4,7 @@
 \alias{test_year_bool}
 \title{Test whether something is associated with time}
 \usage{
-test_year_bool(pubs, col_use, preprints = FALSE)
+test_year_bool(pubs, col_use, preprints = TRUE)
 }
 \arguments{
 \item{pubs}{A data frame with at least these columns:

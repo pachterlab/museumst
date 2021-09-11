@@ -11,7 +11,7 @@ hist_bool_line(
   ncol = 3,
   n_top = Inf,
   binwidth = 365,
-  preprints = FALSE
+  preprints = TRUE
 )
 }
 \arguments{

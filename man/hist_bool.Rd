@@ -4,7 +4,7 @@
 \alias{hist_bool}
 \title{Plot histogram for each value of a logical variable}
 \usage{
-hist_bool(pubs, col_use, binwidth = 365, preprints = FALSE)
+hist_bool(pubs, col_use, binwidth = 365, preprints = TRUE)
 }
 \arguments{
 \item{pubs}{A data frame with at least these columns:

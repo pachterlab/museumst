@@ -7,7 +7,7 @@
 pubs_on_map(
   pubs,
   city_gc,
-  zoom = c("world", "europe", "usa"),
+  zoom = c("world", "europe", "usa", "ne_asia"),
   plot = c("point", "bin2d", "hexbin"),
   facet_by = NULL,
   n_top = Inf,
@@ -33,7 +33,7 @@ if faceting by those. If facetting, then a column whose name is the value in
 
 \item{zoom}{Whether to plot the world map or only Europe (centered on Western
 Europe and some Eastern European countries are partially cropped off) or only
-the US.}
+the US or only northeast Asia.}
 
 \item{plot}{Whether to plot points, rectangular bins (bin2d), or hexagonal
 bins (hexbin). The binned options are useful when there's overplotting.}

@@ -9,7 +9,7 @@ pubs_per_year(
   facet_by = NULL,
   fill_by = NULL,
   binwidth = 365,
-  preprints = FALSE,
+  preprints = TRUE,
   n_top = Inf,
   n_top_fill = Inf,
   sort_by = c("first_appeared", "count", "recent_count")

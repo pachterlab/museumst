@@ -9,7 +9,10 @@ era_freqpoly(
   col_use,
   since_first = FALSE,
   binwidth = 365,
-  preprints = TRUE
+  preprints = TRUE,
+  do_smooth = FALSE,
+  smooth_method = NULL,
+  smooth_formula = NULL
 )
 }
 \arguments{
@@ -31,6 +34,13 @@ appeared.}
 
 \item{preprints}{Logical, whether preprints should be included. Defaults to
 `TRUE` to include preprints.}
+
+\item{do_smooth}{Logical. Whether to plot smoothed curve for the trend rather
+than freqpoly.}
+
+\item{smooth_method}{Method of smoothing, passed to \code{geom_smooth}.}
+
+\item{smooth_formula}{Formula of smoothing, passed to \code{geom_smooth}.}
 }
 \value{
 A ggplot2 object
