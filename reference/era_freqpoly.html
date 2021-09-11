@@ -143,7 +143,10 @@ for this purposes.</p>
   <span class='va'>col_use</span>,
   since_first <span class='op'>=</span> <span class='cn'>FALSE</span>,
   binwidth <span class='op'>=</span> <span class='fl'>365</span>,
-  preprints <span class='op'>=</span> <span class='cn'>TRUE</span>
+  preprints <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  do_smooth <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  smooth_method <span class='op'>=</span> <span class='cn'>NULL</span>,
+  smooth_formula <span class='op'>=</span> <span class='cn'>NULL</span>
 <span class='op'>)</span></code></pre></div>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -176,6 +179,19 @@ appeared.</p></td>
       <th>preprints</th>
       <td><p>Logical, whether preprints should be included. Defaults to
 `TRUE` to include preprints.</p></td>
+    </tr>
+    <tr>
+      <th>do_smooth</th>
+      <td><p>Logical. Whether to plot smoothed curve for the trend rather
+than freqpoly.</p></td>
+    </tr>
+    <tr>
+      <th>smooth_method</th>
+      <td><p>Method of smoothing, passed to <code>geom_smooth</code>.</p></td>
+    </tr>
+    <tr>
+      <th>smooth_formula</th>
+      <td><p>Formula of smoothing, passed to <code>geom_smooth</code>.</p></td>
     </tr>
     </table>
 

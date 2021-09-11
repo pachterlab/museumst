@@ -133,7 +133,7 @@ method or species.</p>
     <div class="ref-usage sourceCode"><pre class='sourceCode r'><code><span class='fu'>pubs_on_map</span><span class='op'>(</span>
   <span class='va'>pubs</span>,
   <span class='va'>city_gc</span>,
-  zoom <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"world"</span>, <span class='st'>"europe"</span>, <span class='st'>"usa"</span><span class='op'>)</span>,
+  zoom <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"world"</span>, <span class='st'>"europe"</span>, <span class='st'>"usa"</span>, <span class='st'>"ne_asia"</span><span class='op'>)</span>,
   plot <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"point"</span>, <span class='st'>"bin2d"</span>, <span class='st'>"hexbin"</span><span class='op'>)</span>,
   facet_by <span class='op'>=</span> <span class='cn'>NULL</span>,
   n_top <span class='op'>=</span> <span class='cn'>Inf</span>,
@@ -166,7 +166,7 @@ if faceting by those. If facetting, then a column whose name is the value in
       <th>zoom</th>
       <td><p>Whether to plot the world map or only Europe (centered on Western
 Europe and some Eastern European countries are partially cropped off) or only
-the US.</p></td>
+the US or only northeast Asia.</p></td>
     </tr>
     <tr>
       <th>plot</th>
