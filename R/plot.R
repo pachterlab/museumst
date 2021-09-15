@@ -229,6 +229,7 @@ pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
         pal_use <- scales::viridis_pal()(n_viridis)
         names(pal_use) <- as.character(seq.int(min(pubs[[fill_by]]),
                                                max(pubs[[fill_by]]), 1))
+        pal_use <- pal_use[as.character(sort(unique(pubs$fill)))]
         p <- p + scale_fill_manual(values = pal_use, drop = TRUE)
       } else {
         p <- p +
