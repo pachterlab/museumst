@@ -46,7 +46,7 @@ read_metadata_fresh <- function(sheet_use) {
 #' @importFrom stringr str_replace
 #' @export
 read_metadata <- function(sheet_use = c("Prequel", "smFISH", "NGS barcoding", "ISS",
-                                        "ROI selection", "No priori",
+                                        "ROI selection", "De novo",
                                         "Analysis", "Prequel analysis"),
                           cache = TRUE, cache_location = "./sheets_cache",
                           update = FALSE) {

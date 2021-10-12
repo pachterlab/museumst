@@ -74,7 +74,7 @@ institution_words <- c(institution_words, tolower(unique(city_pop$City)))
 
 # Get geocode of all institutions present
 sheets <- read_metadata(c("Prequel", "smFISH", "NGS barcoding", "ISS",
-                          "ROI selection", "No priori",
+                          "ROI selection", "De novo",
                           "Analysis", "Prequel analysis"), update = TRUE)
 gcs <- geocode_first_time(sheets, cache = TRUE, cache_location = "inst",
                           geocode_method = "Google")
@@ -94,7 +94,7 @@ xylims_us <- na_w_pop %>%
 
 # Cache sheets
 sheet_use <- c("Prequel", "smFISH", "NGS barcoding", "ISS",
-               "ROI selection", "No priori",
+               "ROI selection", "De novo",
                "Analysis", "Prequel analysis")
 sheets <- read_metadata_fresh(sheet_use = sheet_use)
 fns <- str_replace(sheet_use, "\\s", "_")
@@ -135,7 +135,7 @@ usethis::use_data(lang_img, species_img, na_w_pop, ne, xylims_ne,
 
 # Colors for sheets for plotting
 sheets <- c("Prequel", "ROI selection", "NGS barcoding", "smFISH", "ISS",
-            "No priori")
+            "De novo")
 sheet_fill <- scales::brewer_pal(palette = "Pastel2")(length(sheets))
 names(sheet_fill) <- sheets
 usethis::use_data(sheet_fill, overwrite = TRUE)
