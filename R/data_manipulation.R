@@ -1,5 +1,5 @@
 # Update this manually when the copy of metadata within the package is updated
-.pkg_update_time <- "2021-05-11 13:00:48 PDT"
+.pkg_update_time <- "2021-12-11 16:25:09 PST"
 
 #' Get the timestamp of the internal version of the metadata
 #'
