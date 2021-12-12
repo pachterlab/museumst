@@ -23,7 +23,7 @@ for this purposes."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/aj
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">museumst</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9021</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9022</span>
       </span>
     </div>
 
@@ -65,7 +65,8 @@ they rise and fall. So I think freqpoly may be better than blocky histograms
 for this purposes.</p>
     </div>
 
-    <div class="ref-usage sourceCode"><pre class="sourceCode r"><code><span class="fu">era_freqpoly</span><span class="op">(</span>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">era_freqpoly</span><span class="op">(</span>
   <span class="va">pubs</span>,
   <span class="va">col_use</span>,
   since_first <span class="op">=</span> <span class="cn">FALSE</span>,
@@ -75,35 +76,43 @@ for this purposes.</p>
   smooth_method <span class="op">=</span> <span class="cn">NULL</span>,
   smooth_formula <span class="op">=</span> <span class="cn">NULL</span>
 <span class="op">)</span></code></pre></div>
+    </div>
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments"><colgroup><col class="name"><col class="desc"></colgroup><tr><th>pubs</th>
-      <td><p>A data frame with at least these columns:</p><dl><dt>journal</dt><dd><p>Name of the journal of the paper.</p></dd>
-  <dt>year</dt><dd><p>Year when the paper was published.</p></dd>
+    <div id="arguments">
+    <h2>Arguments</h2>
+    <dl><dt>pubs</dt>
+<dd><p>A data frame with at least these columns:</p><dl><dt>journal</dt>
+<dd><p>Name of the journal of the paper.</p></dd>
+
+  <dt>year</dt>
+<dd><p>Year when the paper was published.</p></dd>
+
 
 </dl><p>There must be one row per publication or per method or species for each title
 if faceting by those. If facetting, then a column whose name is the value in
-`facet_by` must be present.</p></td>
-    </tr><tr><th>col_use</th>
-      <td><p>Which logical variable to plot. Tidyeval is supported.</p></td>
-    </tr><tr><th>since_first</th>
-      <td><p>Logical. Whether to plot days after the first publication
-appeared.</p></td>
-    </tr><tr><th>binwidth</th>
-      <td><p>Width of bins for the histogram in days.</p></td>
-    </tr><tr><th>preprints</th>
-      <td><p>Logical, whether preprints should be included. Defaults to
-`TRUE` to include preprints.</p></td>
-    </tr><tr><th>do_smooth</th>
-      <td><p>Logical. Whether to plot smoothed curve for the trend rather
-than freqpoly.</p></td>
-    </tr><tr><th>smooth_method</th>
-      <td><p>Method of smoothing, passed to <code>geom_smooth</code>.</p></td>
-    </tr><tr><th>smooth_formula</th>
-      <td><p>Formula of smoothing, passed to <code>geom_smooth</code>.</p></td>
-    </tr></table><h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
+`facet_by` must be present.</p></dd>
+<dt>col_use</dt>
+<dd><p>Which logical variable to plot. Tidyeval is supported.</p></dd>
+<dt>since_first</dt>
+<dd><p>Logical. Whether to plot days after the first publication
+appeared.</p></dd>
+<dt>binwidth</dt>
+<dd><p>Width of bins for the histogram in days.</p></dd>
+<dt>preprints</dt>
+<dd><p>Logical, whether preprints should be included. Defaults to
+`TRUE` to include preprints.</p></dd>
+<dt>do_smooth</dt>
+<dd><p>Logical. Whether to plot smoothed curve for the trend rather
+than freqpoly.</p></dd>
+<dt>smooth_method</dt>
+<dd><p>Method of smoothing, passed to <code>geom_smooth</code>.</p></dd>
+<dt>smooth_formula</dt>
+<dd><p>Formula of smoothing, passed to <code>geom_smooth</code>.</p></dd>
+</dl></div>
+    <div id="value">
+    <h2>Value</h2>
     <p>A ggplot2 object</p>
+    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -117,7 +126,7 @@ than freqpoly.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 1.9000.9000.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
 </div>
 
       </footer></div>

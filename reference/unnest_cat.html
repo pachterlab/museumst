@@ -20,7 +20,7 @@ row per category of interest."><!-- mathjax --><script src="https://cdnjs.cloudf
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">museumst</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9021</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9022</span>
       </span>
     </div>
 
@@ -59,18 +59,23 @@ by a semicolon. This function unnests that and returns a data frame with one
 row per category of interest.</p>
     </div>
 
-    <div class="ref-usage sourceCode"><pre class="sourceCode r"><code><span class="fu">unnest_cat</span><span class="op">(</span><span class="va">sheet</span>, <span class="va">col_use</span>, other_cols <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">unnest_cat</span><span class="op">(</span><span class="va">sheet</span>, <span class="va">col_use</span>, other_cols <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    </div>
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments"><colgroup><col class="name"><col class="desc"></colgroup><tr><th>sheet</th>
-      <td><p>The tibble for the spreadsheet.</p></td>
-    </tr><tr><th>col_use</th>
-      <td><p>Column to unnest. Tidyeval is supported.</p></td>
-    </tr><tr><th>other_cols</th>
-      <td><p>Character vector of other columns to include.</p></td>
-    </tr></table><h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
+    <div id="arguments">
+    <h2>Arguments</h2>
+    <dl><dt>sheet</dt>
+<dd><p>The tibble for the spreadsheet.</p></dd>
+<dt>col_use</dt>
+<dd><p>Column to unnest. Tidyeval is supported.</p></dd>
+<dt>other_cols</dt>
+<dd><p>Character vector of other columns to include.</p></dd>
+</dl></div>
+    <div id="value">
+    <h2>Value</h2>
     <p>A data frame with one row per category of interest. NAs are removed.</p>
+    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -84,7 +89,7 @@ row per category of interest.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 1.9000.9000.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
 </div>
 
       </footer></div>

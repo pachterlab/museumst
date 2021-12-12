@@ -18,7 +18,7 @@ vocabulary. I guess maybe I should start using a controlled vocabulary."><!-- ma
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">museumst</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9021</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9022</span>
       </span>
     </div>
 
@@ -55,7 +55,8 @@ vocabulary. I guess maybe I should start using a controlled vocabulary."><!-- ma
 vocabulary. I guess maybe I should start using a controlled vocabulary.</p>
     </div>
 
-    <div class="ref-usage sourceCode"><pre class="sourceCode r"><code><span class="fu">plot_wordcloud</span><span class="op">(</span>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plot_wordcloud</span><span class="op">(</span>
   <span class="va">sheet</span>,
   col_use <span class="op">=</span> <span class="va">title</span>,
   species_use <span class="op">=</span> <span class="st">"all"</span>,
@@ -63,34 +64,38 @@ vocabulary. I guess maybe I should start using a controlled vocabulary.</p>
   year_max <span class="op">=</span> <span class="cn">NA</span>,
   other_stop_words <span class="op">=</span> <span class="cn">NULL</span>,
   seed <span class="op">=</span> <span class="fl">1</span>,
-  scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">0.1</span><span class="op">)</span>,
+  scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">0.1</span><span class="op">)</span>,
   min.freq <span class="op">=</span> <span class="fl">1</span>,
   <span class="va">...</span>
 <span class="op">)</span></code></pre></div>
+    </div>
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments"><colgroup><col class="name"><col class="desc"></colgroup><tr><th>sheet</th>
-      <td><p>The sheet read in from Google Sheets as a tibble.</p></td>
-    </tr><tr><th>col_use</th>
-      <td><p>Which column to break down into words for word cloud. Tidyeval
-is supported.</p></td>
-    </tr><tr><th>species_use</th>
-      <td><p>Which species to filter by.</p></td>
-    </tr><tr><th>year_min</th>
-      <td><p>Minimum year. The range of years will be &gt;= year_min and
-&lt; year_max.</p></td>
-    </tr><tr><th>year_max</th>
-      <td><p>Maximum year.</p></td>
-    </tr><tr><th>other_stop_words</th>
-      <td><p>A character vector for other stop words besides the
-stop_words data frame that comes with tidytext.</p></td>
-    </tr><tr><th>seed</th>
-      <td><p>Random seed to use.</p></td>
-    </tr><tr><th>...</th>
-      <td><p>Other arguments passed to <code><a href="https://rdrr.io/pkg/wordcloud/man/wordcloud.html">wordcloud::wordcloud</a></code>.</p></td>
-    </tr></table><h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
+    <div id="arguments">
+    <h2>Arguments</h2>
+    <dl><dt>sheet</dt>
+<dd><p>The sheet read in from Google Sheets as a tibble.</p></dd>
+<dt>col_use</dt>
+<dd><p>Which column to break down into words for word cloud. Tidyeval
+is supported.</p></dd>
+<dt>species_use</dt>
+<dd><p>Which species to filter by.</p></dd>
+<dt>year_min</dt>
+<dd><p>Minimum year. The range of years will be &gt;= year_min and
+&lt; year_max.</p></dd>
+<dt>year_max</dt>
+<dd><p>Maximum year.</p></dd>
+<dt>other_stop_words</dt>
+<dd><p>A character vector for other stop words besides the
+stop_words data frame that comes with tidytext.</p></dd>
+<dt>seed</dt>
+<dd><p>Random seed to use.</p></dd>
+<dt>...</dt>
+<dd><p>Other arguments passed to <code><a href="https://rdrr.io/pkg/wordcloud/man/wordcloud.html" class="external-link">wordcloud::wordcloud</a></code>.</p></dd>
+</dl></div>
+    <div id="value">
+    <h2>Value</h2>
     <p>A html widget.</p>
+    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -104,7 +109,7 @@ stop_words data frame that comes with tidytext.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 1.9000.9000.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
 </div>
 
       </footer></div>

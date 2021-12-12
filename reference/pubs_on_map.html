@@ -19,7 +19,7 @@ method or species."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/aj
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">museumst</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9021</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9022</span>
       </span>
     </div>
 
@@ -57,11 +57,12 @@ number of publications at the location. Can facet by some category like
 method or species.</p>
     </div>
 
-    <div class="ref-usage sourceCode"><pre class="sourceCode r"><code><span class="fu">pubs_on_map</span><span class="op">(</span>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">pubs_on_map</span><span class="op">(</span>
   <span class="va">pubs</span>,
   <span class="va">city_gc</span>,
-  zoom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"world"</span>, <span class="st">"europe"</span>, <span class="st">"usa"</span>, <span class="st">"ne_asia"</span><span class="op">)</span>,
-  plot <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"point"</span>, <span class="st">"bin2d"</span>, <span class="st">"hexbin"</span><span class="op">)</span>,
+  zoom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"world"</span>, <span class="st">"europe"</span>, <span class="st">"usa"</span>, <span class="st">"ne_asia"</span><span class="op">)</span>,
+  plot <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"point"</span>, <span class="st">"bin2d"</span>, <span class="st">"hexbin"</span><span class="op">)</span>,
   facet_by <span class="op">=</span> <span class="cn">NULL</span>,
   n_top <span class="op">=</span> <span class="cn">Inf</span>,
   ncol <span class="op">=</span> <span class="fl">3</span>,
@@ -69,57 +70,66 @@ method or species.</p>
   label_cities <span class="op">=</span> <span class="cn">FALSE</span>,
   n_label <span class="op">=</span> <span class="fl">10</span>,
   per_year <span class="op">=</span> <span class="cn">FALSE</span>,
-  bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">70</span>, <span class="fl">70</span><span class="op">)</span>
+  bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">70</span>, <span class="fl">70</span><span class="op">)</span>
 <span class="op">)</span></code></pre></div>
+    </div>
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments"><colgroup><col class="name"><col class="desc"></colgroup><tr><th>pubs</th>
-      <td><p>A data frame with at least these columns:</p><dl><dt>journal</dt><dd><p>Name of the journal of the paper.</p></dd>
-  <dt>year</dt><dd><p>Year when the paper was published.</p></dd>
+    <div id="arguments">
+    <h2>Arguments</h2>
+    <dl><dt>pubs</dt>
+<dd><p>A data frame with at least these columns:</p><dl><dt>journal</dt>
+<dd><p>Name of the journal of the paper.</p></dd>
+
+  <dt>year</dt>
+<dd><p>Year when the paper was published.</p></dd>
+
 
 </dl><p>There must be one row per publication or per method or species for each title
 if faceting by those. If facetting, then a column whose name is the value in
-`facet_by` must be present.</p></td>
-    </tr><tr><th>city_gc</th>
-      <td><p>From geocode_inst_city</p></td>
-    </tr><tr><th>zoom</th>
-      <td><p>Whether to plot the world map or only Europe (centered on Western
+`facet_by` must be present.</p></dd>
+<dt>city_gc</dt>
+<dd><p>From geocode_inst_city</p></dd>
+<dt>zoom</dt>
+<dd><p>Whether to plot the world map or only Europe (centered on Western
 Europe and some Eastern European countries are partially cropped off) or only
-the US or only northeast Asia.</p></td>
-    </tr><tr><th>plot</th>
-      <td><p>Whether to plot points, rectangular bins (bin2d), or hexagonal
-bins (hexbin). The binned options are useful when there's overplotting.</p></td>
-    </tr><tr><th>facet_by</th>
-      <td><p>Name of a column for facetting.</p></td>
-    </tr><tr><th>n_top</th>
-      <td><p>Number of categories with the most publications to plot in facets;
-the other categories are lumped into "other".</p></td>
-    </tr><tr><th>ncol</th>
-      <td><p>Number of columns in facetted plot.</p></td>
-    </tr><tr><th>label_insts</th>
-      <td><p>Logical, whether to label institutions.</p></td>
-    </tr><tr><th>label_cities</th>
-      <td><p>Logical, whether to label cities.</p></td>
-    </tr><tr><th>n_label</th>
-      <td><p>Number of top cities to label, so the labels won't clutter the
-plot.</p></td>
-    </tr><tr><th>per_year</th>
-      <td><p>Logical, whether to do the count for each year separately.
-This is for making animations with gganimate.</p></td>
-    </tr><tr><th>bins</th>
-      <td><p>Numeric vector of length 2, the number of bins for bin2d or hex
-in the x and y directions. Ignored if plotting points.</p></td>
-    </tr></table><h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
+the US or only northeast Asia.</p></dd>
+<dt>plot</dt>
+<dd><p>Whether to plot points, rectangular bins (bin2d), or hexagonal
+bins (hexbin). The binned options are useful when there's overplotting.</p></dd>
+<dt>facet_by</dt>
+<dd><p>Name of a column for facetting.</p></dd>
+<dt>n_top</dt>
+<dd><p>Number of categories with the most publications to plot in facets;
+the other categories are lumped into "other".</p></dd>
+<dt>ncol</dt>
+<dd><p>Number of columns in facetted plot.</p></dd>
+<dt>label_insts</dt>
+<dd><p>Logical, whether to label institutions.</p></dd>
+<dt>label_cities</dt>
+<dd><p>Logical, whether to label cities.</p></dd>
+<dt>n_label</dt>
+<dd><p>Number of top cities to label, so the labels won't clutter the
+plot.</p></dd>
+<dt>per_year</dt>
+<dd><p>Logical, whether to do the count for each year separately.
+This is for making animations with gganimate.</p></dd>
+<dt>bins</dt>
+<dd><p>Numeric vector of length 2, the number of bins for bin2d or hex
+in the x and y directions. Ignored if plotting points.</p></dd>
+</dl></div>
+    <div id="value">
+    <h2>Value</h2>
     <p>A ggplot2 object</p>
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
+    </div>
+    <div id="details">
+    <h2>Details</h2>
     <p>World map will use the Robinson projection. European map uses the LAEA Europe
 projection (EPSG:3035), and the American map uses the US National Atlas Equal Area
 projection (EPSG:2163) and Alaska and Hawaii are moved and included. The option
 to zoom in on Europe and the US is available because those are the two regions
 of the world with the most publications and it's hard to see the data when
 plotted on a world map.</p>
+    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -133,7 +143,7 @@ plotted on a world map.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 1.9000.9000.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
 </div>
 
       </footer></div>

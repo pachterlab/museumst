@@ -18,7 +18,7 @@ states within the US."><!-- mathjax --><script src="https://cdnjs.cloudflare.com
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">museumst</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9021</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9022</span>
       </span>
     </div>
 
@@ -55,28 +55,33 @@ states within the US."><!-- mathjax --><script src="https://cdnjs.cloudflare.com
 states within the US.</p>
     </div>
 
-    <div class="ref-usage sourceCode"><pre class="sourceCode r"><code><span class="fu">pubs_per_capita</span><span class="op">(</span>
+    <div id="ref-usage">
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">pubs_per_capita</span><span class="op">(</span>
   <span class="va">pubs</span>,
-  zoom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"world"</span>, <span class="st">"europe"</span>, <span class="st">"usa"</span><span class="op">)</span>,
-  plot <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"choropleth"</span>, <span class="st">"bar"</span><span class="op">)</span>,
+  zoom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"world"</span>, <span class="st">"europe"</span>, <span class="st">"usa"</span><span class="op">)</span>,
+  plot <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"choropleth"</span>, <span class="st">"bar"</span><span class="op">)</span>,
   label_states <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span></code></pre></div>
+    </div>
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments"><colgroup><col class="name"><col class="desc"></colgroup><tr><th>pubs</th>
-      <td><p>A data frame with one row per publication and columns country and
-for the US, also a column "state/province".</p></td>
-    </tr><tr><th>zoom</th>
-      <td><p>Whether to plot the world map or only Europe (centered on Western
+    <div id="arguments">
+    <h2>Arguments</h2>
+    <dl><dt>pubs</dt>
+<dd><p>A data frame with one row per publication and columns country and
+for the US, also a column "state/province".</p></dd>
+<dt>zoom</dt>
+<dd><p>Whether to plot the world map or only Europe (centered on Western
 Europe and some Eastern European countries are partially cropped off) or only
-the US.</p></td>
-    </tr><tr><th>plot</th>
-      <td><p>Whether to plot choropleth or bar plot.</p></td>
-    </tr><tr><th>label_states</th>
-      <td><p>If plotting the US, whether to label the states.</p></td>
-    </tr></table><h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
+the US.</p></dd>
+<dt>plot</dt>
+<dd><p>Whether to plot choropleth or bar plot.</p></dd>
+<dt>label_states</dt>
+<dd><p>If plotting the US, whether to label the states.</p></dd>
+</dl></div>
+    <div id="value">
+    <h2>Value</h2>
     <p>A ggplot2 object.</p>
+    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -90,7 +95,7 @@ the US.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 1.9000.9000.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
 </div>
 
       </footer></div>
