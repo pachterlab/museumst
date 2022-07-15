@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -54,34 +54,45 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">word_prop_scatter</span><span class="op">(</span>
-  <span class="va">pubs</span>,
-  col_use <span class="op">=</span> <span class="va">title</span>,
-  era <span class="op">=</span> <span class="va">sheet</span>,
-  n_top <span class="op">=</span> <span class="fl">20</span>,
-  other_stop_words <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">word_prop_scatter</span><span class="op">(</span></span>
+<span>  <span class="va">pubs</span>,</span>
+<span>  col_use <span class="op">=</span> <span class="va">title</span>,</span>
+<span>  era <span class="op">=</span> <span class="va">sheet</span>,</span>
+<span>  n_top <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  other_stop_words <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>pubs</dt>
 <dd><p>A data frame at least with a column for the category of interest.</p></dd>
+
+
 <dt>col_use</dt>
 <dd><p>Which column to break down into words for word cloud. Tidyeval
 is supported.</p></dd>
+
+
 <dt>era</dt>
 <dd><p>Which column indicates whether the item is from prequel or current era.
 Can be character, factor, or logical. Tidyeval is supported.</p></dd>
+
+
 <dt>n_top</dt>
 <dd><p>Number of top entries to plot. Especially useful for isotype.</p></dd>
+
+
 <dt>other_stop_words</dt>
 <dd><p>A character vector for other stop words besides the
 stop_words data frame that comes with tidytext.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A ggplot2 object.</p>
+    
+
+<p>A ggplot2 object.</p>
     </div>
 
   </div>
@@ -96,7 +107,7 @@ stop_words data frame that comes with tidytext.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.9000.</p>
 </div>
 
       </footer></div>

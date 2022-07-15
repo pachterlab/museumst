@@ -27,7 +27,7 @@ vocabulary. I guess maybe I should start using a controlled vocabulary."><!-- ma
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -56,45 +56,70 @@ vocabulary. I guess maybe I should start using a controlled vocabulary.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plot_wordcloud</span><span class="op">(</span>
-  <span class="va">sheet</span>,
-  col_use <span class="op">=</span> <span class="va">title</span>,
-  species_use <span class="op">=</span> <span class="st">"all"</span>,
-  year_min <span class="op">=</span> <span class="cn">NA</span>,
-  year_max <span class="op">=</span> <span class="cn">NA</span>,
-  other_stop_words <span class="op">=</span> <span class="cn">NULL</span>,
-  seed <span class="op">=</span> <span class="fl">1</span>,
-  scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">0.1</span><span class="op">)</span>,
-  min.freq <span class="op">=</span> <span class="fl">1</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_wordcloud</span><span class="op">(</span></span>
+<span>  <span class="va">sheet</span>,</span>
+<span>  col_use <span class="op">=</span> <span class="va">title</span>,</span>
+<span>  species_use <span class="op">=</span> <span class="st">"all"</span>,</span>
+<span>  year_min <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  year_max <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  other_stop_words <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">0.1</span><span class="op">)</span>,</span>
+<span>  min.freq <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>sheet</dt>
 <dd><p>The sheet read in from Google Sheets as a tibble.</p></dd>
+
+
 <dt>col_use</dt>
 <dd><p>Which column to break down into words for word cloud. Tidyeval
 is supported.</p></dd>
+
+
 <dt>species_use</dt>
 <dd><p>Which species to filter by.</p></dd>
+
+
 <dt>year_min</dt>
 <dd><p>Minimum year. The range of years will be &gt;= year_min and
 &lt; year_max.</p></dd>
+
+
 <dt>year_max</dt>
 <dd><p>Maximum year.</p></dd>
+
+
 <dt>other_stop_words</dt>
 <dd><p>A character vector for other stop words besides the
 stop_words data frame that comes with tidytext.</p></dd>
+
+
 <dt>seed</dt>
 <dd><p>Random seed to use.</p></dd>
+
+
+<dt>scale</dt>
+<dd><p>A vector of length 2 indicating the range of the size of the words.</p></dd>
+
+
+<dt>min.freq</dt>
+<dd><p>words with frequency below min.freq will not be plotted</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Other arguments passed to <code><a href="https://rdrr.io/pkg/wordcloud/man/wordcloud.html" class="external-link">wordcloud::wordcloud</a></code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A html widget.</p>
+    
+
+<p>A html widget.</p>
     </div>
 
   </div>
@@ -109,7 +134,7 @@ stop_words data frame that comes with tidytext.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.9000.</p>
 </div>
 
       </footer></div>

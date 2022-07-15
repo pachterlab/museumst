@@ -27,7 +27,7 @@ makes the plot easier to read than filling with different colors."><!-- mathjax 
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -56,16 +56,17 @@ makes the plot easier to read than filling with different colors.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">pubs_per_year</span><span class="op">(</span>
-  <span class="va">pubs</span>,
-  facet_by <span class="op">=</span> <span class="cn">NULL</span>,
-  fill_by <span class="op">=</span> <span class="cn">NULL</span>,
-  binwidth <span class="op">=</span> <span class="fl">365</span>,
-  preprints <span class="op">=</span> <span class="cn">TRUE</span>,
-  n_top <span class="op">=</span> <span class="cn">Inf</span>,
-  n_top_fill <span class="op">=</span> <span class="cn">Inf</span>,
-  sort_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"first_appeared"</span>, <span class="st">"count"</span>, <span class="st">"recent_count"</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pubs_per_year</span><span class="op">(</span></span>
+<span>  <span class="va">pubs</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fill_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  binwidth <span class="op">=</span> <span class="fl">365</span>,</span>
+<span>  preprints <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  n_top <span class="op">=</span> <span class="cn">Inf</span>,</span>
+<span>  n_top_fill <span class="op">=</span> <span class="cn">Inf</span>,</span>
+<span>  sort_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"first_appeared"</span>, <span class="st">"count"</span>, <span class="st">"recent_count"</span><span class="op">)</span>,</span>
+<span>  log_color <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -81,31 +82,53 @@ makes the plot easier to read than filling with different colors.</p>
 </dl><p>There must be one row per publication or per method or species for each title
 if faceting by those. If facetting, then a column whose name is the value in
 `facet_by` must be present.</p></dd>
+
+
 <dt>facet_by</dt>
 <dd><p>Name of a column for facetting.</p></dd>
+
+
 <dt>fill_by</dt>
 <dd><p>Name of a column of a categorical variable with which to color
 the histogram.</p></dd>
+
+
 <dt>binwidth</dt>
 <dd><p>Width of bins for the histogram in days.</p></dd>
+
+
 <dt>preprints</dt>
 <dd><p>Logical, whether preprints should be included. Defaults to
 `TRUE` to include preprints.</p></dd>
+
+
 <dt>n_top</dt>
 <dd><p>Number of categories with the most publications to plot in facets;
 the other categories are lumped into "other".</p></dd>
+
+
 <dt>n_top_fill</dt>
 <dd><p>Number of categories with the most publications to be
 differentiated by color.</p></dd>
+
+
 <dt>sort_by</dt>
 <dd><p>How to sort the facets. first_appeared means the category that
 appeared earlier will be nearer to the top. count means the category with more
 count (number of publications) will be nearer to the top. Ignored if not
 facetting.</p></dd>
+
+
+<dt>log_color</dt>
+<dd><p>If filling histograms by integer values, whether to log
+transform the values before mapping to colors to improve dynamic range.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A ggplot2 object.</p>
+    
+
+<p>A ggplot2 object.</p>
     </div>
 
   </div>
@@ -120,7 +143,7 @@ facetting.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.9000.</p>
 </div>
 
       </footer></div>

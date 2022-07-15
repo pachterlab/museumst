@@ -28,7 +28,7 @@ method or species."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/aj
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -58,20 +58,20 @@ method or species.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">pubs_on_map</span><span class="op">(</span>
-  <span class="va">pubs</span>,
-  <span class="va">city_gc</span>,
-  zoom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"world"</span>, <span class="st">"europe"</span>, <span class="st">"usa"</span>, <span class="st">"ne_asia"</span><span class="op">)</span>,
-  plot <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"point"</span>, <span class="st">"bin2d"</span>, <span class="st">"hexbin"</span><span class="op">)</span>,
-  facet_by <span class="op">=</span> <span class="cn">NULL</span>,
-  n_top <span class="op">=</span> <span class="cn">Inf</span>,
-  ncol <span class="op">=</span> <span class="fl">3</span>,
-  label_insts <span class="op">=</span> <span class="cn">TRUE</span>,
-  label_cities <span class="op">=</span> <span class="cn">FALSE</span>,
-  n_label <span class="op">=</span> <span class="fl">10</span>,
-  per_year <span class="op">=</span> <span class="cn">FALSE</span>,
-  bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">70</span>, <span class="fl">70</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pubs_on_map</span><span class="op">(</span></span>
+<span>  <span class="va">pubs</span>,</span>
+<span>  <span class="va">city_gc</span>,</span>
+<span>  zoom <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"world"</span>, <span class="st">"europe"</span>, <span class="st">"usa"</span>, <span class="st">"ne_asia"</span><span class="op">)</span>,</span>
+<span>  plot <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"point"</span>, <span class="st">"bin2d"</span>, <span class="st">"hexbin"</span><span class="op">)</span>,</span>
+<span>  facet_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  n_top <span class="op">=</span> <span class="cn">Inf</span>,</span>
+<span>  ncol <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  label_insts <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  label_cities <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n_label <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  per_year <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  bins <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">70</span>, <span class="fl">70</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -87,39 +87,64 @@ method or species.</p>
 </dl><p>There must be one row per publication or per method or species for each title
 if faceting by those. If facetting, then a column whose name is the value in
 `facet_by` must be present.</p></dd>
+
+
 <dt>city_gc</dt>
 <dd><p>From geocode_inst_city</p></dd>
+
+
 <dt>zoom</dt>
 <dd><p>Whether to plot the world map or only Europe (centered on Western
 Europe and some Eastern European countries are partially cropped off) or only
 the US or only northeast Asia.</p></dd>
+
+
 <dt>plot</dt>
 <dd><p>Whether to plot points, rectangular bins (bin2d), or hexagonal
 bins (hexbin). The binned options are useful when there's overplotting.</p></dd>
+
+
 <dt>facet_by</dt>
 <dd><p>Name of a column for facetting.</p></dd>
+
+
 <dt>n_top</dt>
 <dd><p>Number of categories with the most publications to plot in facets;
 the other categories are lumped into "other".</p></dd>
+
+
 <dt>ncol</dt>
 <dd><p>Number of columns in facetted plot.</p></dd>
+
+
 <dt>label_insts</dt>
 <dd><p>Logical, whether to label institutions.</p></dd>
+
+
 <dt>label_cities</dt>
 <dd><p>Logical, whether to label cities.</p></dd>
+
+
 <dt>n_label</dt>
 <dd><p>Number of top cities to label, so the labels won't clutter the
 plot.</p></dd>
+
+
 <dt>per_year</dt>
 <dd><p>Logical, whether to do the count for each year separately.
 This is for making animations with gganimate.</p></dd>
+
+
 <dt>bins</dt>
 <dd><p>Numeric vector of length 2, the number of bins for bin2d or hex
 in the x and y directions. Ignored if plotting points.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A ggplot2 object</p>
+    
+
+<p>A ggplot2 object</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -143,7 +168,7 @@ plotted on a world map.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.9000.</p>
 </div>
 
       </footer></div>

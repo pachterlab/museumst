@@ -28,7 +28,7 @@ the sheet than to geocode."><!-- mathjax --><script src="https://cdnjs.cloudflar
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -58,33 +58,42 @@ the sheet than to geocode.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">read_metadata</span><span class="op">(</span>
-  sheet_use <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Prequel"</span>, <span class="st">"smFISH"</span>, <span class="st">"NGS wo MD"</span>, <span class="st">"ISS"</span>, <span class="st">"Microdissection"</span>,
-    <span class="st">"No priori"</span>, <span class="st">"Other"</span>, <span class="st">"Analysis"</span>, <span class="st">"Prequel analysis"</span><span class="op">)</span>,
-  cache <span class="op">=</span> <span class="cn">TRUE</span>,
-  cache_location <span class="op">=</span> <span class="st">"./sheets_cache"</span>,
-  update <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">read_metadata</span><span class="op">(</span></span>
+<span>  sheet_use <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Prequel"</span>, <span class="st">"smFISH"</span>, <span class="st">"NGS barcoding"</span>, <span class="st">"ISS"</span>, <span class="st">"ROI selection"</span>,</span>
+<span>    <span class="st">"De novo"</span>, <span class="st">"Analysis"</span>, <span class="st">"Prequel analysis"</span><span class="op">)</span>,</span>
+<span>  cache <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  cache_location <span class="op">=</span> <span class="st">"./sheets_cache"</span>,</span>
+<span>  update <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>sheet_use</dt>
 <dd><p>Name of the sheet(s) to read.</p></dd>
+
+
 <dt>cache</dt>
 <dd><p>Logial, whether to cache.</p></dd>
+
+
 <dt>cache_location</dt>
 <dd><p>Where to save the cache</p></dd>
+
+
 <dt>update</dt>
 <dd><p>Logical, whether to update cache. If not, then the cache is read,
 and if the cache is absent, then a file contained within
 this package is read. This file within the package is updated with each
 version of this package. If TRUE, then the data is directly downloaded from
 Google Sheets, which is guaranteed to be up to date.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A tibble for the sheet of interest.</p>
+    
+
+<p>A tibble for the sheet of interest.</p>
     </div>
 
   </div>
@@ -99,7 +108,7 @@ Google Sheets, which is guaranteed to be up to date.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.9000.</p>
 </div>
 
       </footer></div>

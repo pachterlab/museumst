@@ -29,7 +29,7 @@ row per category of interest."><!-- mathjax --><script src="https://cdnjs.cloudf
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -60,21 +60,28 @@ row per category of interest.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">unnest_cat</span><span class="op">(</span><span class="va">sheet</span>, <span class="va">col_use</span>, other_cols <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">unnest_cat</span><span class="op">(</span><span class="va">sheet</span>, <span class="va">col_use</span>, other_cols <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>sheet</dt>
 <dd><p>The tibble for the spreadsheet.</p></dd>
+
+
 <dt>col_use</dt>
 <dd><p>Column to unnest. Tidyeval is supported.</p></dd>
+
+
 <dt>other_cols</dt>
 <dd><p>Character vector of other columns to include.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A data frame with one row per category of interest. NAs are removed.</p>
+    
+
+<p>A data frame with one row per category of interest. NAs are removed.</p>
     </div>
 
   </div>
@@ -89,7 +96,7 @@ row per category of interest.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.9000.</p>
 </div>
 
       </footer></div>

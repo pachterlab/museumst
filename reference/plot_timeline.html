@@ -27,7 +27,7 @@ descriptions are above and/or below that line."><!-- mathjax --><script src="htt
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -56,14 +56,14 @@ descriptions are above and/or below that line.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plot_timeline</span><span class="op">(</span>
-  <span class="va">events_df</span>,
-  <span class="va">ys</span>,
-  description_width <span class="op">=</span> <span class="fl">20</span>,
-  expand_x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.1</span><span class="op">)</span>,
-  expand_y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.05</span><span class="op">)</span>,
-  include_refs <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_timeline</span><span class="op">(</span></span>
+<span>  <span class="va">events_df</span>,</span>
+<span>  <span class="va">ys</span>,</span>
+<span>  description_width <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  expand_x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.1</span><span class="op">)</span>,</span>
+<span>  expand_y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.05</span><span class="op">)</span>,</span>
+<span>  include_refs <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -82,27 +82,40 @@ descriptions are above and/or below that line.</p>
 
 
 </dl></dd>
+
+
 <dt>ys</dt>
 <dd><p>A numeric vector of the y coordinates of the items. Since I don't
 know how to implement the ggrepel algorithm to make sure that the labels don't
 overlap for geom_richtext, I have to manually set the y coordinates to make
 sure that the labels don't overlap and look good.</p></dd>
+
+
 <dt>description_width</dt>
 <dd><p>Width of the description text in characters to wrap
 the text in the labels.</p></dd>
+
+
 <dt>expand_x</dt>
 <dd><p>A numeric vector of length 2 of the proportion to expand the
 x axis on the left and the right. This is a way to manually make sure that the
 labels are not cropped off at the edge of the plot.</p></dd>
+
+
 <dt>expand_y</dt>
 <dd><p>Same as expand_x, but for the y axis.</p></dd>
+
+
 <dt>include_refs</dt>
 <dd><p>Logical, indicating whether to include references in the
 text box.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A ggplot2 object for the plot.</p>
+    
+
+<p>A ggplot2 object for the plot.</p>
     </div>
 
   </div>
@@ -117,7 +130,7 @@ text box.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.9000.</p>
 </div>
 
       </footer></div>

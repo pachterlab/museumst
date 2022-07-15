@@ -29,7 +29,7 @@ number of publications."><!-- mathjax --><script src="https://cdnjs.cloudflare.c
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -60,41 +60,54 @@ number of publications.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">pubs_per_cat</span><span class="op">(</span>
-  <span class="va">pubs</span>,
-  <span class="va">category</span>,
-  n_top <span class="op">=</span> <span class="cn">NULL</span>,
-  isotype <span class="op">=</span> <span class="cn">FALSE</span>,
-  img_df <span class="op">=</span> <span class="cn">NULL</span>,
-  img_unit <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pubs_per_cat</span><span class="op">(</span></span>
+<span>  <span class="va">pubs</span>,</span>
+<span>  <span class="va">category</span>,</span>
+<span>  n_top <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  isotype <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  img_df <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  img_unit <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>pubs</dt>
 <dd><p>A data frame at least with a column for the category of interest.</p></dd>
+
+
 <dt>category</dt>
 <dd><p>Column name to plot. Tidyeval is supported. If it's species
 or language, then img_df does not have to be supplied for isotype plot since
 the images are supplied internally.</p></dd>
+
+
 <dt>n_top</dt>
 <dd><p>Number of top entries to plot. Especially useful for isotype.</p></dd>
+
+
 <dt>isotype</dt>
 <dd><p>Logical, whether to make isotype plot, like one icon stands for
 a certain number of publications.</p></dd>
+
+
 <dt>img_df</dt>
 <dd><p>A data frame with one column with the same name as `category`
 and another column called `image_paths` for path to the images. Relative path
 is fine since it will be internally converted to absolute path. This argument
 can be left as NULL if category is species or language, since in these two
 cases, the `img_df` is provided internally.</p></dd>
+
+
 <dt>img_unit</dt>
 <dd><p>Integer, how many publications for one icon.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A ggplot2 object.</p>
+    
+
+<p>A ggplot2 object.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -152,7 +165,7 @@ if found, are listed here as well.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.9000.</p>
 </div>
 
       </footer></div>
