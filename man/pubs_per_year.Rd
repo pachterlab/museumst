@@ -12,7 +12,8 @@ pubs_per_year(
   preprints = TRUE,
   n_top = Inf,
   n_top_fill = Inf,
-  sort_by = c("first_appeared", "count", "recent_count")
+  sort_by = c("first_appeared", "count", "recent_count"),
+  log_color = FALSE
 )
 }
 \arguments{
@@ -45,6 +46,9 @@ differentiated by color.}
 appeared earlier will be nearer to the top. count means the category with more
 count (number of publications) will be nearer to the top. Ignored if not
 facetting.}
+
+\item{log_color}{If filling histograms by integer values, whether to log
+transform the values before mapping to colors to improve dynamic range.}
 }
 \value{
 A ggplot2 object.

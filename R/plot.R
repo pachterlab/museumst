@@ -132,6 +132,8 @@ plot_timeline <- function(events_df, ys, description_width = 20,
 #' appeared earlier will be nearer to the top. count means the category with more
 #' count (number of publications) will be nearer to the top. Ignored if not
 #' facetting.
+#' @param log_color If filling histograms by integer values, whether to log
+#' transform the values before mapping to colors to improve dynamic range.
 #' @return A ggplot2 object.
 #' @importFrom dplyr filter select
 #' @importFrom forcats fct_reorder fct_lump_n
@@ -142,7 +144,8 @@ plot_timeline <- function(events_df, ys, description_width = 20,
 #' @export
 pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
                           preprints = TRUE, n_top = Inf, n_top_fill = Inf,
-                          sort_by = c("first_appeared", "count", "recent_count")) {
+                          sort_by = c("first_appeared", "count", "recent_count"),
+                          log_color = FALSE) {
   journal <- date_published <- facets <- NULL
   sort_by <- match.arg(sort_by)
   if (!preprints) {
@@ -193,7 +196,7 @@ pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
             mutate(fill = fct_infreq(fill) %>% fct_relevel("Other", after = Inf))
         }
       } else {
-        use_int <- is.integer(pubs[[fill_by]]) & length(unique(pubs[[fill_by]])) < 10
+        use_int <- is.integer(pubs[[fill_by]]) & length(unique(pubs[[fill_by]])) < 20
         if (use_int) {
           pubs <- pubs %>%
             mutate(fill = factor(!!sym(fill_by), levels = seq.int(min(pubs[[fill_by]]),
@@ -204,6 +207,7 @@ pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
             n_top_fill <- 9
           }
           pubs <- pubs %>%
+            ungroup() %>%
             mutate(fill = cut(!!sym(fill_by), breaks = n_top_fill))
         }
       }
@@ -225,11 +229,19 @@ pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
         p <- p +
           scale_fill_brewer(palette = pal_use)
       } else if (use_int) {
-        n_viridis <- max(pubs[[fill_by]]) - min(pubs[[fill_by]]) + 1
-        pal_use <- scales::viridis_pal()(n_viridis)
-        names(pal_use) <- as.character(seq.int(min(pubs[[fill_by]]),
-                                               max(pubs[[fill_by]]), 1))
-        pal_use <- pal_use[as.character(sort(unique(pubs$fill)))]
+        if (log_color) {
+          fill_levels <- sort(unique(pubs[[fill_by]]))
+          log_fill <- log(fill_levels)
+          log_fill_scaled <- floor(log_fill/max(log_fill)*255) + 1
+          pal_use <- scales::viridis_pal()(256)[log_fill_scaled]
+          names(pal_use) <- as.character(fill_levels)
+        } else {
+          n_viridis <- max(pubs[[fill_by]]) - min(pubs[[fill_by]]) + 1
+          pal_use <- scales::viridis_pal()(n_viridis)
+          names(pal_use) <- as.character(seq.int(min(pubs[[fill_by]]),
+                                                 max(pubs[[fill_by]]), 1))
+          pal_use <- pal_use[as.character(sort(unique(pubs$fill)))]
+        }
         p <- p + scale_fill_manual(values = pal_use, drop = TRUE)
       } else {
         p <- p +
