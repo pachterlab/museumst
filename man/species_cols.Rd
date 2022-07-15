@@ -8,7 +8,7 @@
 A named vector of colors; the names are the species, including "Other".
 }
 \source{
-Brewer
+dittoSeq
 }
 \usage{
 species_cols

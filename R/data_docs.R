@@ -10,7 +10,7 @@
 #' To give each common species a fixed color for a unified look among figures.
 #'
 #' @format A named vector of colors; the names are the species, including "Other".
-#' @source Brewer
+#' @source dittoSeq
 "species_cols"
 
 #' Color palette for sheets

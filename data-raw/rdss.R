@@ -120,15 +120,20 @@ europe_countries <- c("Albania", "Andorra", "Austria", "Belgium", "Bosnia and He
 # When coloring by species, give each species a fixed color.
 # Also, when there are too many species, the colors are hard to tell from each other
 # So colors are only for the most commonly used species.
+ditto_colors <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00",
+                  "#CC79A7", "#666666", "#AD7700", "#1C91D4", "#007756", "#D5C711",
+                  "#005685", "#A04700", "#B14380", "#4D4D4D", "#FFBE2D", "#80C7EF",
+                  "#00F6B3", "#F4EB71", "#06A5FF", "#FF8320", "#D99BBD", "#8C8C8C",
+                  "#FFCB57", "#9AD2F2", "#2CFFC6", "#F6EF8E", "#38B7FF", "#FF9B4D",
+                  "#E0AFCA", "#A3A3A3", "#8A5F00", "#1674A9", "#005F45", "#AA9F0D",
+                  "#00446B", "#803800", "#8D3666", "#3D3D3D")
 species <- c("Mus musculus", "Drosophila melanogaster",
              "Danio rerio", "Caenorhabditis elegans", "Xenopus laevis",
-             "Ciona intestinalis", "Gallus gallus", "Arabidopsis thaliana",
-             "Sus scrofa")
-species_cols <- scales::brewer_pal(palette = "Set2")(8)
-species_cols <- c(species_cols, scales::brewer_pal(palette = "Paired")(12)[c(12,1)],
-                  "gray50")
-names(species_cols) <- c(species, "Homo sapiens", "Other")
-usethis::use_data(species_cols)
+             "Ciona intestinalis", "Gallus gallus", "Rattus norvegicus",
+             "Arabidopsis thaliana", "Sus scrofa", "Homo sapiens", "Other")
+species_cols <- c(ditto_colors[c(7, 6, 4, 17, 8, 26, 39, 16, 11, 40, 2)], "gray50")
+names(species_cols) <- species
+usethis::use_data(species_cols, overwrite = TRUE)
 usethis::use_data(lang_img, species_img, na_w_pop, ne, xylims_ne,
                   europe_countries, xylims, xylims_us, internal = TRUE,
                   overwrite = TRUE)

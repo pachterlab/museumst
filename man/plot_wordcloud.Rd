@@ -35,6 +35,10 @@ stop_words data frame that comes with tidytext.}
 
 \item{seed}{Random seed to use.}
 
+\item{scale}{A vector of length 2 indicating the range of the size of the words. }
+
+\item{min.freq}{words with frequency below min.freq will not be plotted}
+
 \item{...}{Other arguments passed to \code{wordcloud::wordcloud}.}
 }
 \value{
