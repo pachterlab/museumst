@@ -20,7 +20,7 @@ number of publications."><!-- mathjax --><script src="https://cdnjs.cloudflare.c
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">museumst</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9022</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="Unreleased version">0.0.0.9023</span>
       </span>
     </div>
 
@@ -63,6 +63,7 @@ number of publications.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pubs_per_cat</span><span class="op">(</span></span>
 <span>  <span class="va">pubs</span>,</span>
 <span>  <span class="va">category</span>,</span>
+<span>  fill_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_top <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  isotype <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  img_df <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -80,6 +81,10 @@ number of publications.</p>
 <dd><p>Column name to plot. Tidyeval is supported. If it's species
 or language, then img_df does not have to be supplied for isotype plot since
 the images are supplied internally.</p></dd>
+
+
+<dt>fill_by</dt>
+<dd><p>Variable to fill the bars with if not plotting isotypes.</p></dd>
 
 
 <dt>n_top</dt>
@@ -165,7 +170,7 @@ if found, are listed here as well.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.9000.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.9000.</p>
 </div>
 
       </footer></div>
