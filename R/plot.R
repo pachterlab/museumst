@@ -311,6 +311,7 @@ pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
 #' @param category Column name to plot. Tidyeval is supported. If it's species
 #' or language, then img_df does not have to be supplied for isotype plot since
 #' the images are supplied internally.
+#' @param fill_by Variable to fill the bars with if not plotting isotypes.
 #' @param n_top Number of top entries to plot. Especially useful for isotype.
 #' @param isotype Logical, whether to make isotype plot, like one icon stands for
 #' a certain number of publications.
@@ -329,8 +330,8 @@ pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
 #' @importFrom dplyr row_number desc inner_join
 #' @importFrom stringr str_to_sentence
 #' @export
-pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df = NULL,
-                         img_unit = NULL) {
+pubs_per_cat <- function(pubs, category, fill_by = NULL, n_top = NULL,
+                         isotype = FALSE, img_df = NULL, img_unit = NULL) {
   n <- reordered <- image <- NULL
   category <- enquo(category)
   if (!is.null(n_top)) {
@@ -372,7 +373,12 @@ pubs_per_cat <- function(pubs, category, n_top = NULL, isotype = FALSE, img_df =
   } else {
     pubs <- pubs %>%
       mutate(reordered = fct_infreq(!!category) %>% fct_rev())
-    p <- ggplot(pubs, aes(reordered)) + geom_bar()
+    fill_by <- enquo(fill_by)
+    if (!is.null(fill_by)) {
+      p <- ggplot(pubs, aes(reordered, fill = !!fill_by)) + geom_bar()
+    } else {
+      p <- ggplot(pubs, aes(reordered)) + geom_bar()
+    }
   }
   p <- p +
     scale_y_continuous(expand = expansion(mult = c(0, 0.05)),

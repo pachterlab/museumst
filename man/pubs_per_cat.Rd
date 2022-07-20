@@ -7,6 +7,7 @@
 pubs_per_cat(
   pubs,
   category,
+  fill_by = NULL,
   n_top = NULL,
   isotype = FALSE,
   img_df = NULL,
@@ -19,6 +20,8 @@ pubs_per_cat(
 \item{category}{Column name to plot. Tidyeval is supported. If it's species
 or language, then img_df does not have to be supplied for isotype plot since
 the images are supplied internally.}
+
+\item{fill_by}{Variable to fill the bars with if not plotting isotypes.}
 
 \item{n_top}{Number of top entries to plot. Especially useful for isotype.}
 
