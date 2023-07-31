@@ -452,6 +452,18 @@ pubs_on_map <- function(pubs, city_gc,
   } else {
     vars_count <- c("country", "state/province", "city")
   }
+  # Filter continent before doing fct_lump_n
+  countries_use <- switch(zoom,
+                          europe = europe_countries,
+                          usa = c("USA", "US", "United States",
+                                  "United States of America", "Canada", "Mexico"),
+                          ne_asia = c("China", "Taiwan", "Korea", "Japan", "Mongolia",
+                                      "Vietnam"),
+                          world = NULL)
+  if (!is.null(countries_use)) {
+    pubs <- pubs |>
+      filter(country %in% countries_use)
+  }
   if (!is.null(facet_by)) {
     pubs <- pubs %>%
       mutate(facets = fct_lump_n(!!sym(facet_by), n = n_top),
@@ -481,7 +493,6 @@ pubs_on_map <- function(pubs, city_gc,
     map_use <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
     crs_europe <- 3035
     inst_count <- inst_count %>%
-      filter(country %in% europe_countries) %>%
       mutate(geometry = sf::st_transform(geometry, crs = crs_europe))
     # project on European transformation
     map_use <- sf::st_transform(map_use, crs = crs_europe)
@@ -491,16 +502,11 @@ pubs_on_map <- function(pubs, city_gc,
     map_use <- na_w_pop
     crs_usa <- 2163
     inst_count <- inst_count %>%
-      filter(country %in% c("USA", "US", "United States",
-                            "United States of America", "Canada", "Mexico")) %>%
       mutate(geometry = sf::st_transform(geometry, crs = crs_usa))
     suppressWarnings(sf::st_crs(one_world_medium) <- 4326)
     map_all <- sf::st_transform(one_world_medium, crs = crs_usa)
   } else if (zoom == "ne_asia") {
     map_use <- ne
-    inst_count <- inst_count %>%
-      filter(country %in% c("China", "Taiwan", "Korea", "Japan", "Mongolia",
-                            "Vietnam"))
     map_all <- one_world_medium
   }
   if (max(inst_count$n, na.rm = TRUE) < 4) {
