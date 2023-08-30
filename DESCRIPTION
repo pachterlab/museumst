@@ -1,8 +1,8 @@
 Package: museumst
 Type: Package
 Title: Museum of Spatial Transcriptomics
-Version: 0.0.0.9023
-Date: 2022-07-19
+Version: 0.0.0.9024
+Date: 2023-08-30
 Authors@R: 
     c(person("Lambda", "Moses", email = "dlu2@caltech.edu", 
     role = c("aut", "cre"),

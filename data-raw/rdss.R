@@ -131,7 +131,7 @@ species <- c("Mus musculus", "Drosophila melanogaster",
              "Danio rerio", "Caenorhabditis elegans", "Xenopus laevis",
              "Ciona intestinalis", "Gallus gallus", "Rattus norvegicus",
              "Arabidopsis thaliana", "Sus scrofa", "Homo sapiens", "Other")
-species_cols <- c(ditto_colors[c(7, 6, 4, 17, 8, 26, 39, 16, 11, 40, 2)], "gray50")
+species_cols <- c(ditto_colors[c(7, 6, 4, 17, 32, 26, 39, 16, 11, 38, 10)], "gray50")
 names(species_cols) <- species
 usethis::use_data(species_cols, overwrite = TRUE)
 usethis::use_data(lang_img, species_img, na_w_pop, ne, xylims_ne,
