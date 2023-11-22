@@ -150,7 +150,7 @@ pubs_per_year <- function(pubs, facet_by = NULL, fill_by = NULL, binwidth = 365,
   sort_by <- match.arg(sort_by)
   if (!preprints) {
     pubs <- pubs %>%
-      filter(!journal %in% c("bioRxiv", "arXiv"))
+      filter(!journal %in% c("bioRxiv", "arXiv", "Research Square", "medRxiv"))
   }
   if (!is.null(facet_by)) {
     pubs <- pubs %>%
