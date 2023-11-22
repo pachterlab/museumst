@@ -5,8 +5,8 @@
 \title{Read the metadata from Google Sheets}
 \usage{
 read_metadata(
-  sheet_use = c("Prequel", "smFISH", "NGS barcoding", "ISS", "ROI selection",
-    "De novo", "Analysis", "Prequel analysis"),
+  sheet_use = c("Prequel", "smFISH", "NGS barcoding", "ISS", "ROI selection", "De novo",
+    "Analysis", "Prequel analysis"),
   cache = TRUE,
   cache_location = "./sheets_cache",
   update = FALSE

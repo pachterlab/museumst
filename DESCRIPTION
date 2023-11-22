@@ -1,8 +1,8 @@
 Package: museumst
 Type: Package
 Title: Museum of Spatial Transcriptomics
-Version: 0.0.0.9024
-Date: 2023-08-30
+Version: 0.0.0.9025
+Date: 2023-11-21
 Authors@R: 
     c(person("Lambda", "Moses", email = "dlu2@caltech.edu", 
     role = c("aut", "cre"),
@@ -43,7 +43,6 @@ Suggests:
     knitr,
     magick,
     quanteda,
-    rgeos,
     rmarkdown,
     rnaturalearthdata,
     rnaturalearth,
@@ -59,4 +58,4 @@ Suggests:
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3
