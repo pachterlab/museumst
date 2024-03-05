@@ -4,7 +4,6 @@ library(readxl)
 library(rnaturalearth)
 library(googlesheets4)
 library(sf)
-library(rgeos)
 library(ggmap)
 species_img <- tibble(species = c("Mus musculus", "Drosophila melanogaster",
                                   "Danio rerio", "Ciona intestinalis", "Xenopus laevis",
@@ -23,12 +22,13 @@ species_img <- tibble(species = c("Mus musculus", "Drosophila melanogaster",
 
 lang_img <- tibble(language = c("C", "C++", "CUDA", "Java", "Mathematica",
                                 "MATLAB", "Python", "R", "Rust", "Scala",
-                                "JavaScript"),
+                                "JavaScript", "SPSS", "shell"),
                    image_paths = paste0("images/",
                                         c("c.png", "CPlusPlus.jpg", "cuda.png",
                                           "java.png", "mathematica.jpg",
                                           "matlab.jpg", "python.png", "Rlogo.png",
-                                          "rust.png", "scala.png", "js.png")))
+                                          "rust.png", "scala.png", "js.png",
+                                          "spss.png", "bash.png")))
 
 # American map with data for population per state
 na <- ne_states(c("United States of America", "Canada", "Mexico"), returnclass = "sf")

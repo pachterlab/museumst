@@ -1,5 +1,5 @@
 # Update this manually when the copy of metadata within the package is updated
-.pkg_update_time <- "2021-12-11 16:25:09 PST"
+.pkg_update_time <- "2024-03-05 12:05:07 PST"
 
 #' Get the timestamp of the internal version of the metadata
 #'
@@ -18,7 +18,8 @@ read_metadata_fresh <- function(sheet_use) {
   url_use <- "https://docs.google.com/spreadsheets/d/1sJDb9B7AtYmfKv4-m8XR7uc3XXw_k4kGSout8cqZ8bY/edit#gid=566523154"
   sheets <- map(sheet_use, read_sheet, ss = url_use)
   sheets <- map(sheets, ~ .x %>%
-                  mutate(year = year(date_published),
+                  mutate(date_published = if (is.list(date_published)) unlist(date_published) else date_published,
+                         year = year(date_published),
                          date_published = as_date(date_published)))
   return(sheets)
 }
