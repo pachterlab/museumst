@@ -508,23 +508,14 @@ pubs_on_map <- function(pubs, city_gc,
     map_use <- ne
     map_all <- one_world_medium
   }
-  if (max(inst_count$n, na.rm = TRUE) < 4) {
-    size_break_width <- 1
-  } else {
-    size_break_width1 <- ceiling((max(inst_count$n, na.rm = TRUE) -
-                                   min(inst_count$n, na.rm = TRUE))/3)
-    size_break_width2 <- ceiling((max(inst_count$n, na.rm = TRUE) -
-                                    min(inst_count$n, na.rm = TRUE))/4)
-  }
   n <- NULL
   if (plot == "point") {
     p <- ggplot() +
       geom_sf(data = map_use, linetype = "dotted") +
       geom_sf(data = map_all, fill = NA) +
-      scale_size_area(breaks = breaks_width(size_break_width1),
-                      name = "Number of\npublications") +
+      scale_size_area(name = "Number of\npublications") +
       theme(panel.border = element_blank(), axis.title = element_blank()) +
-      scale_color_viridis_c(breaks_width(size_break_width2), name = "")
+      scale_color_viridis_c(name = "")
     city2 <- city <- NULL
     if (is.null(facet_by)) {
       if (per_year) {
