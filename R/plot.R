@@ -397,7 +397,7 @@ pubs_per_cat <- function(pubs, category, fill_by = NULL, n_top = NULL,
 #'
 #' World map will use the Robinson projection. European map uses the LAEA Europe
 #' projection (EPSG:3035), and the American map uses the US National Atlas Equal Area
-#' projection (EPSG:2163) and Alaska and Hawaii are moved and included. The option
+#' projection (EPSG:9311) and Alaska and Hawaii are moved and included. The option
 #' to zoom in on Europe and the US is available because those are the two regions
 #' of the world with the most publications and it's hard to see the data when
 #' plotted on a world map.
@@ -499,7 +499,7 @@ pubs_on_map <- function(pubs, city_gc,
     map_all <- sf::st_transform(one_world_medium, crs = crs_europe)
   } else if (zoom == "usa") {
     map_use <- na_w_pop
-    crs_usa <- 2163
+    crs_usa <- 9311
     inst_count <- inst_count %>%
       mutate(geometry = sf::st_transform(geometry, crs = crs_usa))
     suppressWarnings(sf::st_crs(one_world_medium) <- 4326)
@@ -704,7 +704,7 @@ pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
     }
   } else {
     map_use <- na_w_pop
-    map_all <- sf::st_transform(one_world_medium, 2163)
+    map_all <- sf::st_transform(one_world_medium, 9311)
     pubs_count <- pubs %>%
       filter(country %in% c("USA", "US", "United States", "United States of America")) %>%
       count(`state/province`)
@@ -734,7 +734,7 @@ pubs_per_capita <- function(pubs, zoom = c("world", "europe", "usa"),
     if (zoom != "world") {
       # Limit to that box
       xylims_use <- if (zoom == "europe") xylims else xylims_us
-      crs_use <- if (zoom == "europe") 3035 else 2163
+      crs_use <- if (zoom == "europe") 3035 else 9311
       p <- p +
         coord_sf(xlim = xylims_use[c("xmin", "xmax")], ylim = xylims_use[c("ymin", "ymax")],
                  crs = crs_use)

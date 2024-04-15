@@ -42,7 +42,7 @@ na <- na %>%
 na <- na %>%
   rename(state_name = name)
 na_w_pop <- na %>%
-  mutate(geometry = sf::st_transform(geometry, crs = 2163))
+  mutate(geometry = sf::st_transform(geometry, crs = 9311))
 
 # Northeast Asia
 map_use1 <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf") %>%
