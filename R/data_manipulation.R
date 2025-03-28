@@ -20,7 +20,11 @@ read_metadata_fresh <- function(sheet_use) {
   sheets <- map(sheets, ~ .x %>%
                   mutate(date_published = if (is.list(date_published)) unlist(date_published) else date_published,
                          year = year(date_published),
-                         date_published = as_date(date_published)))
+                         date_published = as_date(date_published)) |>
+                  mutate(across(where(is.list), function(x) {
+                    x <- lapply(x, function(y) if (is.null(y)) NA else y)
+                    unlist(x)
+                  })))
   return(sheets)
 }
 
@@ -49,7 +53,7 @@ read_metadata_fresh <- function(sheet_use) {
 read_metadata <- function(sheet_use = c("Prequel", "smFISH", "NGS barcoding", "ISS",
                                         "ROI selection", "De novo",
                                         "Analysis", "Prequel analysis"),
-                          cache = TRUE, cache_location = "./sheets_cache",
+                          cache = FALSE, cache_location = "./sheets_cache",
                           update = FALSE) {
   sheet_use <- match.arg(sheet_use, several.ok = TRUE)
   sheet_use2 <- str_replace(sheet_use, "\\s", "_")
